@@ -57,7 +57,7 @@ class LicenseController extends Controller
                 'success' => false,
                 'message' => $e->getMessage(),
                 'error' => 'ACTIVATION_FAILED',
-            ], 400);
+            ], 200);
         }
     }
 
@@ -94,7 +94,7 @@ class LicenseController extends Controller
                 'data' => [
                     'valid' => false,
                 ],
-            ], 400);
+            ], 200);
         }
     }
 
@@ -127,7 +127,7 @@ class LicenseController extends Controller
                 'success' => false,
                 'message' => $e->getMessage(),
                 'error' => 'RENEWAL_FAILED',
-            ], 400);
+            ], 200);
         }
     }
 
@@ -158,7 +158,7 @@ class LicenseController extends Controller
                 'success' => false,
                 'message' => $e->getMessage(),
                 'error' => 'DEACTIVATION_FAILED',
-            ], 400);
+            ], 200);
         }
     }
 
@@ -188,7 +188,7 @@ class LicenseController extends Controller
                 'success' => false,
                 'message' => $e->getMessage(),
                 'error' => 'LICENSE_NOT_FOUND',
-            ], 404);
+            ], 200);
         }
     }
 
@@ -218,7 +218,7 @@ class LicenseController extends Controller
                 'success' => false,
                 'valid' => false,
                 'message' => $e->getMessage(),
-            ], 400);
+            ], 200);
         }
     }
 }
