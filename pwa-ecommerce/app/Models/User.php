@@ -188,4 +188,9 @@ class User extends Authenticatable implements FilamentUser
     {
         return $query->where('is_online', true);
     }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return str_ends_with($this->email, '@tiemnhaduy.com') && $this->hasVerifiedEmail();
+    }
 }
