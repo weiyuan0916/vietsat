@@ -6,6 +6,11 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
+/**
+ * PWA Install Alert Component
+ * 
+ * Displays a toast notification prompting users to install the PWA
+ */
 class PWAlert extends Component
 {
     /**
