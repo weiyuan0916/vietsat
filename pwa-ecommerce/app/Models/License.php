@@ -266,7 +266,8 @@ class License extends Model
             return null;
         }
 
-        return storage_path('app/' . $this->update_file_path);
+        // The 'local' disk stores files in storage/app/private/
+        return storage_path('app/private/' . $this->update_file_path);
     }
 
     /**

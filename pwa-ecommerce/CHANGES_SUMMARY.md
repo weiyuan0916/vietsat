@@ -1,7 +1,8 @@
-# ✅ Changes Applied - File Upload Fix
+# ✅ Changes Applied - File Upload & Download Fix
 
-## 🎯 Issue Resolved
+## 🎯 Issues Resolved
 
+### Issue 1: Upload Limit Error ✅ FIXED
 **Problem:**
 - ❌ Error: "The data.update_file_path field must not be greater than 12288 kilobytes" (12MB limit)
 - ❌ Could not upload `.zip` files
@@ -12,11 +13,41 @@
 - ✅ Updated PHP configuration
 - ✅ Restarted PHP/Herd
 
+### Issue 2: Download Error ✅ FIXED
+**Problem:**
+- ❌ Error: "Update file not found on server" when downloading
+- ❌ File exists in storage but API can't find it
+
+**Solution:**
+- ✅ Fixed path construction in `License::getUpdateFilePath()`
+- ✅ Fixed Filament file size callback path
+- ✅ Corrected for Laravel's `local` disk storing in `storage/app/private/`
+
 ---
 
 ## 📝 Changes Made
 
-### 1. Filament Resource (Code)
+### 1. License Model - Download Path Fix
+**File:** `app/Models/License.php`
+
+**Changes:**
+- ✅ Fixed `getUpdateFilePath()` method to use correct path
+- ✅ Changed from `storage/app/` to `storage/app/private/`
+- ✅ Now correctly finds files stored by Filament
+
+**Before:**
+```php
+return storage_path('app/' . $this->update_file_path);
+// ❌ Wrong: storage/app/license-updates/file.zip
+```
+
+**After:**
+```php
+return storage_path('app/private/' . $this->update_file_path);
+// ✅ Correct: storage/app/private/license-updates/file.zip
+```
+
+### 2. Filament Resource (Upload & File Size)
 **File:** `app/Filament/Resources/LicenseResource.php`
 
 **Changes:**
@@ -26,6 +57,7 @@
   - `application/x-zip-compressed`
 - ✅ Updated helper text: "max 2GB"
 - ✅ Added all file extensions explicitly
+- ✅ Fixed `afterStateUpdated` callback path for file size calculation
 
 **Supported file types:**
 - `.exe` (Windows)
@@ -34,7 +66,7 @@
 - `.dmg` (macOS)
 - `.zip` (Compressed) **← NEW!**
 
-### 2. PHP Configuration
+### 3. PHP Configuration
 **File:** `/Users/adward/Library/Application Support/Herd/config/php/83/php.ini`
 
 **Changed:**

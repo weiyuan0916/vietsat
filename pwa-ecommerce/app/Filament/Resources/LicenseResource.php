@@ -147,8 +147,8 @@ class LicenseResource extends Resource
                             ->helperText('Upload app update file (max 2GB). Supported: .exe, .apk, .ipa, .dmg, .zip')
                             ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                 if ($state) {
-                                    // Get file size
-                                    $filePath = storage_path('app/' . $state);
+                                    // Get file size (local disk stores in storage/app/private/)
+                                    $filePath = storage_path('app/private/' . $state);
                                     if (file_exists($filePath)) {
                                         $set('update_file_size', filesize($filePath));
                                         
