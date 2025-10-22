@@ -32,6 +32,9 @@ class License extends Model
         'expires_at',
         'last_renewed_at',
         'metadata',
+        'min_app_version',
+        'latest_app_version',
+        'force_update',
     ];
 
     /**
@@ -46,6 +49,7 @@ class License extends Model
         'metadata' => 'array',
         'max_activations' => 'integer',
         'current_activations' => 'integer',
+        'force_update' => 'boolean',
     ];
 
     /**
@@ -140,6 +144,66 @@ class License extends Model
     {
         return $query->where('status', 'active')
             ->where('expires_at', '>', now());
+    }
+
+    /**
+     * Check if the app version meets minimum requirements.
+     *
+     * @param string $appVersion Current app version (e.g., "1.2.3")
+     * @return bool
+     */
+    public function isVersionCompatible(string $appVersion): bool
+    {
+        if (!$this->min_app_version) {
+            return true; // No version requirement
+        }
+
+        return version_compare($appVersion, $this->min_app_version, '>=');
+    }
+
+    /**
+     * Check if an update is available.
+     *
+     * @param string $appVersion Current app version
+     * @return bool
+     */
+    public function hasUpdateAvailable(string $appVersion): bool
+    {
+        if (!$this->latest_app_version) {
+            return false;
+        }
+
+        return version_compare($appVersion, $this->latest_app_version, '<');
+    }
+
+    /**
+     * Check if user must update before using the app.
+     *
+     * @param string $appVersion Current app version
+     * @return bool
+     */
+    public function requiresUpdate(string $appVersion): bool
+    {
+        return $this->force_update && !$this->isVersionCompatible($appVersion);
+    }
+
+    /**
+     * Get version status information.
+     *
+     * @param string $appVersion Current app version
+     * @return array
+     */
+    public function getVersionStatus(string $appVersion): array
+    {
+        return [
+            'current_version' => $appVersion,
+            'min_version' => $this->min_app_version,
+            'latest_version' => $this->latest_app_version,
+            'is_compatible' => $this->isVersionCompatible($appVersion),
+            'has_update' => $this->hasUpdateAvailable($appVersion),
+            'requires_update' => $this->requiresUpdate($appVersion),
+            'force_update' => $this->force_update ?? false,
+        ];
     }
 }
 

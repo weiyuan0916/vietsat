@@ -75,7 +75,7 @@ class LicenseController extends Controller
                 machineId: $request->input('machine_id')
             );
 
-            return response()->json([
+            $response = [
                 'success' => true,
                 'message' => $result['message'],
                 'data' => [
@@ -84,7 +84,15 @@ class LicenseController extends Controller
                     'days_remaining' => $result['days_remaining'],
                     'expires_at' => $result['expires_at'],
                 ],
-            ], 200);
+            ];
+
+            // Add version checking if app_version is provided
+            if ($request->has('app_version')) {
+                $versionStatus = $result['license']->getVersionStatus($request->input('app_version'));
+                $response['data']['version_status'] = $versionStatus;
+            }
+
+            return response()->json($response, 200);
 
         } catch (Exception $e) {
             return response()->json([
@@ -206,18 +214,65 @@ class LicenseController extends Controller
                 machineId: $request->input('machine_id')
             );
 
-            return response()->json([
+            $response = [
                 'success' => true,
                 'valid' => $result['valid'],
                 'days_remaining' => $result['days_remaining'],
                 'expires_at' => $result['expires_at'],
-            ], 200);
+            ];
+
+            // Add version checking if app_version is provided
+            if ($request->has('app_version')) {
+                $versionStatus = $result['license']->getVersionStatus($request->input('app_version'));
+                $response['version_status'] = $versionStatus;
+            }
+
+            return response()->json($response, 200);
 
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'valid' => false,
                 'message' => $e->getMessage(),
+            ], 200);
+        }
+    }
+
+    /**
+     * Check if app update is required or available.
+     * 
+     * @param ValidateLicenseRequest $request
+     * @return JsonResponse
+     */
+    public function checkUpdate(ValidateLicenseRequest $request): JsonResponse
+    {
+        try {
+            $licenseKey = $request->input('license_key');
+            $appVersion = $request->input('app_version');
+
+            $result = $this->licenseService->getLicenseInfo($licenseKey);
+            $license = $result['license'];
+
+            if (!$license->isValid()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'License is not valid or has expired',
+                    'error' => 'INVALID_LICENSE',
+                ], 200);
+            }
+
+            $versionStatus = $license->getVersionStatus($appVersion);
+
+            return response()->json([
+                'success' => true,
+                'data' => $versionStatus,
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'error' => 'CHECK_UPDATE_FAILED',
             ], 200);
         }
     }

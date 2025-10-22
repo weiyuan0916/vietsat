@@ -46,7 +46,8 @@ Route::prefix('v1')->group(function () {
          * Request Body:
          * {
          *   "license_key": "LS-XXXX-XXXX-XXXX-XXXX",
-         *   "machine_id": "unique-machine-identifier"
+         *   "machine_id": "unique-machine-identifier",
+         *   "app_version": "1.0.0" (optional - for version checking)
          * }
          */
         Route::post('validate', [LicenseController::class, 'validate'])
@@ -59,11 +60,39 @@ Route::prefix('v1')->group(function () {
          * Request Body:
          * {
          *   "license_key": "LS-XXXX-XXXX-XXXX-XXXX",
-         *   "machine_id": "unique-machine-identifier"
+         *   "machine_id": "unique-machine-identifier",
+         *   "app_version": "1.0.0" (optional - for version checking)
          * }
          */
         Route::post('check-status', [LicenseController::class, 'checkStatus'])
             ->name('check-status');
+        
+        /**
+         * POST /api/v1/licenses/check-update
+         * Check if app update is required or available
+         * 
+         * Request Body:
+         * {
+         *   "license_key": "LS-XXXX-XXXX-XXXX-XXXX",
+         *   "app_version": "1.0.0"
+         * }
+         * 
+         * Response:
+         * {
+         *   "success": true,
+         *   "data": {
+         *     "current_version": "1.0.0",
+         *     "min_version": "1.0.0",
+         *     "latest_version": "1.2.0",
+         *     "is_compatible": true,
+         *     "has_update": true,
+         *     "requires_update": false,
+         *     "force_update": false
+         *   }
+         * }
+         */
+        Route::post('check-update', [LicenseController::class, 'checkUpdate'])
+            ->name('check-update');
         
         /**
          * POST /api/v1/licenses/renew

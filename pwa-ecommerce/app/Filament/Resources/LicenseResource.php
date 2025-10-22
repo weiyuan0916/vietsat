@@ -88,7 +88,7 @@ class LicenseResource extends Resource
                             ->disabled()
                             ->dehydrated(false),
                     ])
-                    ->columns(2),
+                    ->columns(1),
                 
                 Layout\Section::make('Date Settings')
                     ->schema([
@@ -107,7 +107,30 @@ class LicenseResource extends Resource
                             ->disabled()
                             ->dehydrated(false),
                     ])
-                    ->columns(3),
+                    ->columns(1),
+                
+                Layout\Section::make('Version Control')
+                    ->description('Manage app version requirements for this license')
+                    ->schema([
+                        Forms\TextInput::make('min_app_version')
+                            ->label('Minimum App Version')
+                            ->placeholder('1.0.0')
+                            ->helperText('Minimum app version required (e.g., 1.0.0)')
+                            ->maxLength(50),
+                        
+                        Forms\TextInput::make('latest_app_version')
+                            ->label('Latest App Version')
+                            ->placeholder('1.2.0')
+                            ->helperText('Latest available app version (e.g., 1.2.0)')
+                            ->maxLength(50),
+                        
+                        Forms\Toggle::make('force_update')
+                            ->label('Force Update')
+                            ->helperText('Force users to update if their app version is below minimum')
+                            ->default(false),
+                    ])
+                    ->columns(2)
+                    ->collapsible(),
                 
                 Layout\Section::make('Additional Information')
                     ->schema([
@@ -156,6 +179,21 @@ class LicenseResource extends Resource
                     ->label('Activations')
                     ->formatStateUsing(fn ($record) => "{$record->current_activations}/{$record->max_activations}")
                     ->sortable(),
+                
+                Tables\Columns\TextColumn::make('min_app_version')
+                    ->label('Min Version')
+                    ->default('Any')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                
+                Tables\Columns\TextColumn::make('latest_app_version')
+                    ->label('Latest Version')
+                    ->default('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                
+                Tables\Columns\IconColumn::make('force_update')
+                    ->label('Force Update')
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 
                 Tables\Columns\TextColumn::make('expires_at')
                     ->label('Expires')
