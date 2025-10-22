@@ -110,7 +110,7 @@ class LicenseResource extends Resource
                     ->columns(1),
                 
                 Layout\Section::make('Version Control')
-                    ->description('Manage app version requirements for this license')
+                    ->description('Manage app version requirements and update files for this license')
                     ->schema([
                         Forms\TextInput::make('min_app_version')
                             ->label('Minimum App Version')
@@ -128,6 +128,50 @@ class LicenseResource extends Resource
                             ->label('Force Update')
                             ->helperText('Force users to update if their app version is below minimum')
                             ->default(false),
+                        
+                        Forms\FileUpload::make('update_file_path')
+                            ->label('Update File (.exe, .apk, .ipa, .dmg, .zip)')
+                            ->disk('local')
+                            ->directory('license-updates')
+                            ->acceptedFileTypes([
+                                'application/x-msdownload',              // .exe
+                                'application/x-msdos-program',           // .exe
+                                'application/vnd.android.package-archive', // .apk
+                                'application/octet-stream',              // generic binary
+                                'application/x-apple-diskimage',         // .dmg
+                                'application/zip',                       // .zip
+                                'application/x-zip-compressed',          // .zip
+                                '.exe', '.apk', '.ipa', '.dmg', '.zip'   // file extensions
+                            ])
+                            ->maxSize(2097152) // 2GB max (2048MB * 1024KB)
+                            ->helperText('Upload app update file (max 2GB). Supported: .exe, .apk, .ipa, .dmg, .zip')
+                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                if ($state) {
+                                    // Get file size
+                                    $filePath = storage_path('app/' . $state);
+                                    if (file_exists($filePath)) {
+                                        $set('update_file_size', filesize($filePath));
+                                        
+                                        // Auto-set file version from latest_app_version if available
+                                        if ($latestVersion = $get('latest_app_version')) {
+                                            $set('update_file_version', $latestVersion);
+                                        }
+                                    }
+                                }
+                            })
+                            ->columnSpanFull(),
+                        
+                        Forms\TextInput::make('update_file_version')
+                            ->label('Update File Version')
+                            ->placeholder('Auto-filled from Latest App Version')
+                            ->helperText('Version of the uploaded update file')
+                            ->maxLength(50),
+                        
+                        Forms\TextInput::make('update_file_size')
+                            ->label('File Size (bytes)')
+                            ->disabled()
+                            ->dehydrated(true)
+                            ->helperText('Automatically calculated when file is uploaded'),
                     ])
                     ->columns(2)
                     ->collapsible(),

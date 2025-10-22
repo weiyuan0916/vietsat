@@ -19,7 +19,7 @@ class LicenseResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
+        $data = [
             'id' => $this->id,
             'license_key' => $this->license_key,
             'type' => $this->type,
@@ -41,6 +41,19 @@ class LicenseResource extends JsonResource
             'updated_at' => $this->updated_at->toDateTimeString(),
             'activations' => LicenseActivationResource::collection($this->whenLoaded('activations')),
         ];
+
+        // Include update file information if available
+        if ($this->update_file_path) {
+            $data['update_file'] = [
+                'download_url' => $this->getUpdateFileUrl(),
+                'version' => $this->update_file_version,
+                'size' => $this->update_file_size,
+                'size_formatted' => $this->getFormattedFileSize(),
+                'available' => $this->hasUpdateFile(),
+            ];
+        }
+
+        return $data;
     }
 }
 

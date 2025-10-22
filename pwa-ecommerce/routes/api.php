@@ -87,12 +87,28 @@ Route::prefix('v1')->group(function () {
          *     "is_compatible": true,
          *     "has_update": true,
          *     "requires_update": false,
-         *     "force_update": false
+         *     "force_update": false,
+         *     "download_url": "https://yourapi.com/api/v1/licenses/download-update/LS-XXXX-XXXX-XXXX-XXXX",
+         *     "file_version": "1.2.0",
+         *     "file_size": 52428800,
+         *     "file_size_formatted": "50.0 MB"
          *   }
          * }
          */
         Route::post('check-update', [LicenseController::class, 'checkUpdate'])
             ->name('check-update');
+        
+        /**
+         * GET /api/v1/licenses/download-update/{licenseKey}
+         * Download the update file for a license
+         * 
+         * This endpoint streams the update file (.exe, .apk, etc.) to the client.
+         * The license must be valid and an update file must be uploaded.
+         * 
+         * Response: Binary file stream (application/x-msdownload, etc.)
+         */
+        Route::get('download-update/{licenseKey}', [LicenseController::class, 'downloadUpdate'])
+            ->name('download-update');
         
         /**
          * POST /api/v1/licenses/renew

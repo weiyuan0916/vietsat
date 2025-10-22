@@ -35,6 +35,9 @@ class License extends Model
         'min_app_version',
         'latest_app_version',
         'force_update',
+        'update_file_path',
+        'update_file_version',
+        'update_file_size',
     ];
 
     /**
@@ -50,6 +53,7 @@ class License extends Model
         'max_activations' => 'integer',
         'current_activations' => 'integer',
         'force_update' => 'boolean',
+        'update_file_size' => 'integer',
     ];
 
     /**
@@ -195,7 +199,7 @@ class License extends Model
      */
     public function getVersionStatus(string $appVersion): array
     {
-        return [
+        $status = [
             'current_version' => $appVersion,
             'min_version' => $this->min_app_version,
             'latest_version' => $this->latest_app_version,
@@ -204,6 +208,75 @@ class License extends Model
             'requires_update' => $this->requiresUpdate($appVersion),
             'force_update' => $this->force_update ?? false,
         ];
+
+        // Include download URL if update file is available
+        if ($this->update_file_path) {
+            $status['download_url'] = $this->getUpdateFileUrl();
+            $status['file_version'] = $this->update_file_version;
+            $status['file_size'] = $this->update_file_size;
+            $status['file_size_formatted'] = $this->getFormattedFileSize();
+        }
+
+        return $status;
+    }
+
+    /**
+     * Get the public URL for the update file.
+     *
+     * @return string|null
+     */
+    public function getUpdateFileUrl(): ?string
+    {
+        if (!$this->update_file_path) {
+            return null;
+        }
+
+        return url('/api/v1/licenses/download-update/' . $this->license_key);
+    }
+
+    /**
+     * Get formatted file size (e.g., "15.5 MB").
+     *
+     * @return string|null
+     */
+    public function getFormattedFileSize(): ?string
+    {
+        if (!$this->update_file_size) {
+            return null;
+        }
+
+        $bytes = $this->update_file_size;
+        $units = ['B', 'KB', 'MB', 'GB'];
+        
+        for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
+            $bytes /= 1024;
+        }
+
+        return round($bytes, 2) . ' ' . $units[$i];
+    }
+
+    /**
+     * Get the absolute file path for the update file.
+     *
+     * @return string|null
+     */
+    public function getUpdateFilePath(): ?string
+    {
+        if (!$this->update_file_path) {
+            return null;
+        }
+
+        return storage_path('app/' . $this->update_file_path);
+    }
+
+    /**
+     * Check if update file exists.
+     *
+     * @return bool
+     */
+    public function hasUpdateFile(): bool
+    {
+        return $this->update_file_path && file_exists($this->getUpdateFilePath());
     }
 }
 

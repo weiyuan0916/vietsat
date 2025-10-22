@@ -9,7 +9,10 @@ use App\Http\Requests\RenewLicenseRequest;
 use App\Http\Requests\DeactivateLicenseRequest;
 use App\Http\Resources\LicenseResource;
 use App\Services\LicenseService;
+use App\Models\License;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Exception;
 
 /**
@@ -274,6 +277,85 @@ class LicenseController extends Controller
                 'message' => $e->getMessage(),
                 'error' => 'CHECK_UPDATE_FAILED',
             ], 200);
+        }
+    }
+
+    /**
+     * Download update file for a license.
+     * 
+     * @param string $licenseKey
+     * @return StreamedResponse|JsonResponse
+     */
+    public function downloadUpdate(string $licenseKey): StreamedResponse|JsonResponse
+    {
+        try {
+            $license = License::where('license_key', $licenseKey)->first();
+
+            if (!$license) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid license key',
+                    'error' => 'INVALID_LICENSE',
+                ], 404);
+            }
+
+            if (!$license->isValid()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'License is not active or has expired',
+                    'error' => 'LICENSE_INVALID',
+                ], 403);
+            }
+
+            if (!$license->update_file_path) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No update file available for this license',
+                    'error' => 'NO_UPDATE_FILE',
+                ], 404);
+            }
+
+            $filePath = $license->getUpdateFilePath();
+
+            if (!file_exists($filePath)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Update file not found on server',
+                    'error' => 'FILE_NOT_FOUND',
+                ], 404);
+            }
+
+            // Get original filename from path
+            $fileName = basename($license->update_file_path);
+            
+            // Determine content type
+            $extension = pathinfo($fileName, PATHINFO_EXTENSION);
+            $contentTypes = [
+                'exe' => 'application/x-msdownload',
+                'apk' => 'application/vnd.android.package-archive',
+                'ipa' => 'application/octet-stream',
+                'dmg' => 'application/x-apple-diskimage',
+                'zip' => 'application/zip',
+            ];
+            
+            $contentType = $contentTypes[$extension] ?? 'application/octet-stream';
+
+            // Stream the file download
+            return response()->streamDownload(function () use ($filePath) {
+                echo file_get_contents($filePath);
+            }, $fileName, [
+                'Content-Type' => $contentType,
+                'Content-Length' => filesize($filePath),
+                'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+                'Cache-Control' => 'no-cache, must-revalidate',
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'error' => 'DOWNLOAD_FAILED',
+            ], 500);
         }
     }
 }
