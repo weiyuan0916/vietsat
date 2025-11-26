@@ -11,6 +11,7 @@ use App\Http\Resources\LicenseResource;
 use App\Services\LicenseService;
 use App\Models\License;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Exception;
@@ -199,6 +200,47 @@ class LicenseController extends Controller
                 'success' => false,
                 'message' => $e->getMessage(),
                 'error' => 'LICENSE_NOT_FOUND',
+            ], 200);
+        }
+    }
+
+    /**
+     * Simple license key status check (only requires license key).
+     * Returns true if license is active, false if expired or deactivated.
+     * 
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function checkKey(Request $request): JsonResponse
+    {
+        try {
+            $licenseKey = $request->input('license_key');
+            
+            if (!$licenseKey) {
+                return response()->json([
+                    'status' => false
+                ], 200);
+            }
+
+            $license = License::where('license_key', $licenseKey)->first();
+            
+            if (!$license) {
+                return response()->json([
+                    'status' => false
+                ], 200);
+            }
+
+            // Check if license is active and not expired
+            $isActive = $license->status === 'active' && 
+                       ($license->expires_at === null || $license->expires_at->isFuture());
+
+            return response()->json([
+                'status' => $isActive
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => false
             ], 200);
         }
     }
