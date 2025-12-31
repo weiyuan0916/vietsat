@@ -54,6 +54,23 @@ Route::prefix('v1')->group(function () {
             ->name('validate');
         
         /**
+         * POST /api/v1/licenses/check-key
+         * Simple license key status check (only requires license key)
+         * 
+         * Request Body:
+         * {
+         *   "license_key": "LS-XXXX-XXXX-XXXX-XXXX"
+         * }
+         * 
+         * Response:
+         * {
+         *   "status": true/false
+         * }
+         */
+        Route::post('check-key', [LicenseController::class, 'checkKey'])
+            ->name('check-key');
+        
+        /**
          * POST /api/v1/licenses/check-status
          * Lightweight status check (returns minimal data)
          * 
@@ -144,4 +161,3 @@ Route::prefix('v1')->group(function () {
             ->name('show');
     });
 });
-
