@@ -24,13 +24,16 @@ class PcInfoResource extends Resource
 {
     protected static ?string $model = PcInfo::class;
 
-    protected static string $navigationIcon = 'heroicon-o-computer-desktop';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-computer-desktop';
 
-    protected static int $navigationSort = 15;
+    protected static int|null $navigationSort = 15;
 
     protected static ?string $recordTitleAttribute = 'display_name';
 
-    protected static ?string $navigationGroup = 'System Management';
+    public static function getNavigationGroup(): ?string
+    {
+        return 'System Management';
+    }
 
     protected static ?string $label = 'PC Information';
 
