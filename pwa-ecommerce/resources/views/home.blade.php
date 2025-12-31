@@ -5,8 +5,6 @@
 @section('meta_keywords', 'làm website, thiết kế website, tool theo yêu cầu, dịch vụ công nghệ, Tiệm Nhà Duy')
 
 @section('content-theme')
-<script async src="https://events.framer.com/script?v=2" data-fid="30ac621a1e609353bda26bb79b285277b2d468babf706e8e0910531657b93ec2" data-no-nt></script>
-<!-- Start of bodyStart -->
 
 <!-- End of bodyStart -->
 <div id="main" data-framer-hydrate-v2="{&quot;routeId&quot;:&quot;augiA20Il&quot;,&quot;localeId&quot;:&quot;default&quot;,&quot;breakpoints&quot;:[{&quot;hash&quot;:&quot;72rtr7&quot;,&quot;mediaQuery&quot;:&quot;(min-width: 1200px)&quot;},{&quot;hash&quot;:&quot;1fu346c&quot;,&quot;mediaQuery&quot;:&quot;(min-width: 810px) and (max-width: 1199px)&quot;},{&quot;hash&quot;:&quot;1ez7xnl&quot;,&quot;mediaQuery&quot;:&quot;(max-width: 809px)&quot;},{&quot;hash&quot;:&quot;wfn55x&quot;,&quot;mediaQuery&quot;:&quot;(min-width: 1200px)&quot;},{&quot;hash&quot;:&quot;1bj59a6&quot;,&quot;mediaQuery&quot;:&quot;(min-width: 810px) and (max-width: 1199px)&quot;},{&quot;hash&quot;:&quot;jyq5g3&quot;,&quot;mediaQuery&quot;:&quot;(max-width: 809px)&quot;}]}" data-framer-ssr-released-at="2025-05-06T14:44:27.354Z" data-framer-page-optimized-at="2025-05-08T11:07:16.098Z"><!--$-->
