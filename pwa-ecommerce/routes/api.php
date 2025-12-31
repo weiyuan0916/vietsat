@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\LicenseController;
+use App\Http\Controllers\Api\PcInfoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -159,5 +160,68 @@ Route::prefix('v1')->group(function () {
          */
         Route::get('{licenseKey}', [LicenseController::class, 'show'])
             ->name('show');
+    });
+
+    // PC Information Routes
+    Route::prefix('pc-infos')->name('pc-infos.')->group(function () {
+
+        /**
+         * POST /api/v1/pc-infos
+         * Store or update PC information
+         *
+         * Request Body:
+         * {
+         *   "host_name": "DESKTOP-ABC123",
+         *   "user_name": "john_doe",
+         *   "password": "encrypted_password",
+         *   "local_ip_address": "192.168.1.100",
+         *   "public_ip_address": "203.0.113.1"
+         * }
+         */
+        Route::post('/', [PcInfoController::class, 'store'])
+            ->name('store');
+
+        /**
+         * GET /api/v1/pc-infos
+         * Get all PC information with optional filtering and pagination
+         *
+         * Query Parameters:
+         * - host_name: Filter by host name
+         * - user_name: Filter by user name
+         * - ip_address: Filter by IP address
+         * - sort_by: Sort field (default: created_at)
+         * - sort_direction: Sort direction (asc/desc, default: desc)
+         * - per_page: Items per page (default: 15)
+         */
+        Route::get('/', [PcInfoController::class, 'index'])
+            ->name('index');
+
+        /**
+         * GET /api/v1/pc-infos/{pcInfo}
+         * Get specific PC information
+         */
+        Route::get('{pcInfo}', [PcInfoController::class, 'show'])
+            ->name('show');
+
+        /**
+         * PUT/PATCH /api/v1/pc-infos/{pcInfo}
+         * Update PC information
+         */
+        Route::match(['put', 'patch'], '{pcInfo}', [PcInfoController::class, 'update'])
+            ->name('update');
+
+        /**
+         * DELETE /api/v1/pc-infos/{pcInfo}
+         * Delete PC information
+         */
+        Route::delete('{pcInfo}', [PcInfoController::class, 'destroy'])
+            ->name('destroy');
+
+        /**
+         * GET /api/v1/pc-infos/statistics/overview
+         * Get PC information statistics
+         */
+        Route::get('statistics/overview', [PcInfoController::class, 'statistics'])
+            ->name('statistics');
     });
 });
