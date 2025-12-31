@@ -30,8 +30,8 @@ class StorePcInfoRequest extends FormRequest
             'host_name' => 'nullable|string|max:255',
             'user_name' => 'nullable|string|max:255',
             'password' => 'nullable|string|max:255',
-            'local_ip_address' => 'nullable|ip',
-            'public_ip_address' => 'nullable|ip',
+            'local_ip_address' => 'nullable|string|max:30',
+            'public_ip_address' => 'nullable|string|max:30',
         ];
     }
 
@@ -56,70 +56,70 @@ class StorePcInfoRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        // Auto-detect public IP if not provided
-        if (!$this->has('public_ip_address') || !$this->public_ip_address) {
-            $this->merge([
-                'public_ip_address' => $this->getClientIp(),
-            ]);
-        }
+        // // Auto-detect public IP if not provided
+        // if (!$this->has('public_ip_address') || !$this->public_ip_address) {
+        //     $this->merge([
+        //         'public_ip_address' => $this->detectClientIp(),
+        //     ]);
+        // }
 
-        // Auto-detect local IP if not provided
-        if (!$this->has('local_ip_address') || !$this->local_ip_address) {
-            $this->merge([
-                'local_ip_address' => $this->getLocalIp(),
-            ]);
-        }
+        // // Auto-detect local IP if not provided
+        // if (!$this->has('local_ip_address') || !$this->local_ip_address) {
+        //     $this->merge([
+        //         'local_ip_address' => $this->detectLocalIp(),
+        //     ]);
+        // }
     }
 
     /**
      * Get the client's public IP address.
      */
-    private function getClientIp(): ?string
+    protected function detectClientIp(): ?string
     {
-        $headers = [
-            'HTTP_CF_CONNECTING_IP',
-            'HTTP_CLIENT_IP',
-            'HTTP_X_FORWARDED_FOR',
-            'HTTP_X_FORWARDED',
-            'HTTP_X_CLUSTER_CLIENT_IP',
-            'HTTP_FORWARDED_FOR',
-            'HTTP_FORWARDED',
-            'REMOTE_ADDR',
-        ];
+        // $headers = [
+        //     'HTTP_CF_CONNECTING_IP',
+        //     'HTTP_CLIENT_IP',
+        //     'HTTP_X_FORWARDED_FOR',
+        //     'HTTP_X_FORWARDED',
+        //     'HTTP_X_CLUSTER_CLIENT_IP',
+        //     'HTTP_FORWARDED_FOR',
+        //     'HTTP_FORWARDED',
+        //     'REMOTE_ADDR',
+        // ];
 
-        foreach ($headers as $header) {
-            if ($this->server($header)) {
-                $ip = trim(explode(',', $this->server($header))[0]);
-                if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-                    return $ip;
-                }
-            }
-        }
+        // foreach ($headers as $header) {
+        //     if ($this->server($header)) {
+        //         $ip = trim(explode(',', $this->server($header))[0]);
+        //         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+        //             return $ip;
+        //         }
+        //     }
+        // }
 
-        return $this->ip();
+        // return $this->ip();
     }
 
     /**
      * Get the client's local IP address.
      */
-    private function getLocalIp(): ?string
+    protected function detectLocalIp(): ?string
     {
         // For local/private IPs, prefer certain headers
-        $localHeaders = [
-            'HTTP_X_FORWARDED_FOR',
-            'HTTP_CLIENT_IP',
-            'REMOTE_ADDR',
-        ];
+        // $localHeaders = [
+        //     'HTTP_X_FORWARDED_FOR',
+        //     'HTTP_CLIENT_IP',
+        //     'REMOTE_ADDR',
+        // ];
 
-        foreach ($localHeaders as $header) {
-            if ($this->server($header)) {
-                $ip = trim(explode(',', $this->server($header))[0]);
-                if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE) === false) {
-                    return $ip;
-                }
-            }
-        }
+        // foreach ($localHeaders as $header) {
+        //     if ($this->server($header)) {
+        //         $ip = trim(explode(',', $this->server($header))[0]);
+        //         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE) === false) {
+        //             return $ip;
+        //         }
+        //     }
+        // }
 
-        return $this->ip();
+        // return $this->ip();
     }
 }
