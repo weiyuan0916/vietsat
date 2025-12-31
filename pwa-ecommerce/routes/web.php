@@ -2,11 +2,42 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\HomeController;
+use Illuminate\Http\Request;
 
 /**
  * Home Route
  */
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Basic pages from new UI
+Route::get('/about', function () {
+    return view('pages.about');
+})->name('about');
+
+Route::get('/services', function () {
+    return view('pages.services');
+})->name('services');
+
+Route::get('/projects', function () {
+    return view('pages.projects');
+})->name('projects');
+
+Route::get('/contact', function () {
+    return view('pages.contact');
+})->name('contact');
+
+// Contact form POST handler
+Route::post('/contact/send', function (Request $request) {
+    $data = $request->validate([
+        'name' => 'required|string|max:191',
+        'email' => 'required|email|max:191',
+        'message' => 'required|string|max:2000',
+    ]);
+
+    // Placeholder: in production send email or store to DB
+    // For now flash success and redirect back
+    return back()->with('status', 'Cảm ơn! Chúng tôi đã nhận được tin nhắn của bạn.');
+})->name('contact.send');
 
 /**
  * Placeholder Routes (to be implemented)

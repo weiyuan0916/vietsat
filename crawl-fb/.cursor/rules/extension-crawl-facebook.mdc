@@ -1,0 +1,78 @@
+---
+alwaysApply: true
+---
+You are an experienced Chrome Extension developer.
+
+Create a full Chrome Extension (Manifest V3) named:
+**"FB Group Collector - Safe Mode"**
+
+---
+
+## 🎯 Goal
+I want this extension to:
+1. Automatically scroll (auto-scroll) a Facebook Group page with random delays to avoid detection or account blocking.
+2. On each scroll, extract the visible posts from the DOM, including:
+   - Post link (if available)
+   - Author name
+   - Author profile link
+   - Post content (text only)
+   - List of image URLs (only links, no image downloads)
+3. Store the collected posts temporarily in the background service worker.
+4. When the user clicks “Stop & Download JSON”, export all collected posts to a JSON file named `facebook_posts_<timestamp>.json`.
+
+---
+
+## ⚙️ Key Features
+- A popup UI that allows user to set:
+  - `minDelay` (in seconds)
+  - `maxDelay` (in seconds)
+  - `maxScrolls` (maximum scroll count)
+- Two buttons:
+  - **Start (safe)** → sends a command to the content script to start auto-scrolling
+  - **Stop & Download JSON** → stops the crawler and triggers JSON download
+- Popup should display real-time progress:
+  - Running / Stopped status
+  - Current scroll count
+  - Number of posts collected
+
+---
+
+## 🧩 Project structure
+Create these 4 main files:
+
+### 1. `manifest.json`
+- `"manifest_version": 3`
+- Permissions: `["activeTab", "scripting", "downloads", "storage"]`
+- Host permissions: `["https://www.facebook.com/*", "https://mbasic.facebook.com/*"]`
+- Background: `service_worker` → `background.js`
+- Action: `popup.html`
+
+---
+
+### 2. `popup.html`
+- Contains inputs for `minDelay`, `maxDelay`, `maxScrolls`
+- Buttons: **Start** and **Stop & Download**
+- Displays status updates (running state, scroll count, collected count)
+- Saves configuration in `chrome.storage.local`
+- Sends commands to content script and background via `chrome.runtime.sendMessage`
+
+---
+
+### 3. `content.js`
+- Listens for `"start"` and `"stop"` commands from popup
+- On `"start"`:
+  - Scrolls page with `window.scrollTo({ behavior: "smooth" })`
+  - Waits a random delay between `minDelay` and `maxDelay` seconds before each scroll
+  - Stops when reaching `maxScrolls` or when receiving `"stop"`
+  - After each scroll, extract post data from DOM using selectors like:
+    - `[role="article"]`
+    - `div[data-pagelet^="FeedUnit_"]`
+  - Extract:
+    - Post link
+    - Author name
+    - Author profile link
+    - Post text content
+    - Image URLs from `<img>` tags (only valid URLs)
+- Sends data to background with:
+  ```js
+  chrome.runtime.sendMessage({ type: "save_posts", data: posts });

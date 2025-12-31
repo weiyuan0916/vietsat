@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FB Group Collector - Safe Mode</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🔍 FB Group Collector</h1>
+      <p class="subtitle">Safe Mode - Auto Scroll & Extract</p>
+    </header>
+
+    <!-- Settings Card -->
+    <div class="card">
+      <div class="settings-group">
+        <label for="minDelay">
+          Min Delay (seconds)
+          <span class="help-text">Minimum wait time between scrolls</span>
+        </label>
+        <input type="number" id="minDelay" min="1" max="30" value="2" step="0.5">
+      </div>
+
+      <div class="settings-group">
+        <label for="maxDelay">
+          Max Delay (seconds)
+          <span class="help-text">Maximum wait time between scrolls</span>
+        </label>
+        <input type="number" id="maxDelay" min="2" max="60" value="5" step="0.5">
+      </div>
+
+      <div class="settings-group">
+        <label for="maxScrolls">
+          Max Scrolls
+          <span class="help-text">Stop after this many scrolls (0 = unlimited)</span>
+        </label>
+        <input type="number" id="maxScrolls" min="0" max="1000" value="50" step="1">
+      </div>
+    </div>
+
+    <!-- Status Card -->
+    <div class="card status-card">
+      <div class="status-item">
+        <span class="status-label">Status</span>
+        <span class="status-value" id="status">
+          <span class="status-dot stopped"></span>Stopped
+        </span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Scroll Count</span>
+        <span class="status-value" id="scrollCount">0</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Posts Collected</span>
+        <span class="status-value" id="postsCount">
+          0 <span class="badge">NEW</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Control Buttons -->
+    <div class="button-group">
+      <button id="startBtn">▶ Start</button>
+      <button id="stopBtn" disabled>⬇ Stop & Download</button>
+    </div>
+
+    <footer>
+      Made with ❤️ for safe data collection
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
+
