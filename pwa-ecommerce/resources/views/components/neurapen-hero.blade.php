@@ -4,13 +4,13 @@
             <div class="framer-1esoyne" data-framer-name="left">
                 <div class="framer-btbqnj" data-framer-name="copy">
                     <div class="ssr-variant hidden-1ez7xnl">
-                        <div class="framer-tc3xx6" data-framer-name="The Smartest Way to Digitize" style="outline:none;display:flex;flex-direction:column;justify-content:flex-start;flex-shrink:0;transform:none" data-framer-component-type="RichTextContainer">
-                            <h1 class="framer-text framer-styles-preset-1710rat" data-styles-preset="xtuiSZcXI" style="--framer-text-color:var(--token-9d4e0d44-8439-4f65-a99e-bf97b7246dfd, rgb(245, 244, 242))">The Smartest Way to Digitize</h1>
+                        <div class="framer-tc3xx6" data-framer-name="The Smartest123 Way to Digitize" style="outline:none;display:flex;flex-direction:column;justify-content:flex-start;flex-shrink:0;transform:none" data-framer-component-type="RichTextContainer">
+                            <h1 class="framer-text framer-styles-preset-1710rat" data-styles-preset="xtuiSZcXI" style="--framer-text-color:var(--token-9d4e0d44-8439-4f65-a99e-bf97b7246dfd, rgb(245, 244, 242))">The Smartest123 Way to Digitize</h1>
                         </div>
                     </div>
                     <div class="ssr-variant hidden-72rtr7">
-                        <div class="framer-tc3xx6" data-framer-name="The Smartest Way to Digitize" style="outline:none;display:flex;flex-direction:column;justify-content:flex-start;flex-shrink:0;transform:none" data-framer-component-type="RichTextContainer">
-                            <h1 class="framer-text framer-styles-preset-1710rat" data-styles-preset="xtuiSZcXI" style="--framer-text-alignment:center;--framer-text-color:var(--token-9d4e0d44-8439-4f65-a99e-bf97b7246dfd, rgb(245, 244, 242))">The Smartest Way to Digitize</h1>
+                        <div class="framer-tc3xx6" data-framer-name="The Smartest123 Way to Digitize" style="outline:none;display:flex;flex-direction:column;justify-content:flex-start;flex-shrink:0;transform:none" data-framer-component-type="RichTextContainer">
+                            <h1 class="framer-text framer-styles-preset-1710rat" data-styles-preset="xtuiSZcXI" style="--framer-text-alignment:center;--framer-text-color:var(--token-9d4e0d44-8439-4f65-a99e-bf97b7246dfd, rgb(245, 244, 242))">The Smartest123 Way to Digitize</h1>
                         </div>
                     </div>
                     <div class="ssr-variant hidden-1ez7xnl">
@@ -257,8 +257,8 @@
         <div class="framer-3g24kz" data-framer-appear-id="3g24kz" data-framer-name="container">
             <div class="framer-1esoyne" data-framer-name="left">
                 <div class="framer-btbqnj" data-framer-name="copy">
-                    <div class="framer-tc3xx6" data-framer-name="The Smartest Way to Digitize" style="outline:none;display:flex;flex-direction:column;justify-content:flex-start;flex-shrink:0;transform:none" data-framer-component-type="RichTextContainer">
-                        <h1 class="framer-text framer-styles-preset-1710rat" data-styles-preset="xtuiSZcXI" style="--framer-text-alignment:center;--framer-text-color:var(--token-9d4e0d44-8439-4f65-a99e-bf97b7246dfd, rgb(245, 244, 242))">The Smartest Way to Digitize</h1>
+                    <div class="framer-tc3xx6" data-framer-name="The Smartest123 Way to Digitize" style="outline:none;display:flex;flex-direction:column;justify-content:flex-start;flex-shrink:0;transform:none" data-framer-component-type="RichTextContainer">
+                        <h1 class="framer-text framer-styles-preset-1710rat" data-styles-preset="xtuiSZcXI" style="--framer-text-alignment:center;--framer-text-color:var(--token-9d4e0d44-8439-4f65-a99e-bf97b7246dfd, rgb(245, 244, 242))">The Smartest123 Way to Digitize</h1>
                     </div>
                     <div class="framer-8u6jyt-container">
                         <div class="framer-0tjlY framer-vs9bU framer-UGjiz framer-5iybn framer-v-5iybn" data-framer-name="Big" style="background:linear-gradient(91.61636656635307deg, var(--token-9d4e0d44-8439-4f65-a99e-bf97b7246dfd, rgb(245, 244, 242)) /* {&quot;name&quot;:&quot;White Chalk&quot;} */ 11.500000208616257%, var(--token-7c26d933-2d16-4554-8f23-f4022b9cd2ff, rgb(226, 204, 157)) /* {&quot;name&quot;:&quot;Prairie land&quot;} */ 70.40438652038574%, var(--token-9663aaf6-f4bf-42ba-aac5-ae3f7ce20cb8, rgb(231, 76, 46)) /* {&quot;name&quot;:&quot;Tomato curry&quot;} */ 100%);border-bottom-left-radius:8px;border-bottom-right-radius:8px;border-top-left-radius:8px;border-top-right-radius:8px;width:100%">

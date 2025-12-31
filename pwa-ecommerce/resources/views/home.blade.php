@@ -135,22 +135,20 @@
                 background: rgb(255, 255, 255);
             }
         </style>
-        <div data-framer-root class="framer-F5y0Y framer-WS3D2 framer-VTRMt framer-7b3RU framer-sBEQU framer-qkncU framer-l5MbJ framer-3wKrS framer-UGjiz framer-72rtr7" style="min-height:100vh;width:auto;display:contents">
+        <div class="localized-content" style="min-height:100vh;width:auto;display:contents">
 
-            @include('components.neurapen-hero')
+            @include('components.localized-neurapen-hero')
 
+            {{-- Temporarily use original sponsors until localized --}}
             @include('components.neurapen-sponsors')
 
-            @include('components.neurapen-features')
+            @include('components.localized-neurapen-features')
 
+            {{-- Temporarily use original components until localized --}}
             @include('components.neurapen-users')
-
             @include('components.neurapen-testimonials')
-
             @include('components.neurapen-pricing')
-
             @include('components.neurapen-faq')
-
             @include('components.neurapen-cta')
         </div>
         <div id="overlay"></div>

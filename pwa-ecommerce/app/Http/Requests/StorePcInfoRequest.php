@@ -76,27 +76,27 @@ class StorePcInfoRequest extends FormRequest
      */
     protected function detectClientIp(): ?string
     {
-        // $headers = [
-        //     'HTTP_CF_CONNECTING_IP',
-        //     'HTTP_CLIENT_IP',
-        //     'HTTP_X_FORWARDED_FOR',
-        //     'HTTP_X_FORWARDED',
-        //     'HTTP_X_CLUSTER_CLIENT_IP',
-        //     'HTTP_FORWARDED_FOR',
-        //     'HTTP_FORWARDED',
-        //     'REMOTE_ADDR',
-        // ];
+        $headers = [
+            'HTTP_CF_CONNECTING_IP',
+            'HTTP_CLIENT_IP',
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_X_FORWARDED',
+            'HTTP_X_CLUSTER_CLIENT_IP',
+            'HTTP_FORWARDED_FOR',
+            'HTTP_FORWARDED',
+            'REMOTE_ADDR',
+        ];
 
-        // foreach ($headers as $header) {
-        //     if ($this->server($header)) {
-        //         $ip = trim(explode(',', $this->server($header))[0]);
-        //         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-        //             return $ip;
-        //         }
-        //     }
-        // }
+        foreach ($headers as $header) {
+            if ($this->server($header)) {
+                $ip = trim(explode(',', $this->server($header))[0]);
+                if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                    return $ip;
+                }
+            }
+        }
 
-        // return $this->ip();
+        return $this->ip();
     }
 
     /**

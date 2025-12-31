@@ -123,4 +123,20 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Supported Locales
+    |--------------------------------------------------------------------------
+    |
+    | The supported locales for the application. These are the locales that
+    | can be used for localization. The first locale in the array will be
+    | used as the default locale if no locale is specified.
+    |
+    */
+
+    'supported_locales' => [
+        'en' => 'English',
+        'vi' => 'Tiếng Việt',
+    ],
+
 ];
