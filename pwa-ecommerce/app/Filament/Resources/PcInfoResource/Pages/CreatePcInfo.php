@@ -12,3 +12,5 @@ class CreatePcInfo extends CreateRecord
 {
     protected static string $resource = PcInfoResource::class;
 }
+
+

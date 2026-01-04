@@ -100,3 +100,5 @@ class PcInfo extends Model
         return $query->where('user_name', 'like', "%{$userName}%");
     }
 }
+
+

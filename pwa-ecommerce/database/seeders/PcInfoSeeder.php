@@ -49,3 +49,5 @@ class PcInfoSeeder extends Seeder
         PcInfo::factory(3)->recent()->create();
     }
 }
+
+
