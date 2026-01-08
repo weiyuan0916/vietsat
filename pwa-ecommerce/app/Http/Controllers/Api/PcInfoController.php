@@ -17,7 +17,11 @@ use Exception;
 class PcInfoController extends Controller
 {
     /**
-     * Store PC information.
+     * Store PC information with smart duplicate handling.
+     *
+     * Logic:
+     * - If public_ip_address equals local_ip_address: Update existing record with same IP
+     * - If public_ip_address differs from local_ip_address: Always create new record
      *
      * @param StorePcInfoRequest $request
      * @return JsonResponse
@@ -25,28 +29,38 @@ class PcInfoController extends Controller
     public function store(StorePcInfoRequest $request): JsonResponse
     {
         try {
-            // Check if PC info already exists for this host_name or IP
-            $existingPcInfo = PcInfo::where(function ($query) use ($request) {
-                if ($request->has('host_name') && $request->host_name) {
-                    $query->where('host_name', $request->host_name);
-                }
-                if ($request->has('local_ip_address') && $request->local_ip_address) {
-                    $query->orWhere('local_ip_address', $request->local_ip_address);
-                }
-                if ($request->has('public_ip_address') && $request->public_ip_address) {
-                    $query->orWhere('public_ip_address', $request->public_ip_address);
-                }
-            })->first();
+            $validatedData = $request->validated();
+            $publicIp = $validatedData['public_ip_address'] ?? null;
+            $localIp = $validatedData['local_ip_address'] ?? null;
 
-            if ($existingPcInfo) {
-                // Update existing record
-                $existingPcInfo->update($request->validated());
-                $pcInfo = $existingPcInfo;
-                $message = 'PC information updated successfully';
+            // Check if public IP equals local IP
+            if ($publicIp && $localIp && $publicIp === $localIp) {
+                // Same IP: Update existing record with this IP
+                $existingPcInfo = PcInfo::where(function ($query) use ($publicIp) {
+                    $query->where('public_ip_address', $publicIp)
+                          ->orWhere('local_ip_address', $publicIp);
+                })->first();
+
+                if ($existingPcInfo) {
+                    // Update existing record
+                    $existingPcInfo->update($validatedData);
+                    $pcInfo = $existingPcInfo;
+                    $message = 'PC information updated successfully (same IP detected)';
+                    $statusCode = 200; // Updated
+                    $created = false;
+                } else {
+                    // No existing record with this IP, create new
+                    $pcInfo = PcInfo::create($validatedData);
+                    $message = 'PC information stored successfully';
+                    $statusCode = 201; // Created
+                    $created = true;
+                }
             } else {
-                // Create new record
-                $pcInfo = PcInfo::create($request->validated());
-                $message = 'PC information stored successfully';
+                // Different IPs or missing IPs: Always create new record
+                $pcInfo = PcInfo::create($validatedData);
+                $message = 'PC information stored successfully (new record)';
+                $statusCode = 201; // Created
+                $created = true;
             }
 
             return response()->json([
@@ -54,9 +68,14 @@ class PcInfoController extends Controller
                 'message' => $message,
                 'data' => [
                     'pc_info' => $pcInfo,
-                    'created' => $existingPcInfo ? false : true,
+                    'created' => $created,
+                    'ip_comparison' => [
+                        'public_ip' => $publicIp,
+                        'local_ip' => $localIp,
+                        'same_ip' => $publicIp === $localIp,
+                    ],
                 ],
-            ], 201);
+            ], $statusCode);
 
         } catch (Exception $e) {
             return response()->json([

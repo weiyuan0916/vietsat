@@ -167,7 +167,12 @@ Route::prefix('v1')->group(function () {
 
         /**
          * POST /api/v1/pc-infos
-         * Store or update PC information
+         * Store PC information with smart duplicate handling
+         *
+         * Logic:
+         * - If public_ip_address equals local_ip_address: Update existing record
+         * - If public_ip_address differs from local_ip_address: Create new record
+         * - Always saves the data regardless of existing records
          *
          * Request Body:
          * {
@@ -177,6 +182,10 @@ Route::prefix('v1')->group(function () {
          *   "local_ip_address": "192.168.1.100",
          *   "public_ip_address": "203.0.113.1"
          * }
+         *
+         * Response:
+         * - 201: Created (new record)
+         * - 200: Updated (existing record)
          */
         Route::post('/', [PcInfoController::class, 'store'])
             ->name('store');
