@@ -747,7 +747,8 @@ preloadPages();
 // ====================
 // API Configuration
 // ====================
-var API_BASE_URL = '/api';
+// Point to Laravel backend API
+var API_BASE_URL = 'https://pwa-ecommerce.test/api';
 
 // ====================
 // Service API Functions
@@ -835,7 +836,7 @@ function subscribeToOrder(orderCode) {
     
     // Initialize Reverb connection
     reverb = new Reverb.Reverb({
-        authEndpoint: '/broadcasting/auth',
+        authEndpoint: 'https://pwa-ecommerce.test/broadcasting/auth',
     });
     
     // Subscribe to private channel for this order

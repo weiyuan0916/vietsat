@@ -167,34 +167,3 @@ Route::get('/register', function () {
 Route::post('/logout', function () {
     return redirect()->route('home'); // Placeholder
 })->name('logout');
-
-/**
- * Framework7 SPA Routes
- * Serve the index.html for all app routes (SPA routing)
- */
-Route::get('/app', function () {
-    return response()->file(public_path('app/index.html'));
-});
-
-Route::get('/app/{route?}', function ($route = null) {
-    // Allow only Framework7 routes, serve index.html for SPA
-    $allowedRoutes = [
-        'index.html',
-        'service.html',
-        'css/',
-        'js/',
-        'img/',
-        'fonts/',
-        'pages/',
-        'manifest.json',
-    ];
-    
-    // Check if it's a valid file
-    $filePath = public_path('app/' . $route);
-    if ($route && file_exists($filePath) && is_file($filePath)) {
-        return response()->file($filePath);
-    }
-    
-    // Otherwise serve index.html for SPA routing
-    return response()->file(public_path('app/index.html'));
-})->where('route', '.*');
