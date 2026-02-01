@@ -1,2 +1,0 @@
-function e(t,a){return{description:"Tiệm Nhà Duy is a versatile SaaS Framer template crafted to suit a variety of digital products and services. With a user-centric design and layout, it\u2019s perfect for highlighting features, engaging visitors, and driving conversions effortlessly.",favicon:"https://framerusercontent.com/assets/YHv5Q03QNxKUNImnLcDkk5cWhY.svg",robots:"max-image-preview:large",socialImage:"https://framerusercontent.com/assets/mJbZ2nsWLB2DRCGnbBKefRcsIk.png",title:"Tiệm Nhà Duy"}}export{e as a};
-//# sourceMappingURL=chunk-CWZ5A4L6.js.map

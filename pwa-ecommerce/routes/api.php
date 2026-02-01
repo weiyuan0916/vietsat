@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\LicenseController;
 use App\Http\Controllers\Api\PcInfoController;
+use App\Http\Controllers\Api\ServiceController;
+use App\Http\Controllers\Api\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -233,4 +235,93 @@ Route::prefix('v1')->group(function () {
         Route::get('statistics/overview', [PcInfoController::class, 'statistics'])
             ->name('statistics');
     });
+
+    // Service Routes
+    Route::prefix('service')->name('service.')->group(function () {
+        /**
+         * GET /api/v1/service/default
+         * Get the default service plan
+         *
+         * Response:
+         * {
+         *   "id": 1,
+         *   "name": "Default Plan",
+         *   "duration_days": 90,
+         *   "price": 100000
+         * }
+         */
+        Route::get('default', [ServiceController::class, 'default'])
+            ->name('default');
+    });
+
+    // Order Routes
+    Route::prefix('orders')->name('orders.')->group(function () {
+        /**
+         * POST /api/v1/orders
+         * Create a new service order
+         *
+         * Request Body:
+         * {
+         *   "facebook_profile_link": "https://facebook.com/..."
+         * }
+         *
+         * Response:
+         * {
+         *   "order_code": "ORD-XXXXXXXXXX",
+         *   "amount": 100000,
+         *   "expires_at": "2026-01-31T10:00:00Z",
+         *   "qr_content": "bank:ORD-XXXXXXXXXX:100000"
+         * }
+         */
+        Route::post('/', [OrderController::class, 'store'])
+            ->name('store');
+
+        /**
+         * GET /api/v1/orders/{orderCode}
+         * Get order details and status
+         *
+         * Response:
+         * {
+         *   "order_code": "ORD-XXXXXXXXXX",
+         *   "amount": 100000,
+         *   "status": "pending",
+         *   "expires_at": "2026-01-31T10:00:00Z",
+         *   "paid_at": null
+         * }
+         */
+        Route::get('{orderCode}', [OrderController::class, 'show'])
+            ->name('show');
+    });
+
+    // Debug route - Xem dữ liệu và mối quan hệ (Remove in production)
+    Route::get('debug/data', function () {
+        $services = \App\Models\Service::with('orders')->get();
+        
+        return response()->json([
+            'services' => $services->map(function($service) {
+                return [
+                    'id' => $service->id,
+                    'name' => $service->name,
+                    'price' => $service->price,
+                    'price_formatted' => number_format($service->price) . ' VND',
+                    'duration_days' => $service->duration_days,
+                    'is_active' => $service->is_active,
+                    'orders_count' => $service->orders->count(),
+                    'orders' => $service->orders->map(function($order) {
+                        return [
+                            'order_code' => $order->order_code,
+                            'amount' => $order->amount,
+                            'status' => $order->status,
+                            'expires_at' => $order->expires_at,
+                            'paid_at' => $order->paid_at,
+                        ];
+                    }),
+                ];
+            }),
+            'relationships' => [
+                'service -> orders' => 'Service hasMany ServiceOrder',
+                'service_order -> service' => 'ServiceOrder belongsTo Service',
+            ]
+        ]);
+    })->name('debug.data');
 });

@@ -1,0 +1,111 @@
+---
+alwaysApply: true
+---
+📐 PROJECT RULES — FRAMEWORK7 + LARAVEL
+1. GENERAL PRINCIPLES
+
+Backend is the single source of truth
+
+Frontend is a thin client
+
+No business logic in UI
+
+No trust in client input
+
+2. FRONTEND RULES (Framework7)
+
+Do NOT hardcode:
+
+price
+
+duration
+
+expiration
+
+All service config must come from API
+
+Only handle:
+
+UI
+
+realtime display
+
+user input
+
+One entry point: /app
+
+3. BACKEND RULES (Laravel)
+
+API only
+
+All monetary values calculated server-side
+
+All expiration calculated server-side
+
+Use DB transactions for:
+
+payment confirmation
+
+service activation
+
+4. DATABASE RULES
+
+No magic IDs
+
+All relations explicit
+
+Unique constraints for:
+
+order_code
+
+bank_txn_id
+
+Soft delete only if necessary
+
+5. REALTIME RULES
+
+Private channels only
+
+Auth before subscribe
+
+Emit events server-side only
+
+6. SEEDING RULES
+
+Seeder must be:
+
+idempotent
+
+environment-safe
+
+Default service must always exist
+
+7. FUTURE EXTENSION RULE
+
+When adding more plans:
+
+Only add new rows in services
+
+Frontend auto renders
+
+No refactor of payment logic
+
+8. FORBIDDEN ACTIONS
+
+❌ Hardcode price in UI
+❌ Hardcode plan id
+❌ Confirm payment from client
+❌ Skip DB transaction
+❌ Public realtime channel
+
+9. MAINTENANCE GOAL
+
+A new developer must be able to:
+
+Add a new plan
+
+Without touching payment core
+
+Without touching frontend logic
+
+Without breaking existing orders
