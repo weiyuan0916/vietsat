@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ApiDocumentationController;
+use App\Http\Controllers\Api\FacebookProfileController;
 use App\Http\Controllers\Api\LicenseController;
 use App\Http\Controllers\Api\PcInfoController;
 use App\Http\Controllers\Api\ServiceController;
@@ -237,21 +239,87 @@ Route::prefix('v1')->group(function () {
     });
 
     // Service Routes
-    Route::prefix('service')->name('service.')->group(function () {
+    Route::prefix('services')->name('services.')->group(function () {
         /**
-         * GET /api/v1/service/default
+         * GET /api/v1/services
+         * Get all services with pagination
+         *
+         * Query Parameters:
+         * - page: Trang hiện tại (mặc định: 1)
+         * - per_page: Số item mỗi trang (mặc định: 10, tối đa: 100)
+         *
+         * Response (200) - Success:
+         * {
+         *   "status": true,
+         *   "message": "Lấy danh sách dịch vụ thành công.",
+         *   "data": {
+         *     "items": [...],
+         *     "meta": {...},
+         *     "links": {...}
+         *   }
+         * }
+         */
+        Route::get('/', [ServiceController::class, 'index'])
+            ->name('index');
+
+        /**
+         * GET /api/v1/services/default
          * Get the default service plan
          *
-         * Response:
+         * Response (200) - Success:
          * {
-         *   "id": 1,
-         *   "name": "Default Plan",
-         *   "duration_days": 90,
-         *   "price": 100000
+         *   "status": true,
+         *   "message": "Lấy thông tin dịch vụ thành công.",
+         *   "data": {
+         *     "id": 1,
+         *     "name": "Default Plan",
+         *     "duration_days": 90,
+         *     "price": 100000,
+         *     "formatted_price": "100,000 VND"
+         *   }
+         * }
+         *
+         * Response (404) - Not found:
+         * {
+         *   "status": false,
+         *   "message": "Không tìm thấy dịch vụ hoạt động.",
+         *   "data": null
          * }
          */
         Route::get('default', [ServiceController::class, 'default'])
             ->name('default');
+
+        /**
+         * GET /api/v1/services/{id}
+         * Get a specific service by ID
+         *
+         * Response (200) - Success:
+         * {
+         *   "status": true,
+         *   "message": "Lấy thông tin dịch vụ thành công.",
+         *   "data": {
+         *     "id": 1,
+         *     "name": "Default Plan",
+         *     " /"
+         * ơp0987654321`1`2345u690-=ư=-09876=-0987qs    
+         * i ds  edsduration_days": 90,
+         *     "price": 100000,
+         *     "formatted_price": "100,000 VND",
+         *     "is_active": true,
+         *     "created_at": "2026-01-30T10:00:00Z",
+         *     "updated_at": "2026-01-30T10:00:00Z"
+         *   }
+         * }
+         *
+         * Response (404) - Not found:
+         * {
+         *   "status": false,
+         *   "message": "Không tìm thấy dịch vụ.",
+         *   "data": null
+         * }
+         */
+        Route::get('{id}', [ServiceController::class, 'show'])
+            ->name('show');
     });
 
     // Order Routes
@@ -265,12 +333,39 @@ Route::prefix('v1')->group(function () {
          *   "facebook_profile_link": "https://facebook.com/..."
          * }
          *
-         * Response:
+         * Response (201) - Success:
          * {
-         *   "order_code": "ORD-XXXXXXXXXX",
-         *   "amount": 100000,
-         *   "expires_at": "2026-01-31T10:00:00Z",
-         *   "qr_content": "bank:ORD-XXXXXXXXXX:100000"
+         *   "status": true,
+         *   "message": "Tạo đơn hàng thành công.",
+         *   "data": {
+         *     "order_code": "ORD-XXXXXXXXXX",
+         *     "amount": 100000,
+         *     "expires_at": "2026-01-31T10:05:00Z",
+         *     "qr_content": "bank:ORD-XXXXXXXXXX:100000",
+         *     "status": "pending",
+         *     "service": {
+         *       "id": 1,
+         *       "name": "Default Plan",
+         *       "duration_days": 90
+         *     }
+         *   }
+         * }
+         *
+         * Response (422) - Validation failed:
+         * {
+         *   "status": false,
+         *   "message": "Dữ liệu đầu vào không hợp lệ.",
+         *   "data": null,
+         *   "errors": {
+         *     "facebook_profile_link": ["The facebook profile link field is required."]
+         *   }
+         * }
+         *
+         * Response (404) - No active service:
+         * {
+         *   "status": false,
+         *   "message": "Không tìm thấy dịch vụ hoạt động.",
+         *   "data": null
          * }
          */
         Route::post('/', [OrderController::class, 'store'])
@@ -280,17 +375,137 @@ Route::prefix('v1')->group(function () {
          * GET /api/v1/orders/{orderCode}
          * Get order details and status
          *
-         * Response:
+         * Response (200) - Success:
          * {
-         *   "order_code": "ORD-XXXXXXXXXX",
-         *   "amount": 100000,
-         *   "status": "pending",
-         *   "expires_at": "2026-01-31T10:00:00Z",
-         *   "paid_at": null
+         *   "status": true,
+         *   "message": "Lấy thông tin đơn hàng thành công.",
+         *   "data": {
+         *     "order_code": "ORD-XXXXXXXXXX",
+         *     "amount": 100000,
+         *     "status": "pending",
+         *     "expires_at": "2026-01-31T10:05:00Z",
+         *     "paid_at": null,
+         *     "created_at": "2026-01-31T10:00:00Z",
+         *     "service": {
+         *       "id": 1,
+         *       "name": "Default Plan",
+         *       "duration_days": 90
+         *     }
+         *   }
+         * }
+         *
+         * Response (404) - Order not found:
+         * {
+         *   "status": false,
+         *   "message": "Không tìm thấy đơn hàng.",
+         *   "data": null
          * }
          */
         Route::get('{orderCode}', [OrderController::class, 'show'])
             ->name('show');
+    });
+
+    // Facebook Profile Routes
+    Route::prefix('facebook-profiles')->name('facebook-profiles.')->group(function () {
+        /**
+         * POST /api/v1/facebook-profiles/validate
+         * Validate and parse Facebook profile URL
+         *
+         * Request Body:
+         * {
+         *   "facebook_profile_link": "https://facebook.com/username hoặc https://facebook.com/profile.php?id=123456789"
+         * }
+         *
+         * Response (200) - Valid profile:
+         * {
+         *   "status": true,
+         *   "message": "URL hợp lệ.",
+         *   "data": {
+         *     "original_url": "https://facebook.com/username",
+         *     "normalized_url": "https://www.facebook.com/username",
+         *     "profile_id": "username",
+         *     "profile_type": "username",
+         *     "is_mobile": false,
+         *     "is_shortened": false,
+         *     "profile_info": {
+         *       "username": "username",
+         *       "facebook_url": "https://www.facebook.com/username",
+         *       "profile_url": "https://www.facebook.com/username"
+         *     }
+         *   }
+         * }
+         *
+         * Response (422) - Invalid URL:
+         * {
+         *   "status": false,
+         *   "message": "Dữ liệu đầu vào không hợp lệ.",
+         *   "data": null,
+         *   "errors": {
+         *     "facebook_profile_link": ["URL phải là liên kết Facebook hợp lệ."]
+         *   }
+         * }
+         */
+        Route::post('validate', [FacebookProfileController::class, 'validate'])
+            ->name('validate');
+
+        /**
+         * POST /api/v1/facebook-profiles/validate-batch
+         * Validate multiple Facebook profile URLs at once
+         *
+         * Request Body:
+         * {
+         *   "urls": [
+         *     "https://facebook.com/username1",
+         *     "https://facebook.com/username2"
+         *   ]
+         * }
+         *
+         * Response (200):
+         * {
+         *   "status": true,
+         *   "message": "Kiểm tra hàng loạt hoàn tất.",
+         *   "data": {
+         *     "total": 2,
+         *     "valid": 2,
+         *     "invalid": 0,
+         *     "results": [...]
+         *   }
+         * }
+         */
+        Route::post('validate-batch', [FacebookProfileController::class, 'validateBatch'])
+            ->name('validate-batch');
+
+        /**
+         * GET /api/v1/facebook-profiles/check
+         * Quick check if a Facebook profile URL is valid
+         *
+         * Query Parameters:
+         * - url: Facebook profile URL to check
+         *
+         * Response (200) - Valid:
+         * {
+         *   "status": true,
+         *   "message": "URL hợp lệ.",
+         *   "data": {
+         *     "valid": true,
+         *     "profile_id": "username",
+         *     "profile_type": "username"
+         *   }
+         * }
+         *
+         * Response (200) - Invalid:
+         * {
+         *   "status": true,
+         *   "message": "URL không hợp lệ.",
+         *   "data": {
+         *     "valid": false,
+         *     "profile_id": null,
+         *     "profile_type": null
+         *   }
+         * }
+         */
+        Route::get('check', [FacebookProfileController::class, 'check'])
+            ->name('check');
     });
 
     // Debug route - Xem dữ liệu và mối quan hệ (Remove in production)
@@ -324,4 +539,54 @@ Route::prefix('v1')->group(function () {
             ]
         ]);
     })->name('debug.data');
+
+    // API Documentation Routes
+    Route::prefix('docs')->name('docs.')->group(function () {
+        /**
+         * GET /api/docs
+         * Get API documentation in JSON format
+         */
+        Route::get('/', [ApiDocumentationController::class, 'index'])
+            ->name('index');
+
+        /**
+         * GET /api/docs/html
+         * Get API documentation as HTML
+         */
+        Route::get('html', [ApiDocumentationController::class, 'html'])
+            ->name('html');
+
+        /**
+         * GET /api/docs/openapi
+         * Get OpenAPI/Swagger JSON spec
+         */
+        Route::get('openapi', [ApiDocumentationController::class, 'openapi'])
+            ->name('openapi');
+    });
+
+    /**
+     * POST /api/v1/broadcasting/auth
+     * Authorize access to private channels for Reverb (API-only, no CSRF)
+     * 
+     * Request Body:
+     * {
+     *   "socket_id": "socket123.456",
+     *   "channel_name": "private-order.ORD-XXXXXXXXXX",
+     *   "order_code": "ORD-XXXXXXXXXX" (optional)
+     * }
+     * 
+     * Response (200) - Authorized:
+     * {
+     *   "authorized": true,
+     *   "auth": "socket123.456:signature_hash"
+     * }
+     * 
+     * Response (403) - Unauthorized:
+     * {
+     *   "authorized": false,
+     *   "error": "Unauthorized message"
+     * }
+     */
+    Route::post('broadcasting/auth', [\App\Http\Controllers\Api\BroadcastingAuthController::class, 'authorize'])
+        ->name('broadcasting.auth');
 });

@@ -58,6 +58,24 @@ return [
             'ignore_exceptions' => false,
         ],
 
+        // Custom channel for bot detection logging
+        'bot' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/bot-detection.log'),
+            'level' => 'info',
+            'days' => 30,
+            'replace_placeholders' => true,
+        ],
+
+        // Custom channel for order-related logging
+        'order' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/orders.log'),
+            'level' => 'info',
+            'days' => 30,
+            'replace_placeholders' => true,
+        ],
+
         'single' => [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),

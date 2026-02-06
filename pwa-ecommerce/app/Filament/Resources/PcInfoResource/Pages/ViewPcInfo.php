@@ -28,3 +28,10 @@ class ViewPcInfo extends ViewRecord
 
 
 
+
+
+
+
+
+
+

@@ -818,38 +818,62 @@ async function checkOrderStatus(orderCode) {
 }
 
 // ====================
-// Realtime (WebSocket) - Laravel Reverb
+// Realtime (WebSocket) - Laravel Reverb with API-only authentication
 // ====================
-let reverb = null;
+
+// Ensure Echo is loaded - Echo should be included via bootstrap.js which is loaded in the main HTML
+let echo = null;
 let orderChannel = null;
+let currentOrderCode = null;
+
+/**
+ * Initialize Laravel Echo connection
+ * @returns {Object} Echo instance
+ */
+function getEcho() {
+    if (!echo && window.Echo) {
+        echo = window.Echo;
+    }
+    return echo;
+}
 
 /**
  * Subscribe to order payment status updates
+ * Uses Laravel Echo with API-based authentication (no CSRF needed)
+ * 
  * @param {string} orderCode - Order code to subscribe to
  * @returns {Object} Channel object with event listeners
  */
 function subscribeToOrder(orderCode) {
-    // Disconnect existing connection
-    if (reverb) {
-        reverb.disconnect();
+    const echoInstance = getEcho();
+    
+    if (!echoInstance) {
+        console.error('Echo is not initialized. Make sure bootstrap.js is loaded.');
+        app.dialog.alert('Realtime connection not available. Please refresh the page.', 'Connection Error');
+        return null;
     }
     
-    // Initialize Reverb connection
-    reverb = new Reverb.Reverb({
-        authEndpoint: 'https://pwa-ecommerce.test/broadcasting/auth',
-    });
+    // Leave any existing order channel
+    if (orderChannel && currentOrderCode) {
+        echoInstance.leave('order.' + currentOrderCode);
+    }
+    
+    // Store current order code
+    currentOrderCode = orderCode;
     
     // Subscribe to private channel for this order
-    const channel = reverb.channel(`order.${orderCode}`);
+    // Laravel Echo automatically adds 'private-' prefix to channel names
+    // Channel name will be: private-order.ORD-XXXXXXXXXX
+    const channel = echoInstance.private('order.' + orderCode);
     orderChannel = channel;
     
     // Listen for payment events
-    channel.on('payment.pending', (data) => {
+    channel.listen('payment.pending', (data) => {
         console.log('Payment pending:', data);
         app.dialog.alert('Payment pending: ' + (data.message || 'Your order is being processed'), 'Pending');
     });
     
-    channel.on('payment.success', (data) => {
+    channel.listen('payment.success', (data) => {
         console.log('Payment success:', data);
         app.dialog.alert('Payment successful! Your service has been activated.', 'Success', function() {
             // Navigate back or to success page
@@ -857,13 +881,25 @@ function subscribeToOrder(orderCode) {
         });
     });
     
-    channel.on('payment.expired', (data) => {
+    channel.listen('payment.expired', (data) => {
         console.log('Payment expired:', data);
         app.dialog.alert('Payment expired. Please create a new order.', 'Expired');
     });
     
-    // Connect to WebSocket
-    reverb.connect();
+    // Error handling for channel subscription
+    channel.error((error) => {
+        console.error('Channel subscription error:', error);
+        
+        if (error.error && error.error.message) {
+            // Authentication error
+            app.dialog.alert('Could not connect to payment updates. Please try again.', 'Connection Error');
+        } else {
+            app.dialog.alert('Connection error. Check your internet connection.', 'Error');
+        }
+    });
+    
+    // Log successful subscription
+    console.log('Subscribed to order channel:', 'order.' + orderCode);
     
     return channel;
 }
@@ -872,11 +908,20 @@ function subscribeToOrder(orderCode) {
  * Disconnect from WebSocket
  */
 function disconnectReverb() {
-    if (reverb) {
-        reverb.disconnect();
-        reverb = null;
+    if (echo && orderChannel && currentOrderCode) {
+        echo.leave('order.' + currentOrderCode);
         orderChannel = null;
+        currentOrderCode = null;
     }
+}
+
+/**
+ * Check if Echo is connected
+ * @returns {boolean} True if connected
+ */
+function isReverbConnected() {
+    const echoInstance = getEcho();
+    return echoInstance && echoInstance.connector && echoInstance.connector.socket && echoInstance.connector.socket.connection ? echoInstance.connector.socket.connection.isInitialized() : false;
 }
 
 // ====================
