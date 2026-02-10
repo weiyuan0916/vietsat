@@ -178,9 +178,9 @@
       <div class="card">
         <div class="card-image">
           <img src="img/cards/3.jpg" alt="Payment">
-          <div class="card-image-footer">
-            <div class="card-category bg-color-green">Đơn hàng mới</div>
-            <h2>Chờ thanh toán</h2>
+          <div class="card-image-footer" id="payment-status-footer">
+            <div class="card-category bg-color-green" id="order-status-badge">Đơn hàng mới</div>
+            <h2 id="order-status-text">Chờ thanh toán</h2>
           </div>
         </div>
         <div class="card-content card-content-padding">
@@ -197,7 +197,7 @@
                 </div>
                 <div class="stock-item-bottom">
                   <div class="stock-item-name">Order Code</div>
-                  <div class="stock-item-change text-color-orange">Vui lòng thanh toán trong 5 phút</div>
+                  <div class="stock-item-change text-color-orange" id="payment-instruction">Vui lòng thanh toán trong 5 phút</div>
                 </div>
               </div>
             </div>
@@ -216,7 +216,7 @@
                 </div>
               </div>
             </div>
-            <div class="stock-item">
+            <div class="stock-item" id="expiration-section">
               <div class="stock-item-icon bg-color-blue">
                 <i class="icon f7-icons">clock</i>
               </div>
@@ -228,6 +228,23 @@
                 <div class="stock-item-bottom">
                   <div class="stock-item-name">Expires At</div>
                   <div class="stock-item-change text-color-red">Quá hạn đơn sẽ bị hủy</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Success Status (Hidden by default) -->
+            <div class="stock-item" id="success-section" style="display: none;">
+              <div class="stock-item-icon bg-color-green">
+                <i class="icon f7-icons">checkmark_circle_fill</i>
+              </div>
+              <div class="stock-item-details">
+                <div class="stock-item-top">
+                  <div class="stock-item-title">Trạng thái</div>
+                  <div class="stock-item-value text-color-green">Đã thanh toán</div>
+                </div>
+                <div class="stock-item-bottom">
+                  <div class="stock-item-name">Status</div>
+                  <div class="stock-item-change text-color-green">Dịch vụ đã được kích hoạt</div>
                 </div>
               </div>
             </div>

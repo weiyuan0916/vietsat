@@ -83,7 +83,7 @@ return [
                     'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
                 ],
                 'allowed_origins' => [
-                    env('ALLOWED_ORIGINS', 'pwa-ecommerce.test,yiki.test,localhost,localhost:8081,127.0.0.1,127.0.0.1:8081'),
+                    env('ALLOWED_ORIGINS', '*'),
                 ],
                 'ping_interval' => env('REVERB_APP_PING_INTERVAL', 60),
                 'activity_timeout' => env('REVERB_APP_ACTIVITY_TIMEOUT', 30),

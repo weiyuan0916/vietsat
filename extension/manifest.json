@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Facebook UID Opener",
+  "version": "1.0",
+  "description": "Extract a Facebook profile UID and open a group-user link, auto-close the tab after 5 minutes.",
+  "permissions": ["tabs", "alarms", "notifications", "scripting", "windows", "storage"],
+  "host_permissions": ["https://www.facebook.com/*", "https://*/*"],
+  "externally_connectable": {
+    "matches": ["*://*.facebook.com/*", "*://*/*"]
+  },
+  "action": {
+    "default_title": "FB UID Opener",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}
+

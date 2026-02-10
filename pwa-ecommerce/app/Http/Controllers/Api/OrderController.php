@@ -91,7 +91,7 @@ class OrderController extends Controller
                 ->delete();
 
             $order = ServiceOrder::create([
-                'order_code' => 'ORD-' . Str::upper(Str::random(10)),
+                'order_code' => 'ORDFB' . Str::upper(Str::random(10)),
                 'service_id' => $service->id,
                 'amount' => $service->price,
                 'status' => ServiceOrder::STATUS_PENDING,

@@ -875,10 +875,68 @@ function subscribeToOrder(orderCode) {
     
     channel.listen('payment.success', (data) => {
         console.log('Payment success:', data);
-        app.dialog.alert('Payment successful! Your service has been activated.', 'Success', function() {
-            // Navigate back or to success page
-            app.views.current.router.back();
-        });
+
+        // Stop countdown and status polling
+        if (typeof stopCountdown === 'function') {
+            stopCountdown();
+        }
+        if (pollingInterval) {
+            clearInterval(pollingInterval);
+            pollingInterval = null;
+        }
+
+        // Hide expiration section (countdown timer)
+        var expirationSection = document.getElementById('expiration-section');
+        if (expirationSection) {
+            expirationSection.style.display = 'none';
+        }
+
+        // Hide payment instruction
+        var paymentInstruction = document.getElementById('payment-instruction');
+        if (paymentInstruction) {
+            paymentInstruction.style.display = 'none';
+        }
+
+        // Show success section
+        var successSection = document.getElementById('success-section');
+        if (successSection) {
+            successSection.style.display = 'flex';
+        }
+
+        // Update card header status
+        var statusBadge = document.getElementById('order-status-badge');
+        var statusText = document.getElementById('order-status-text');
+        if (statusBadge) {
+            statusBadge.textContent = 'Đã thanh toán';
+            statusBadge.classList.remove('bg-color-green');
+            statusBadge.classList.add('bg-color-blue');
+        }
+        if (statusText) {
+            statusText.textContent = 'Thanh toán thành công';
+        }
+
+        // Update success message
+        var successMessageEl = document.querySelector('.success-message');
+        if (successMessageEl) {
+            successMessageEl.innerHTML = `
+                <i class="icon f7-icons" style="font-size: 40px; margin-bottom: 12px; color: #4CAF50;">checkmark_circle_fill</i>
+                <h2>Thanh toán thành công!</h2>
+                <p>
+                    Dịch vụ của bạn đã được kích hoạt.
+                    <br>
+                    Cảm ơn bạn đã sử dụng dịch vụ.
+                </p>
+            `;
+        }
+
+        // Hide cancel button
+        var cancelButton = document.querySelector('button[onclick="cancelOrder()"]');
+        if (cancelButton) {
+            cancelButton.style.display = 'none';
+        }
+
+        // Show success alert
+        app.dialog.alert('Thanh toán thành công! Dịch vụ đã được kích hoạt.', 'Thành công');
     });
     
     channel.listen('payment.expired', (data) => {
@@ -1025,13 +1083,63 @@ $$(document).on('page:init', '.page[data-name="service"]', function (e) {
         if (pollingInterval) {
             clearInterval(pollingInterval);
         }
-        
+
         pollingInterval = setInterval(function() {
             checkOrderStatus(orderCode)
                 .then(function(orderData) {
                     if (orderData.status === 'paid') {
                         clearInterval(pollingInterval);
                         pollingInterval = null;
+
+                        // Hide expiration section (countdown timer)
+                        var expirationSection = document.getElementById('expiration-section');
+                        if (expirationSection) {
+                            expirationSection.style.display = 'none';
+                        }
+
+                        // Hide payment instruction
+                        var paymentInstruction = document.getElementById('payment-instruction');
+                        if (paymentInstruction) {
+                            paymentInstruction.style.display = 'none';
+                        }
+
+                        // Show success section
+                        var successSection = document.getElementById('success-section');
+                        if (successSection) {
+                            successSection.style.display = 'flex';
+                        }
+
+                        // Update card header status
+                        var statusBadge = document.getElementById('order-status-badge');
+                        var statusText = document.getElementById('order-status-text');
+                        if (statusBadge) {
+                            statusBadge.textContent = 'Đã thanh toán';
+                            statusBadge.classList.remove('bg-color-green');
+                            statusBadge.classList.add('bg-color-blue');
+                        }
+                        if (statusText) {
+                            statusText.textContent = 'Thanh toán thành công';
+                        }
+
+                        // Update success message
+                        var successMessageEl = document.querySelector('.success-message');
+                        if (successMessageEl) {
+                            successMessageEl.innerHTML = `
+                                <i class="icon f7-icons" style="font-size: 40px; margin-bottom: 12px; color: #4CAF50;">checkmark_circle_fill</i>
+                                <h2>Thanh toán thành công!</h2>
+                                <p>
+                                    Dịch vụ của bạn đã được kích hoạt.
+                                    <br>
+                                    Cảm ơn bạn đã sử dụng dịch vụ.
+                                </p>
+                            `;
+                        }
+
+                        // Hide cancel button
+                        var cancelButton = document.querySelector('button[onclick="cancelOrder()"]');
+                        if (cancelButton) {
+                            cancelButton.style.display = 'none';
+                        }
                     }
                 })
                 .catch(function(error) {

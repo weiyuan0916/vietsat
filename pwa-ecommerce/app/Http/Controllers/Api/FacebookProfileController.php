@@ -4,12 +4,19 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FacebookProfileRequest;
+use App\Services\FacebookUidExtractorService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class FacebookProfileController extends Controller
 {
+    private FacebookUidExtractorService $uidExtractor;
+
+    public function __construct(FacebookUidExtractorService $uidExtractor)
+    {
+        $this->uidExtractor = $uidExtractor;
+    }
     /**
      * Validate and parse Facebook profile URL.
      *
@@ -189,6 +196,94 @@ class FacebookProfileController extends Controller
                 'invalid' => $invalidCount,
                 'results' => $results,
             ],
+        ]);
+    }
+
+    /**
+     * Extract real Facebook UID from a profile URL.
+     *
+     * This method fetches the actual Facebook profile page and extracts
+     * the numeric UID using various patterns found in the HTML.
+     *
+     * POST /api/v1/facebook-profiles/extract-uid
+     *
+     * Request Body:
+     * {
+     *   "facebook_profile_link": "https://facebook.com/username hoặc https://facebook.com/profile.php?id=123456789"
+     * }
+     *
+     * Response (200) - UID found:
+     * {
+     *   "success": true,
+     *   "message": "UID được trích xuất thành công.",
+     *   "data": {
+     *     "original_url": "https://facebook.com/username",
+     *     "normalized_url": "https://www.facebook.com/username",
+     *     "profile_id_from_url": "username",
+     *     "uid": "100014343376569",
+     *     "profile_info": {
+     *       "username": "username",
+     *       "facebook_url": "https://www.facebook.com/username",
+     *       "profile_url": "https://www.facebook.com/username"
+     *     }
+     *   }
+     * }
+     *
+     * Response (200) - UID not found (profile might be private):
+     * {
+     *   "success": false,
+     *   "message": "Không tìm thấy UID trong trang. Profile có thể riêng tư hoặc đã bị chặn.",
+     *   "data": null
+     * }
+     *
+     * Response (422) - Invalid URL:
+     * {
+     *   "success": false,
+     *   "message": "URL Facebook không hợp lệ.",
+     *   "data": null,
+     *   "errors": {
+     *     "facebook_profile_link": ["URL phải là liên kết Facebook hợp lệ."]
+     *   }
+     * }
+     */
+    public function extractUid(FacebookProfileRequest $request): JsonResponse
+    {
+        $url = $request->input('facebook_profile_link');
+
+        // First, parse the URL to get basic info
+        $parsed = $this->parseFacebookProfileUrl($url);
+
+        // Try to extract UID from URL first (for URLs with numeric ID)
+        $uidFromUrl = $this->uidExtractor->extractUidFromUrl($url);
+
+        // If we got UID from URL, return it directly
+        if ($uidFromUrl !== null && $this->uidExtractor->isValidUid($uidFromUrl)) {
+            return response()->json([
+                'success' => true,
+                'message' => 'UID được trích xuất thành công từ URL.',
+                'data' => array_merge($parsed, [
+                    'uid' => $uidFromUrl,
+                ]),
+            ]);
+        }
+
+        // Otherwise, fetch the page to extract real UID
+        $result = $this->uidExtractor->extract($url);
+
+        if (!$result['success']) {
+            return response()->json([
+                'success' => false,
+                'message' => $result['error'],
+                'data' => null,
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'UID được trích xuất thành công.',
+            'data' => array_merge($parsed, [
+                'uid' => $result['uid'],
+            ]),
         ]);
     }
 

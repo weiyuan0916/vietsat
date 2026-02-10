@@ -476,6 +476,45 @@ Route::prefix('v1')->group(function () {
             ->name('validate-batch');
 
         /**
+         * POST /api/v1/facebook-profiles/extract-uid
+         * Extract real Facebook UID from a profile URL
+         *
+         * This endpoint fetches the actual Facebook profile page and extracts
+         * the numeric UID using various patterns found in the HTML.
+         *
+         * Request Body:
+         * {
+         *   "facebook_profile_link": "https://facebook.com/username"
+         * }
+         *
+         * Response (200) - UID found:
+         * {
+         *   "success": true,
+         *   "message": "UID được trích xuất thành công.",
+         *   "data": {
+         *     "original_url": "https://facebook.com/username",
+         *     "normalized_url": "https://www.facebook.com/username",
+         *     "profile_id_from_url": "username",
+         *     "uid": "100014343376569",
+         *     "profile_info": {
+         *       "username": "username",
+         *       "facebook_url": "https://www.facebook.com/username",
+         *       "profile_url": "https://www.facebook.com/username"
+         *     }
+         *   }
+         * }
+         *
+         * Response (422) - UID not found or profile private:
+         * {
+         *   "success": false,
+         *   "message": "Không tìm thấy UID trong trang...",
+         *   "data": null
+         * }
+         */
+        Route::post('extract-uid', [FacebookProfileController::class, 'extractUid'])
+            ->name('extract-uid');
+
+        /**
          * GET /api/v1/facebook-profiles/check
          * Quick check if a Facebook profile URL is valid
          *
@@ -589,4 +628,287 @@ Route::prefix('v1')->group(function () {
      */
     Route::post('broadcasting/auth', [\App\Http\Controllers\Api\BroadcastingAuthController::class, 'authorize'])
         ->name('broadcasting.auth');
+
+    /**
+     * GET /api/v1/debug/pusher-test
+     * Test Pusher connection and verify credentials
+     */
+    Route::get('debug/pusher-test', function () {
+        // Check if Pusher is configured
+        $pusherConfigured = !empty(env('PUSHER_APP_KEY')) && !empty(env('PUSHER_APP_SECRET'));
+
+        if (!$pusherConfigured) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Pusher chưa được cấu hình',
+                'config' => [
+                    'app_id' => env('PUSHER_APP_ID') ? '✓ Configured' : '✗ Not set',
+                    'app_key' => env('PUSHER_APP_KEY') ? '✓ Configured' : '✗ Not set',
+                    'app_secret' => env('PUSHER_APP_SECRET') ? '✓ Configured' : '✗ Not set',
+                    'cluster' => env('PUSHER_APP_CLUSTER') ?: '✗ Not set',
+                ],
+            ]);
+        }
+
+        // Try to trigger a test event
+        try {
+            $pusher = new \Pusher\Pusher(
+                env('PUSHER_APP_KEY'),
+                env('PUSHER_APP_SECRET'),
+                env('PUSHER_APP_ID'),
+                [
+                    'cluster' => env('PUSHER_APP_CLUSTER', 'ap1'),
+                    'useTLS' => true,
+                ]
+            );
+
+            // Test channel and event
+            $testChannel = 'order.TEST_DEBUG';
+            $testData = [
+                'message' => 'Debug test - ' . now()->toIso8601String(),
+                'status' => 'testing',
+                'timestamp' => now()->toIso8601String(),
+            ];
+
+            // Trigger test event
+            $result = $pusher->trigger($testChannel, 'order.status', $testData);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Pusher kết nối thành công!',
+                'config' => [
+                    'app_id' => env('PUSHER_APP_ID'),
+                    'app_key' => substr(env('PUSHER_APP_KEY'), 0, 8) . '...',
+                    'cluster' => env('PUSHER_APP_CLUSTER', 'ap1'),
+                ],
+                'test' => [
+                    'channel' => $testChannel,
+                    'event' => 'order.status',
+                    'result' => $result,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Lỗi kết nối Pusher: ' . $e->getMessage(),
+                'config' => [
+                    'app_id' => env('PUSHER_APP_ID'),
+                    'app_key' => substr(env('PUSHER_APP_KEY'), 0, 8) . '...',
+                    'cluster' => env('PUSHER_APP_CLUSTER', 'ap1'),
+                ],
+            ]);
+        }
+    })->name('debug.pusher-test');
+
+    /**
+     * POST /api/v1/debug/trigger-payment
+     * Test trigger payment status event
+     *
+     * Security: Requires HMAC signature or order secret
+     *
+     * Request Body:
+     * {
+     *   "order_code": "ORD-XXXXXXXXXX",
+     *   "status": "paid", // pending, paid, processing, expired
+     *   "message": "Thanh toán thành công",
+     *   "signature": "optional_hmac_signature" // Required if PUSHER_TRIGGER_SECRET is set
+     * }
+     */
+    Route::post('debug/trigger-payment', function (\Illuminate\Http\Request $request) {
+        $orderCode = $request->input('order_code');
+        $status = $request->input('status', 'paid');
+        $message = $request->input('message', 'Test payment status');
+        $signature = $request->input('signature');
+
+        if (empty($orderCode)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'order_code là bắt buộc',
+            ], 422);
+        }
+
+        // ========== SECURITY: Verify order exists ==========
+        $order = \App\Models\ServiceOrder::where('order_code', $orderCode)->first();
+
+        if (!$order) {
+            \Log::warning('[Trigger] Attempt to trigger non-existent order', [
+                'order_code' => $orderCode,
+                'ip' => $request->ip(),
+            ]);
+            return response()->json([
+                'status' => false,
+                'message' => 'Đơn hàng không tồn tại.',
+            ], 404);
+        }
+
+        // ========== SECURITY: Validate status transitions ==========
+        // Only allow pending -> paid transition
+        $validTransitions = [
+            'pending' => ['paid', 'expired'],
+            'paid' => [], // Cannot change from paid
+            'expired' => [], // Cannot change from expired
+        ];
+
+        $currentStatus = $order->status;
+        if (!isset($validTransitions[$currentStatus])) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Trạng thái đơn hàng không hợp lệ.',
+            ], 400);
+        }
+
+        if (!in_array($status, $validTransitions[$currentStatus])) {
+            \Log::warning('[Trigger] Invalid status transition attempt', [
+                'order_code' => $orderCode,
+                'current_status' => $currentStatus,
+                'requested_status' => $status,
+            ]);
+            return response()->json([
+                'status' => false,
+                'message' => "Không thể chuyển trạng thái từ '{$currentStatus}' sang '{$status}'.",
+            ], 400);
+        }
+
+        // ========== SECURITY: Check order expiration ==========
+        if ($order->isExpired() && $status === 'paid') {
+            return response()->json([
+                'status' => false,
+                'message' => 'Đơn hàng đã hết hạn, không thể thanh toán.',
+            ], 400);
+        }
+
+        // ========== SECURITY: HMAC signature verification ==========
+        $triggerSecret = env('PUSHER_TRIGGER_SECRET');
+
+        if ($triggerSecret) {
+            if (empty($signature)) {
+                \Log::warning('[Trigger] Missing signature', [
+                    'order_code' => $orderCode,
+                    'ip' => $request->ip(),
+                ]);
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Yêu cầu chữ ký xác thực.',
+                    'requires_signature' => true,
+                ], 401);
+            }
+
+            // Verify HMAC signature
+            $expectedSignature = hash_hmac(
+                'sha256',
+                $orderCode . ':' . $status . ':' . $message,
+                $triggerSecret
+            );
+
+            if (!hash_equals($expectedSignature, $signature)) {
+                \Log::warning('[Trigger] Invalid signature attempt', [
+                    'order_code' => $orderCode,
+                    'ip' => $request->ip(),
+                ]);
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Chữ ký xác thực không hợp lệ.',
+                ], 401);
+            }
+        }
+
+        try {
+            $channelName = 'order.' . $orderCode;
+            $eventData = [
+                'status' => $status,
+                'message' => $message,
+                'order_code' => $orderCode,
+                'timestamp' => now()->toIso8601String(),
+                'verified' => true, // Indicates this event was verified by backend
+            ];
+
+            // Use PusherService for consistency
+            $pusherService = app(\App\Services\PusherService::class);
+            $result = $pusherService->notifyOrderStatus($orderCode, $status, $message, ['verified' => true]);
+
+            \Log::info('[Trigger] Payment event triggered successfully', [
+                'order_code' => $orderCode,
+                'channel' => $channelName,
+                'event' => 'order.status',
+                'data' => $eventData,
+                'result' => $result,
+            ]);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Đã gửi event thành công!',
+                'data' => [
+                    'channel' => $channelName,
+                    'event' => 'order.status',
+                    'payload' => $eventData,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('[Trigger] Failed to trigger event', [
+                'order_code' => $orderCode,
+                'error' => $e->getMessage(),
+            ]);
+            return response()->json([
+                'status' => false,
+                'message' => 'Lỗi: ' . $e->getMessage(),
+            ], 500);
+        }
+    })->name('debug.trigger-payment');
+
+    /**
+     * POST /api/v1/debug/generate-signature
+     * Generate HMAC signature for trigger-payment request
+     *
+     * Request Body:
+     * {
+     *   "order_code": "ORD-XXXXXXXXXX",
+     *   "status": "paid",
+     *   "message": "Thanh toán thành công"
+     * }
+     *
+     * Response:
+     * {
+     *   "signature": "abc123...",
+     *   "expires_at": "2026-02-07T19:00:00+00:00"
+     * }
+     */
+    Route::post('debug/generate-signature', function (\Illuminate\Http\Request $request) {
+        $triggerSecret = env('PUSHER_TRIGGER_SECRET');
+
+        if (!$triggerSecret) {
+            return response()->json([
+                'status' => false,
+                'message' => 'PUSHER_TRIGGER_SECRET not configured in .env',
+            ], 500);
+        }
+
+        $orderCode = $request->input('order_code');
+        $status = $request->input('status', 'paid');
+        $message = $request->input('message', 'Test payment status');
+
+        if (empty($orderCode)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'order_code là bắt buộc',
+            ], 422);
+        }
+
+        // Generate signature (simple HMAC without timestamp for testing)
+        $signature = hash_hmac(
+            'sha256',
+            $orderCode . ':' . $status . ':' . $message,
+            $triggerSecret
+        );
+
+        return response()->json([
+            'signature' => $signature,
+            'note' => 'Use this signature in trigger-payment request',
+            'full_request' => [
+                'order_code' => $orderCode,
+                'status' => $status,
+                'message' => $message,
+                'signature' => $signature,
+            ],
+        ]);
+    })->name('debug.generate-signature');
 });
