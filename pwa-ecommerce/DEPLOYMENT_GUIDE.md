@@ -562,6 +562,36 @@ git push --force origin main
 
 ---
 
+## Cấu trúc Project
+
+```
+vietsat/                          # Root directory (Git repository)
+├── .github/
+│   └── workflows/
+│       ├── deploy.yml           # CI/CD pipeline
+│       └── ci.yml              # Build & test pipeline
+├── pwa-ecommerce/               # Laravel application
+│   ├── scripts/
+│   │   └── deploy.sh           # Manual deployment script
+│   ├── app/
+│   ├── public/
+│   ├── .env.example
+│   └── ...
+├── public_html/                 # Web root (symlink to pwa-ecommerce/public)
+└── ...
+```
+
+### Deployment Paths
+
+| Path | Mô tả |
+|------|-------|
+| `vietsat/.github/workflows/` | GitHub Actions workflows |
+| `vietsat/pwa-ecommerce/` | Laravel application source |
+| `vietsat/pwa-ecommerce/scripts/deploy.sh` | Manual deploy script |
+| `/home/duynvcom/vietsat/pwa-ecommerce` | DEPLOY_PATH trên server |
+
+---
+
 ## Support
 
 Nếu gặp vấn đề:
@@ -571,6 +601,6 @@ Nếu gặp vấn đề:
 
 ---
 
-**Version:** 1.0.0  
+**Version:** 1.1.0  
 **Last Updated:** 2026-02-12
 
