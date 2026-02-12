@@ -134,14 +134,12 @@ jobs:
             echo "Installing PHP dependencies..."
             composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-scripts
 
-            echo "Clearing caches after composer install..."
-            rm -f bootstrap/cache/config.php
-            rm -f bootstrap/cache/routes.php
-            php artisan config:clear || true
-            php artisan cache:clear || true
-            php artisan filament:upgrade || true
-
             echo "Installing npm dependencies..."
+            # Install npm if not available
+            if ! command -v npm &> /dev/null; then
+              curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash -
+              sudo apt-get install -y nodejs
+            fi
             npm ci
 
             echo "Building frontend assets..."
@@ -153,11 +151,12 @@ jobs:
             fi
 
             echo "Clearing caches..."
-            rm -f bootstrap/cache/*.php
+            rm -rf bootstrap/cache/*
             php artisan config:clear || true
             php artisan route:clear || true
             php artisan view:clear || true
             php artisan cache:clear || true
+            php artisan filament:upgrade || true
 
             echo "Building caches..."
             php artisan config:cache
