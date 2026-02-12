@@ -58,8 +58,10 @@ jobs:
       - name: Run Laravel optimizations
         working-directory: pwa-ecommerce
         run: |
-          php artisan view:clear
-          php artisan cache:clear
+          php artisan view:clear  # Clears compiled views (no DB needed)
+          php artisan config:clear || true
+          php artisan route:clear || true
+          php artisan cache:clear || true
           php artisan config:cache || true
 
       - name: Run PHP unit tests (if tests exist)
