@@ -41,11 +41,11 @@ jobs:
         run: composer install --no-progress --no-suggest --prefer-dist --no-interaction
 
       - name: Install npm dependencies
-        working-directory: pwa-ecommerce
+        working-directory: vietsat
         run: npm ci
 
       - name: Build frontend (esbuild)
-        working-directory: pwa-ecommerce
+        working-directory: vietsat
         run: npm run esbuild:build
 
       - name: Run Laravel optimizations
