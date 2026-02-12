@@ -132,7 +132,11 @@ jobs:
             fi
 
             echo "Installing PHP dependencies..."
-            composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+            composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-scripts
+
+            echo "Clearing caches after composer install..."
+            php artisan config:clear
+            php artisan filament:upgrade || true
 
             echo "Installing npm dependencies..."
             npm ci
