@@ -3,6 +3,9 @@ name: Deploy to Vietnix
 on:
   push:
     branches: [main]
+    paths:
+      - 'pwa-ecommerce/**'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
     inputs:
       environment:
@@ -24,6 +27,7 @@ on:
 env:
   PHP_VERSION: '8.3'
   NODE_VERSION: '22'
+  WORKING_DIR: 'pwa-ecommerce'
 
 jobs:
   build:
@@ -33,6 +37,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          path: ./pwa-ecommerce
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -46,11 +52,12 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+          cache-dependency-path: ./pwa-ecommerce/package-lock.json
 
       - name: Cache Composer dependencies
         uses: actions/cache@v4
         with:
-          path: vendor
+          path: ./pwa-ecommerce/vendor
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
@@ -58,22 +65,23 @@ jobs:
       - name: Cache npm dependencies
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: ./pwa-ecommerce/node_modules
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-npm-
 
       - name: Install Composer dependencies
-        run: composer install --no-progress --no-suggest --prefer-dist --no-interaction --optimize-autoloader
+        run: cd ./pwa-ecommerce && composer install --no-progress --no-suggest --prefer-dist --no-interaction --optimize-autoloader
 
       - name: Install npm dependencies
-        run: npm ci
+        run: cd ./pwa-ecommerce && npm ci
 
       - name: Build frontend assets
-        run: npm run esbuild:build
+        run: cd ./pwa-ecommerce && npm run esbuild:build
 
       - name: Copy environment file
         run: |
+          cd ./pwa-ecommerce
           if [ -f .env.example ]; then
             cp .env.example .env
             echo "APP_ENV=production" >> .env
@@ -82,16 +90,18 @@ jobs:
           fi
 
       - name: Generate application key
-        run: php artisan key:generate --force
+        run: cd ./pwa-ecommerce && php artisan key:generate --force
 
       - name: Run Laravel optimizations (build-time)
         run: |
+          cd ./pwa-ecommerce
           php artisan config:cache 2>/dev/null || true
           php artisan route:cache 2>/dev/null || true
 
       - name: Run PHPUnit tests
         if: runner.os == 'Linux' && (file_exists('phpunit.xml') || file_exists('phpunit.xml.dist'))
         run: |
+          cd ./pwa-ecommerce
           if [ -f phpunit.xml ] || [ -f phpunit.xml.dist ]; then
             ./vendor/bin/phpunit --colors=never || echo "Tests completed with some failures"
           else
@@ -102,11 +112,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vietsat-build
-          path: |
-            public/
-            !public/.gitkeep
-            .env
-            bootstrap/cache/
+          path: ./pwa-ecommerce/
+          include-hidden-files: true
 
   deploy:
     name: Deploy to Production
@@ -123,20 +130,19 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          path: ./deploy-temp
 
       - name: Download built artifacts
         uses: actions/download-artifact@v4
         with:
           name: vietsat-build
-          path: build/
+          path: ./deploy-temp/pwa-ecommerce/
 
-      - name: Move built files to repository root
+      - name: Prepare deployment files
         run: |
-          cp -r build/public/* ./
-          cp build/.env . 2>/dev/null || true
-          mkdir -p bootstrap/cache
-          cp -r build/bootstrap/cache/* bootstrap/cache/ 2>/dev/null || true
-          rm -rf build
+          # Copy built files to deploy-temp root for rsync
+          cp -r ./deploy-temp/pwa-ecommerce/. ./deploy-temp/
+          rm -rf ./deploy-temp/pwa-ecommerce
 
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
@@ -145,6 +151,7 @@ jobs:
 
       - name: Create deployment info file
         run: |
+          cd ./deploy-temp
           echo "DEPLOY_TIME=$(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_ENV
           echo "DEPLOY_COMMIT=$(git log -1 --pretty=format:'%H')" >> $GITHUB_ENV
           echo "DEPLOY_BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
