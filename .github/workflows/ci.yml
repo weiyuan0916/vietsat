@@ -1,4 +1,4 @@
-name: CI Build
+name: CI Build & Deploy
 
 on:
   push:
@@ -10,117 +10,117 @@ jobs:
   build:
     name: Build & Test
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: pwa-ecommerce
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup PHP
+      - name: Setup PHP 8.3
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.3
+          php-version: '8.3'
           coverage: none
 
-      - name: Setup Node.js
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
+          cache-dependency-path: pwa-ecommerce/package-lock.json  # Fix lỗi lock file không tìm thấy
 
-      - name: Cache Composer deps
+      - name: Cache Composer dependencies
         uses: actions/cache@v4
         with:
-          path: vendor
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          path: pwa-ecommerce/vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('pwa-ecommerce/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
+        working-directory: pwa-ecommerce
         run: composer install --no-progress --no-suggest --prefer-dist --no-interaction
 
       - name: Install npm dependencies
+        working-directory: pwa-ecommerce
         run: npm ci
 
       - name: Build frontend (esbuild)
+        working-directory: pwa-ecommerce
         run: npm run esbuild:build
 
       - name: Run Laravel optimizations
+        working-directory: pwa-ecommerce
         run: |
           php artisan view:clear
           php artisan cache:clear
           php artisan config:cache || true
 
-      - name: Run PHP unit tests (if present)
+      - name: Run PHP unit tests (if tests exist)
+        working-directory: pwa-ecommerce
         if: runner.os == 'Linux'
         run: |
           if [ -f phpunit.xml ] || [ -f phpunit.xml.dist ]; then
             composer require --dev phpunit/phpunit --no-interaction --no-progress || true
             ./vendor/bin/phpunit --colors=always || true
           else
-            echo "No phpunit configuration found, skipping tests."
+            echo "No phpunit configuration found, skipping unit tests."
           fi
 
-      - name: Upload built assets
+      - name: Upload built frontend assets
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build
-          path: |
-            public/css/main.css
-            public/js/main.js
-            public/build/**
-
-  checklist:
-    name: Post-check
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Done
-        run: echo "Build finished. Use artifacts or add deploy step that uses secrets (SSH deploy, FTP, etc.)."
+          path: pwa-ecommerce/public/
+          retention-days: 1  # Giữ artifact 1 ngày là đủ cho deploy
 
   deploy:
-    name: Deploy via SSH
+    name: Deploy to Production via SSH
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref == 'refs/heads/main'
-    defaults:
-      run:
-        working-directory: pwa-ecommerce
-    env:
-      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-      DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
-      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      DEPLOY_POST_CMD: ${{ secrets.DEPLOY_POST_CMD }}
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
-      - name: Checkout
+      - name: Checkout code (needed for any scripts if required)
         uses: actions/checkout@v4
 
-      - name: Download frontend artifact
+      - name: Download built frontend artifacts
         uses: actions/download-artifact@v4
         with:
           name: frontend-build
-          path: .
+          path: pwa-ecommerce/public/  # Đặt đúng vào thư mục public/
 
       - name: Setup SSH agent
-        uses: webfactory/ssh-agent@v0.8.0
+        uses: webfactory/ssh-agent@v0.9.0  # Nâng cấp lên phiên bản mới nhất ổn định
         with:
-          ssh-private-key: ${{ env.SSH_PRIVATE_KEY }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Rsync files to remote
+      - name: Deploy via rsync over SSH
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
         run: |
           PORT="${DEPLOY_PORT:-22}"
-          echo "Syncing to ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH} (port $PORT)"
-          rsync -avz --delete -e "ssh -p $PORT -o StrictHostKeyChecking=no" ./public/ "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}"
+          echo "Deploying to ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH} (port $PORT)"
+
+          # Kiểm tra biến có tồn tại không
+          if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_USER" ] || [ -z "$DEPLOY_PATH" ]; then
+            echo "Error: Missing one or more deploy secrets (HOST/USER/PATH)"
+            exit 1
+          fi
+
+          rsync -avz --delete \
+            -e "ssh -p $PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
+            pwa-ecommerce/public/ "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}"
 
       - name: Run post-deploy commands on remote (optional)
-        if: env.DEPLOY_POST_CMD != ''
+        if: ${{ secrets.DEPLOY_POST_CMD != '' }}
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
         run: |
           PORT="${DEPLOY_PORT:-22}"
-          ssh -p $PORT -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} "${DEPLOY_POST_CMD}"
-
-
+          ssh -p $PORT -o StrictHostKeyChecking=no \
+            ${DEPLOY_USER}@${DEPLOY_HOST} "${{ secrets.DEPLOY_POST_CMD }}"
