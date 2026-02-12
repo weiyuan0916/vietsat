@@ -54,8 +54,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: ${{ env.PWA_DIR }}/package-lock.json
 
       - name: Cache Composer dependencies
         uses: actions/cache@v4
@@ -64,14 +62,6 @@ jobs:
           key: composer-${{ runner.os }}-${{ hashFiles('${{ env.PWA_DIR }}/composer.lock') }}
           restore-keys: |
             composer-${{ runner.os }}-
-
-      - name: Cache npm dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PWA_DIR }}/node_modules
-          key: npm-${{ runner.os }}-${{ hashFiles('${{ env.PWA_DIR }}/package-lock.json') }}
-          restore-keys: |
-            npm-${{ runner.os }}-
 
       - name: Install Composer dependencies
         run: composer install --no-progress --no-suggest --prefer-dist --no-interaction --optimize-autoloader
@@ -139,7 +129,6 @@ jobs:
 
       - name: Prepare deployment
         run: |
-          # Copy build files to root
           cp -r build/. ./
           rm -rf build
 
@@ -169,56 +158,45 @@ jobs:
             echo "=== Deployment started ==="
             echo "Deploy path: $DEPLOY_PATH"
 
-            # Navigate to deployment directory
             cd "$DEPLOY_PATH"
 
-            # Create backup directory
             mkdir -p backups
 
-            # Backup .env
             if [ -f .env ]; then
               cp .env "backups/env_$(date +%Y%m%d_%H%M%S).bak"
               ls -t backups/env_*.bak | tail -n +6 | xargs -r rm
             fi
 
-            # Fetch and reset to latest
             echo "Fetching latest changes..."
             git fetch origin main
             git reset --hard origin/main
 
-            # Restore .env from backup
             if [ -f "backups/latest.env.bak" ]; then
               cp backups/latest.env.bak .env
             fi
 
-            # Install dependencies
             echo "Installing dependencies..."
             composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
-            # Run migrations
             if [ "${{ github.event.inputs.skip_migration }}" != "true" ]; then
               echo "Running migrations..."
               php artisan migrate --force --no-interaction
             fi
 
-            # Clear caches
             echo "Clearing caches..."
             php artisan config:clear
             php artisan route:clear
             php artisan view:clear
             php artisan cache:clear
 
-            # Build caches
             echo "Building caches..."
             php artisan config:cache
             php artisan route:cache
 
-            # Set permissions
             echo "Setting permissions..."
             chmod -R 755 storage bootstrap/cache
             chmod 644 .env
 
-            # Optimize
             php artisan optimize
 
             echo "=== Deployment completed ==="
