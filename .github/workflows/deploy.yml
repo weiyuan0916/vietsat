@@ -73,7 +73,7 @@ jobs:
         run: php artisan key:generate --force
 
       - name: Run PHPUnit tests
-        if: runner.os == 'Linux' && (file_exists('phpunit.xml') || file_exists('phpunit.xml.dist'))
+        if: runner.os == 'Linux'
         run: |
           if [ -f phpunit.xml ] || [ -f phpunit.xml.dist ]; then
             ./vendor/bin/phpunit --colors=never || echo "Tests completed"
