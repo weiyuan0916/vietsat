@@ -135,7 +135,10 @@ jobs:
             composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-scripts
 
             echo "Clearing caches after composer install..."
-            php artisan config:clear
+            rm -f bootstrap/cache/config.php
+            rm -f bootstrap/cache/routes.php
+            php artisan config:clear || true
+            php artisan cache:clear || true
             php artisan filament:upgrade || true
 
             echo "Installing npm dependencies..."
@@ -150,10 +153,11 @@ jobs:
             fi
 
             echo "Clearing caches..."
-            php artisan config:clear
-            php artisan route:clear
-            php artisan view:clear
-            php artisan cache:clear
+            rm -f bootstrap/cache/*.php
+            php artisan config:clear || true
+            php artisan route:clear || true
+            php artisan view:clear || true
+            php artisan cache:clear || true
 
             echo "Building caches..."
             php artisan config:cache
