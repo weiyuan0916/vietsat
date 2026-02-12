@@ -43,7 +43,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup PHP
-        uses: shivammather/setup-php@v2
+        uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
           coverage: none
