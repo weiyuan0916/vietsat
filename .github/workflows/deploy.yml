@@ -78,7 +78,7 @@ jobs:
           if [ -f phpunit.xml ] || [ -f phpunit.xml.dist ]; then
             ./vendor/bin/phpunit --colors=never || echo "Tests completed"
           else
-            echo "No phpunit configuration found, skipping tests."
+            echo "No phpunit configuration found, skipping tests"
           fi
 
       - name: Upload built code
