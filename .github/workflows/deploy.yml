@@ -135,10 +135,12 @@ jobs:
             composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-scripts
 
             echo "Installing npm dependencies..."
-            # Install npm if not available
+            # Check if npm is available
             if ! command -v npm &> /dev/null; then
-              curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash -
-              sudo apt-get install -y nodejs
+              # Try installing without sudo - download Node.js binary directly
+              echo "npm not found, installing Node.js..."
+              curl -fsSL https://nodejs.org/dist/v20.x/node-v20.x-linux-x64.tar.xz | tar -xJ -C /usr/local --strip-components=1
+              export PATH="/usr/local/bin:$PATH"
             fi
             npm ci
 
@@ -151,7 +153,7 @@ jobs:
             fi
 
             echo "Clearing caches..."
-            rm -rf bootstrap/cache/*
+            rm -rf bootstrap/cache/*giu
             php artisan config:clear || true
             php artisan route:clear || true
             php artisan view:clear || true
