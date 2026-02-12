@@ -29,7 +29,7 @@ env:
   PWA_DIR: 'pwa-ecommerce'
 
 jobs:
-  build:
+  test:
     name: Build & Test
     runs-on: ubuntu-latest
     defaults:
@@ -81,44 +81,16 @@ jobs:
             echo "No phpunit configuration found, skipping tests"
           fi
 
-      - name: Upload built code
-        uses: actions/upload-artifact@v4
-        with:
-          name: vietsat-build
-          path: ${{ env.PWA_DIR }}/
-          include-hidden-files: true
-
   deploy:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: build
+    needs: test
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
 
     environment:
       name: ${{ github.event.inputs.environment || 'production' }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Download built artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: vietsat-build
-          path: build/
-
-      - name: Prepare deployment
-        run: |
-          cp -r build/. ./
-          rm -rf build
-
-      - name: Setup SSH Agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
       - name: Create deployment info
         run: |
           echo "DEPLOY_TIME=$(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_ENV
@@ -142,17 +114,19 @@ jobs:
 
             cd "$DEPLOY_PATH"
 
+            # Backup .env if exists
             mkdir -p backups
-
             if [ -f .env ]; then
               cp .env "backups/env_$(date +%Y%m%d_%H%M%S).bak"
               ls -t backups/env_*.bak | tail -n +6 | xargs -r rm
             fi
 
+            # Git pull latest code
             echo "Fetching latest changes..."
             git fetch origin main
             git reset --hard origin/main
 
+            # Restore .env from latest backup
             if [ -f "backups/latest.env.bak" ]; then
               cp backups/latest.env.bak .env
             fi
