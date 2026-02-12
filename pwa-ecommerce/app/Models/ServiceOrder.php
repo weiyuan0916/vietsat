@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 class ServiceOrder extends Model
 {
@@ -27,6 +28,14 @@ class ServiceOrder extends Model
     public const STATUS_PENDING = 'pending';
     public const STATUS_PAID = 'paid';
     public const STATUS_EXPIRED = 'expired';
+
+    /**
+     * Generate a unique order code.
+     */
+    public static function generateOrderCode(): string
+    {
+        return 'ORD-' . strtoupper(Str::random(10));
+    }
 
     /**
      * Get the service that owns this order.
@@ -58,5 +67,13 @@ class ServiceOrder extends Model
     public function isExpired(): bool
     {
         return $this->status === self::STATUS_EXPIRED;
+    }
+
+    /**
+     * Check if order is expired based on expires_at.
+     */
+    public function isTimeExpired(): bool
+    {
+        return $this->expires_at && $this->expires_at->isPast();
     }
 }

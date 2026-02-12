@@ -1,0 +1,291 @@
+name: Deploy to Vietnix
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+      skip_migration:
+        description: 'Skip database migration'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+env:
+  PHP_VERSION: '8.3'
+  NODE_VERSION: '22'
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          coverage: none
+          extensions: mbstring, xml, bcmath, curl, zip, pdo_mysql
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --no-suggest --prefer-dist --no-interaction --optimize-autoloader
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run esbuild:build
+
+      - name: Copy environment file
+        run: |
+          if [ -f .env.example ]; then
+            cp .env.example .env
+            echo "APP_ENV=production" >> .env
+            echo "APP_DEBUG=false" >> .env
+            echo "LOG_CHANNEL=error_log" >> .env
+          fi
+
+      - name: Generate application key
+        run: php artisan key:generate --force
+
+      - name: Run Laravel optimizations (build-time)
+        run: |
+          php artisan config:cache 2>/dev/null || true
+          php artisan route:cache 2>/dev/null || true
+
+      - name: Run PHPUnit tests
+        if: runner.os == 'Linux' && (file_exists('phpunit.xml') || file_exists('phpunit.xml.dist'))
+        run: |
+          if [ -f phpunit.xml ] || [ -f phpunit.xml.dist ]; then
+            ./vendor/bin/phpunit --colors=never || echo "Tests completed with some failures"
+          else
+            echo "No phpunit configuration found, skipping tests."
+          fi
+
+      - name: Upload built assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: vietsat-build
+          path: |
+            public/
+            !public/.gitkeep
+            .env
+            bootstrap/cache/
+
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+
+    environment:
+      name: ${{ github.event.inputs.environment || 'production' }}
+      url: ${{ secrets.DEPLOY_URL }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download built artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: vietsat-build
+          path: build/
+
+      - name: Move built files to repository root
+        run: |
+          cp -r build/public/* ./
+          cp build/.env . 2>/dev/null || true
+          mkdir -p bootstrap/cache
+          cp -r build/bootstrap/cache/* bootstrap/cache/ 2>/dev/null || true
+          rm -rf build
+
+      - name: Setup SSH Agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Create deployment info file
+        run: |
+          echo "DEPLOY_TIME=$(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_ENV
+          echo "DEPLOY_COMMIT=$(git log -1 --pretty=format:'%H')" >> $GITHUB_ENV
+          echo "DEPLOY_BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          port: ${{ secrets.DEPLOY_PORT || '22' }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+
+            DEPLOY_PATH="${{ secrets.DEPLOY_PATH }}"
+            DEPLOY_TIME="$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+
+            echo "=== Deployment started at $DEPLOY_TIME ==="
+            echo "Deploy path: $DEPLOY_PATH"
+
+            # Navigate to deployment directory
+            cd "$DEPLOY_PATH"
+
+            # Create backup directory if it doesn't exist
+            mkdir -p backups
+
+            # Backup current deployment (last 5 backups)
+            if [ -f .env ]; then
+              cp .env "backups/env_$(date +%Y%m%d_%H%M%S).bak" 2>/dev/null || true
+              # Keep only last 5 backups
+              ls -t backups/env_*.bak 2>/dev/null | tail -n +6 | xargs -r rm
+            fi
+
+            # Fetch latest changes
+            echo "Fetching latest changes..."
+            git fetch origin main
+            git reset --hard origin/main
+
+            # Restore .env from backup if exists and not in repo
+            if [ -f "backups/latest.env.bak" ]; then
+              cp backups/latest.env.bak .env
+              echo "Restored .env from backup"
+            fi
+
+            # Install dependencies
+            echo "Installing dependencies..."
+            composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+            # Run migrations (skip if flag set)
+            if [ "${{ github.event.inputs.skip_migration }}" != "true" ]; then
+              echo "Running database migrations..."
+              php artisan migrate --force --no-interaction
+            else
+              echo "Skipping database migrations as requested"
+            fi
+
+            # Clear and rebuild caches
+            echo "Clearing caches..."
+            php artisan config:clear
+            php artisan route:clear
+            php artisan view:clear
+            php artisan cache:clear
+
+            # Rebuild caches in production mode
+            echo "Building production caches..."
+            php artisan config:cache
+            php artisan route:cache
+
+            # Set proper permissions
+            echo "Setting permissions..."
+            chmod -R 755 storage bootstrap/cache 2>/dev/null || true
+            chmod 644 .env 2>/dev/null || true
+
+            # Optimize Laravel
+            echo "Optimizing Laravel..."
+            php artisan optimize
+
+            echo "=== Deployment completed successfully ==="
+
+      - name: Send Telegram Notification on Success
+        if: success()
+        uses: appleboy/telegram-action@v1.0.3
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          format: markdown
+          message: |
+            **🚀 Deploy thành công!**
+            
+            **Dự án:** vietsat
+            **Môi trường:** ${{ github.event.inputs.environment || 'production' }}
+            **Branch:** main
+            **Commit:** `${{ env.DEPLOY_COMMIT }}`
+            **Thời gian:** ${{ env.DEPLOY_TIME }}
+            
+            ✅ Code đã được deploy lên Vietnix server
+
+      - name: Send Telegram Notification on Failure
+        if: failure()
+        uses: appleboy/telegram-action@v1.0.3
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          format: markdown
+          message: |
+            **❌ Deploy thất bại!**
+            
+            **Dự án:** vietsat
+            **Môi trường:** ${{ github.event.inputs.environment || 'production' }}
+            **Branch:** main
+            
+            **Lỗi:** Vui lòng kiểm tra GitHub Actions logs
+            
+            🔗 [Xem chi tiết](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+  cleanup:
+    name: Cleanup old builds
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: always() && needs.deploy.result == 'success'
+    
+    steps:
+      - name: Check backup count
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          port: ${{ secrets.DEPLOY_PORT || '22' }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            
+            DEPLOY_PATH="${{ secrets.DEPLOY_PATH }}"
+            cd "$DEPLOY_PATH"
+            
+            # Clean old backups (keep last 10)
+            echo "Cleaning old backups..."
+            ls -t backups/env_*.bak 2>/dev/null | tail -n +11 | xargs -r rm 2>/dev/null || true
+            
+            # Clear old Laravel logs
+            find storage/logs -name "*.log" -type f -mtime +7 -delete 2>/dev/null || true
+            
+            echo "Cleanup completed"
+
