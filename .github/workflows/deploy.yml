@@ -26,7 +26,6 @@ on:
 
 env:
   PHP_VERSION: '8.3'
-  NODE_VERSION: '22'
   PWA_DIR: 'pwa-ecommerce'
 
 jobs:
@@ -44,16 +43,11 @@ jobs:
           fetch-depth: 0
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammather/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
           coverage: none
           extensions: mbstring, xml, bcmath, curl, zip, pdo_mysql
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
 
       - name: Cache Composer dependencies
         uses: actions/cache@v4
@@ -65,12 +59,6 @@ jobs:
 
       - name: Install Composer dependencies
         run: composer install --no-progress --no-suggest --prefer-dist --no-interaction --optimize-autoloader
-
-      - name: Install npm dependencies
-        run: npm ci
-
-      - name: Build frontend assets
-        run: npm run esbuild:build
 
       - name: Copy environment file
         run: |
@@ -84,11 +72,6 @@ jobs:
       - name: Generate application key
         run: php artisan key:generate --force
 
-      - name: Run Laravel optimizations (build-time)
-        run: |
-          php artisan config:cache 2>/dev/null || true
-          php artisan route:cache 2>/dev/null || true
-
       - name: Run PHPUnit tests
         if: runner.os == 'Linux' && (file_exists('phpunit.xml') || file_exists('phpunit.xml.dist'))
         run: |
@@ -98,7 +81,7 @@ jobs:
             echo "No phpunit configuration found, skipping tests."
           fi
 
-      - name: Upload built assets
+      - name: Upload built code
         uses: actions/upload-artifact@v4
         with:
           name: vietsat-build
@@ -175,8 +158,14 @@ jobs:
               cp backups/latest.env.bak .env
             fi
 
-            echo "Installing dependencies..."
+            echo "Installing PHP dependencies..."
             composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+            echo "Installing npm dependencies..."
+            npm ci
+
+            echo "Building frontend assets..."
+            npm run esbuild:build
 
             if [ "${{ github.event.inputs.skip_migration }}" != "true" ]; then
               echo "Running migrations..."
