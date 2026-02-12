@@ -115,12 +115,15 @@ jobs:
             pwa-ecommerce/public/ "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}"
 
       - name: Run post-deploy commands on remote (optional)
-        if: ${{ secrets.DEPLOY_POST_CMD != '' }}
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
         run: |
-          PORT="${DEPLOY_PORT:-22}"
-          ssh -p $PORT -o StrictHostKeyChecking=no \
-            ${DEPLOY_USER}@${DEPLOY_HOST} "${{ secrets.DEPLOY_POST_CMD }}"
+          if [ -n "${{ secrets.DEPLOY_POST_CMD }}" ]; then
+            PORT="${DEPLOY_PORT:-22}"
+            ssh -p $PORT -o StrictHostKeyChecking=no \
+              ${DEPLOY_USER}@${DEPLOY_HOST} "${{ secrets.DEPLOY_POST_CMD }}"
+          else
+            echo "No post-deploy commands configured, skipping"
+          fi
