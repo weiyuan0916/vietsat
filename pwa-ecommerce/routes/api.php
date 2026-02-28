@@ -549,10 +549,17 @@ Route::prefix('v1')->group(function () {
 
     // Debug route - Xem dữ liệu và mối quan hệ (Remove in production)
     Route::get('debug/data', function () {
+        $useExternalApi = config('services.service.use_external_api', true);
+        
         $services = \App\Models\Service::with('orders')->get();
+        $orders = \App\Models\ServiceOrder::with('service')->get();
         
         return response()->json([
-            'services' => $services->map(function($service) {
+            'config' => [
+                'use_external_api' => $useExternalApi,
+                'external_api_url' => config('services.external_api.base_url'),
+            ],
+            'local_services' => $services->map(function($service) {
                 return [
                     'id' => $service->id,
                     'name' => $service->name,
@@ -561,20 +568,23 @@ Route::prefix('v1')->group(function () {
                     'duration_days' => $service->duration_days,
                     'is_active' => $service->is_active,
                     'orders_count' => $service->orders->count(),
-                    'orders' => $service->orders->map(function($order) {
-                        return [
-                            'order_code' => $order->order_code,
-                            'amount' => $order->amount,
-                            'status' => $order->status,
-                            'expires_at' => $order->expires_at,
-                            'paid_at' => $order->paid_at,
-                        ];
-                    }),
+                ];
+            }),
+            'orders' => $orders->map(function($order) {
+                return [
+                    'order_code' => $order->order_code,
+                    'amount' => $order->amount,
+                    'status' => $order->status,
+                    'expires_at' => $order->expires_at,
+                    'paid_at' => $order->paid_at,
+                    'service_data' => $order->service_data,
+                    'has_external_service' => $order->hasExternalServiceData(),
                 ];
             }),
             'relationships' => [
                 'service -> orders' => 'Service hasMany ServiceOrder',
                 'service_order -> service' => 'ServiceOrder belongsTo Service',
+                'service_order -> service_data' => 'External API service data (JSON)',
             ]
         ]);
     })->name('debug.data');

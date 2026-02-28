@@ -11,6 +11,7 @@ class ServiceOrder extends Model
     protected $fillable = [
         'order_code',
         'service_id',
+        'service_data',
         'amount',
         'status',
         'expires_at',
@@ -23,6 +24,7 @@ class ServiceOrder extends Model
         'amount' => 'integer',
         'expires_at' => 'datetime',
         'paid_at' => 'datetime',
+        'service_data' => 'array',
     ];
 
     public const STATUS_PENDING = 'pending';
@@ -75,5 +77,45 @@ class ServiceOrder extends Model
     public function isTimeExpired(): bool
     {
         return $this->expires_at && $this->expires_at->isPast();
+    }
+
+    /**
+     * Get service information for this order.
+     * Returns data from service_data if available (external API),
+     * otherwise falls back to local service relationship.
+     *
+     * @return array|null
+     */
+    public function getServiceInfo(): ?array
+    {
+        // If we have external service data, use it
+        if ($this->service_data) {
+            return [
+                'id' => $this->service_data['id'] ?? null,
+                'name' => $this->service_data['name'] ?? null,
+                'duration_days' => $this->service_data['duration_days'] ?? null,
+            ];
+        }
+
+        // Otherwise, try to get from local service
+        if ($this->service) {
+            return [
+                'id' => $this->service->id,
+                'name' => $this->service->name,
+                'duration_days' => $this->service->duration_days,
+            ];
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if this order uses external service data.
+     *
+     * @return bool
+     */
+    public function hasExternalServiceData(): bool
+    {
+        return !empty($this->service_data);
     }
 }

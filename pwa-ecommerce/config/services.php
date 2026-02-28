@@ -35,4 +35,34 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | External Service API
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for external service API integration.
+    | This is used to fetch services from an external provider.
+    |
+    */
+
+    'external_api' => [
+        'base_url' => env('EXTERNAL_SERVICE_API_URL', 'https://tiemnhaduy.com/api/v1'),
+        'cache_ttl' => env('EXTERNAL_SERVICE_API_CACHE_TTL', 300), // 5 minutes
+        'timeout' => env('EXTERNAL_SERVICE_API_TIMEOUT', 30),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Service Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for local service management.
+    | Set use_external_api to true to fetch services from external API.
+    |
+    */
+
+    'service' => [
+        'use_external_api' => env('USE_EXTERNAL_SERVICE_API', true),
+    ],
+
 ];

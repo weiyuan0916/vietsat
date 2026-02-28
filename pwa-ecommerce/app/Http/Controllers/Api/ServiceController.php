@@ -3,11 +3,20 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Service;
+use App\Services\ExternalServiceApi;
 use Illuminate\Http\JsonResponse;
 
 class ServiceController extends Controller
 {
+    private ExternalServiceApi $externalServiceApi;
+    private bool $useExternalApi;
+
+    public function __construct()
+    {
+        $this->externalServiceApi = new ExternalServiceApi();
+        $this->useExternalApi = config('services.service.use_external_api', true);
+    }
+
     /**
      * Get all services with pagination.
      *
@@ -31,30 +40,26 @@ class ServiceController extends Controller
     public function index(): JsonResponse
     {
         $perPage = min((int) request('per_page', 10), 100);
+        $page = (int) request('page', 1);
 
-        $services = Service::where('is_active', true)
-            ->orderBy('id')
-            ->paginate($perPage);
+        // Use external API
+        $services = $this->externalServiceApi->getServices($page, $perPage);
+
+        if ($services === null) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Không thể kết nối đến dịch vụ.',
+                'data' => null,
+            ], 503);
+        }
 
         return response()->json([
             'status' => true,
             'message' => 'Lấy danh sách dịch vụ thành công.',
             'data' => [
-                'items' => $services->items(),
-                'meta' => [
-                    'current_page' => $services->currentPage(),
-                    'last_page' => $services->lastPage(),
-                    'per_page' => $services->perPage(),
-                    'total' => $services->total(),
-                    'from' => $services->firstItem(),
-                    'to' => $services->lastItem(),
-                ],
-                'links' => [
-                    'first' => $services->url(1),
-                    'last' => $services->url($services->lastPage()),
-                    'prev' => $services->previousPageUrl(),
-                    'next' => $services->nextPageUrl(),
-                ],
+                'items' => $services['items'],
+                'meta' => $services['meta'],
+                'links' => $services['links'],
             ],
         ]);
     }
@@ -86,9 +91,7 @@ class ServiceController extends Controller
      */
     public function default(): JsonResponse
     {
-        $service = Service::where('is_active', true)
-            ->orderBy('id')
-            ->first();
+        $service = $this->externalServiceApi->getDefaultService();
 
         if (! $service) {
             return response()->json([
@@ -102,11 +105,11 @@ class ServiceController extends Controller
             'status' => true,
             'message' => 'Lấy thông tin dịch vụ thành công.',
             'data' => [
-                'id' => $service->id,
-                'name' => $service->name,
-                'duration_days' => $service->duration_days,
-                'price' => $service->price,
-                'formatted_price' => number_format($service->price) . ' VND',
+                'id' => $service['id'],
+                'name' => $service['name'],
+                'duration_days' => $service['duration_days'],
+                'price' => $service['price'],
+                'formatted_price' => $service['formatted_price'],
             ],
         ]);
     }
@@ -141,8 +144,7 @@ class ServiceController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        $service = Service::where('is_active', true)
-            ->find($id);
+        $service = $this->externalServiceApi->getServiceById($id);
 
         if (! $service) {
             return response()->json([
@@ -155,16 +157,7 @@ class ServiceController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Lấy thông tin dịch vụ thành công.',
-            'data' => [
-                'id' => $service->id,
-                'name' => $service->name,
-                'duration_days' => $service->duration_days,
-                'price' => $service->price,
-                'formatted_price' => number_format($service->price) . ' VND',
-                'is_active' => $service->is_active,
-                'created_at' => $service->created_at,
-                'updated_at' => $service->updated_at,
-            ],
+            'data' => $service,
         ]);
     }
 }
