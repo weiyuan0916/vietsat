@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\LicenseController;
 use App\Http\Controllers\Api\PcInfoController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\PageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -403,6 +405,32 @@ Route::prefix('v1')->group(function () {
          */
         Route::get('{orderCode}', [OrderController::class, 'show'])
             ->name('show');
+
+        /**
+         * POST /api/v1/orders/verify-payment
+         * Verify payment from TPBank webhook
+         *
+         * This endpoint is called by api_tpbank_free when a transaction is detected.
+         * It verifies the device fingerprint before confirming payment.
+         *
+         * Request Body:
+         * {
+         *   "order_code": "ORDFBXXXXXXXXXX",
+         *   "bank_txn_id": "TPB123456789"
+         * }
+         */
+        Route::post('verify-payment', [OrderController::class, 'verifyPayment'])
+            ->name('verify-payment');
+
+        /**
+         * GET /api/v1/orders/my-orders
+         * Get current user's orders
+         *
+         * Requires authentication (sanctum)
+         */
+        Route::get('my-orders', [OrderController::class, 'myOrders'])
+            ->name('my-orders')
+            ->middleware('auth:sanctum');
     });
 
     // Facebook Profile Routes
@@ -921,4 +949,103 @@ Route::prefix('v1')->group(function () {
             ],
         ]);
     })->name('debug.generate-signature');
+
+    // Authentication Routes (Public)
+    Route::prefix('auth')->name('auth.')->group(function () {
+        /**
+         * POST /api/v1/auth/register
+         * Register a new user account
+         *
+         * Request Body:
+         * {
+         *   "name": "Nguyen Van A",
+         *   "email": "user@example.com",
+         *   "password": "password123",
+         *   "password_confirmation": "password123"
+         * }
+         *
+         * Response (201):
+         * {
+         *   "status": true,
+         *   "message": "Đăng ký thành công.",
+         *   "data": {
+         *     "user": {...},
+         *     "token": "..."
+         *   }
+         * }
+         */
+        Route::post('register', [AuthController::class, 'register'])
+            ->name('register');
+
+        /**
+         * POST /api/v1/auth/login
+         * Login with email and password
+         *
+         * Request Body:
+         * {
+         *   "email": "user@example.com",
+         *   "password": "password123"
+         * }
+         *
+         * Response (200):
+         * {
+         *   "status": true,
+         *   "message": "Đăng nhập thành công.",
+         *   "data": {
+         *     "user": {...},
+         *     "token": "..."
+         *   }
+         * }
+         */
+        Route::post('login', [AuthController::class, 'login'])
+            ->name('login');
+    });
+
+    // Authenticated Routes
+    Route::prefix('auth')->name('auth.')->middleware('auth:sanctum')->group(function () {
+        /**
+         * POST /api/v1/auth/logout
+         * Logout current user
+         */
+        Route::post('logout', [AuthController::class, 'logout'])
+            ->name('logout');
+
+        /**
+         * GET /api/v1/auth/profile
+         * Get current user profile
+         */
+        Route::get('profile', [AuthController::class, 'profile'])
+            ->name('profile');
+
+        /**
+         * PUT /api/v1/auth/profile
+         * Update user profile
+         */
+        Route::put('profile', [AuthController::class, 'updateProfile'])
+            ->name('updateProfile');
+    });
+
+    // Pages Routes (Public)
+    Route::prefix('pages')->name('pages.')->group(function () {
+        /**
+         * GET /api/v1/pages/privacy
+         * Get privacy policy page
+         */
+        Route::get('privacy', [PageController::class, 'privacy'])
+            ->name('privacy');
+
+        /**
+         * GET /api/v1/pages/terms
+         * Get terms of service page
+         */
+        Route::get('terms', [PageController::class, 'terms'])
+            ->name('terms');
+
+        /**
+         * GET /api/v1/pages/{slug}
+         * Get page by slug
+         */
+        Route::get('{slug}', [PageController::class, 'show'])
+            ->name('show');
+    });
 });

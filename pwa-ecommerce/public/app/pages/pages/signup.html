@@ -1,4 +1,4 @@
-<div class="page no-toolbar">
+<div class="page no-toolbar" data-name="signup">
   <div class="navbar">
     <div class="navbar-bg"></div>
     <div class="navbar-inner">
@@ -9,36 +9,82 @@
       </div>
     </div>
   </div>
-  <div class="page-content">
+  <div class="page-content auth-page">
+    <!-- Illustration -->
     <div class="signup-image">
-      <img src="img/illustrations/signup.png" alt="">
+      <img src="img/illustrations/signup.png" alt="Sign Up">
     </div>
-    <div class="centered-text">
+    
+    <!-- Title -->
+    <div class="auth-title">
       <h1>Sign Up</h1>
-      <a href="#" class="button button-fill color-light-gray button-icon-left">
-        <i class="icon f7-icons">logo_apple</i>
-        Sign Up with Apple
-      </a>
-      <a href="#" class="button button-fill color-light-gray google-button">
-        <img src="img/icons/google.svg" alt="">
-        Sign Up with Google
-      </a>
-      <p class="login-separator">Or with email</p>
-      <form>
-        <input type="text" id="username" name="username" placeholder="Username">
-        <input type="email" id="email" name="email" placeholder="Email">
-        <input type="password" id="password" name="password" placeholder="Password">
-        <a href="#" class="button color-dark button-fill">Create Account</a>
-      </form>
-      <p class="signup-tos">
-        By signing up, I agree to the
-        <a href="#" class="link">Terms and Conditions</a>
-        .
-      </p>
-      <p class="signup-have-account">
-        Have an account?
-        <a href="/signin/" class="link">Log In</a>
-      </p>
+    </div>
+    
+    <!-- Social Login Buttons -->
+    <div class="social-buttons">
+      <button class="button button-fill button-social apple-btn" id="btn-apple-signup">
+        <i class="f7-icons">logo_apple</i>
+        <span>Sign Up with Apple</span>
+      </button>
+      <button class="button button-fill button-social google-btn" id="btn-google-signup">
+        <i class="f7-icons">logo_google</i>
+        <span>Sign Up with Google</span>
+      </button>
+    </div>
+    
+    <!-- Divider -->
+    <div class="auth-divider">
+      <span>Or with email</span>
+    </div>
+    
+    <!-- Registration Form -->
+    <form id="register-form" class="auth-form">
+      <div class="form-group">
+        <div class="input-wrapper">
+          <i class="input-icon f7-icons">person</i>
+          <input type="text" id="reg-name" name="name" placeholder="Full Name" required>
+        </div>
+        <div class="error-message" id="error-name"></div>
+      </div>
+      <div class="form-group">
+        <div class="input-wrapper">
+          <i class="input-icon f7-icons">envelope</i>
+          <input type="email" id="reg-email" name="email" placeholder="Email" required>
+        </div>
+        <div class="error-message" id="error-email"></div>
+      </div>
+      <div class="form-group">
+        <div class="input-wrapper">
+          <i class="input-icon f7-icons">lock</i>
+          <input type="password" id="reg-password" name="password" placeholder="Password (min 6 characters)" required minlength="6">
+        </div>
+        <div class="error-message" id="error-password"></div>
+      </div>
+      <div class="form-group">
+        <div class="input-wrapper">
+          <i class="input-icon f7-icons">lock</i>
+          <input type="password" id="reg-password-confirmation" name="password_confirmation" placeholder="Confirm Password" required>
+        </div>
+        <div class="error-message" id="error-password_confirmation"></div>
+      </div>
+      <button type="submit" class="button button-fill color-dark auth-submit-btn" id="btn-register">
+        <span class="btn-text">Sign Up</span>
+        <span class="btn-loading" style="display:none;">
+          <i class="f7-icons animate-spin">arrow_2_circlepath</i> Loading...
+        </span>
+      </button>
+    </form>
+    
+    <!-- Terms -->
+    <p class="signup-tos">
+      By signing up, you agree to our
+      <a href="#" class="link">Terms of Service</a> and
+      <a href="#" class="link">Privacy Policy</a>.
+    </p>
+    
+    <!-- Login Link -->
+    <div class="signup-prompt">
+      Already have an account? <a href="/signin/" class="link sign-up-link">Sign In</a>
     </div>
   </div>
 </div>

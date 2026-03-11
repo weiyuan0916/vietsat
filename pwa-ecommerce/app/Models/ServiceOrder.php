@@ -11,6 +11,7 @@ class ServiceOrder extends Model
     protected $fillable = [
         'order_code',
         'service_id',
+        'user_id',
         'service_data',
         'amount',
         'status',
@@ -18,6 +19,12 @@ class ServiceOrder extends Model
         'paid_at',
         'bank_txn_id',
         'facebook_profile_link',
+        'device_fingerprint',
+        'ip_address',
+        'user_agent',
+        'processing_started_at',
+        'processing_completed_at',
+        'extension_result',
     ];
 
     protected $casts = [
@@ -25,11 +32,14 @@ class ServiceOrder extends Model
         'expires_at' => 'datetime',
         'paid_at' => 'datetime',
         'service_data' => 'array',
+        'processing_started_at' => 'datetime',
+        'processing_completed_at' => 'datetime',
     ];
 
     public const STATUS_PENDING = 'pending';
     public const STATUS_PAID = 'paid';
     public const STATUS_EXPIRED = 'expired';
+    public const STATUS_PROCESSING = 'processing';
 
     /**
      * Generate a unique order code.
@@ -45,6 +55,14 @@ class ServiceOrder extends Model
     public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);
+    }
+
+    /**
+     * Get the user that owns this order.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     /**

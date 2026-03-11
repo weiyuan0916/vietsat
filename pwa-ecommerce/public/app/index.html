@@ -110,6 +110,21 @@
               </div>
             </div>
             <div class="page-content">
+              <!-- Welcome Banner - Modern Design -->
+              <div class="welcome-banner">
+                <div class="welcome-banner-content">
+                  <div class="welcome-text">
+                    <h2>Chào mừng đến với Yiki</h2>
+                    <p>Dịch vụ hỗ trợ Facebook uy tín và nhanh chóng</p>
+                  </div>
+                  <a href="/service/" class="welcome-cta">
+                    <span>Đăng ký ngay</span>
+                    <i class="icon f7-icons">arrow_right</i>
+                  </a>
+                </div>
+                <div class="welcome-banner-bg"></div>
+              </div>
+
               <swiper-container class="full-width" slides-per-view="2.4" space-between="15" slides-offset-after="15"
                 slides-offset-before="15" speed="400">
                 <swiper-slide>
@@ -661,6 +676,64 @@
             </div>
 
             <div class="page-content">
+              <!-- Account Guest - Sign In Form -->
+              <div id="account-guest">
+                <!-- Illustration -->
+                <div class="signin-image">
+                  <img src="img/illustrations/signin.png" alt="Sign In">
+                </div>
+                
+                <!-- Title -->
+                <div class="auth-title">
+                  <h1>Sign In</h1>
+                </div>
+                
+                <!-- Social Login Buttons -->
+                <div class="social-buttons">
+                  <button class="button button-fill button-social apple-btn" id="btn-apple-signin">
+                    <i class="f7-icons">logo_apple</i>
+                    <span>Sign In with Apple</span>
+                  </button>
+                  <button class="button button-fill button-social google-btn" id="btn-google-signin">
+                    <i class="f7-icons">logo_google</i>
+                    <span>Sign In with Google</span>
+                  </button>
+                </div>
+                
+                <!-- Divider -->
+                <div class="auth-divider">
+                  <span>Or with email</span>
+                </div>
+                
+                <!-- Email Login Form -->
+                <form id="login-form" class="auth-form">
+                  <div class="form-group">
+                    <div class="input-wrapper">
+                      <i class="input-icon f7-icons">envelope</i>
+                      <input type="email" id="login-email" name="email" placeholder="Email" required>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <div class="input-wrapper">
+                      <i class="input-icon f7-icons">lock</i>
+                      <input type="password" id="login-password" name="password" placeholder="Password" required>
+                    </div>
+                  </div>
+                  <button type="submit" class="button button-fill color-dark auth-submit-btn" id="btn-login">
+                    <span class="btn-text">Sign In</span>
+                  </button>
+                </form>
+                
+                <!-- Links -->
+                <div class="auth-links">
+                  <a href="/forgot-password/" class="link forgot-password">Forgot Password?</a>
+                  <div class="signup-prompt">
+                    Don't have an account? <a href="/signup/" class="link sign-up-link">Sign Up</a>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Old Authentication Section - Commented out
               <div class="light-gray-title">Authentication</div>
               <div class="list links-list colored-icons-list list-outline list-dividers full-width">
                 <ul>
@@ -690,6 +763,7 @@
                   </li>
                 </ul>
               </div>
+              -->
               <div class="light-gray-title">Messages</div>
               <div class="list links-list colored-icons-list list-outline list-dividers full-width">
                 <ul>

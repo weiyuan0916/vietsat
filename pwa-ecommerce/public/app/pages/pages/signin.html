@@ -1,4 +1,4 @@
-<div class="page no-toolbar">
+<div class="page no-toolbar" data-name="signin">
   <div class="navbar">
     <div class="navbar-bg"></div>
     <div class="navbar-inner">
@@ -9,30 +9,64 @@
       </div>
     </div>
   </div>
-  <div class="page-content">
+  <div class="page-content auth-page">
+    <!-- Illustration -->
     <div class="signin-image">
-      <img src="img/illustrations/signin.png" alt="">
+      <img src="img/illustrations/signin.png" alt="Sign In">
     </div>
-    <div class="centered-text">
+    
+    <!-- Title -->
+    <div class="auth-title">
       <h1>Sign In</h1>
-      <a href="#" class="button button-fill color-light-gray button-icon-left">
-        <i class="icon f7-icons">logo_apple</i>
-        Sign In with Apple
-      </a>
-      <a href="#" class="button button-fill color-light-gray google-button">
-        <img src="img/icons/google.svg" alt="">
-        Sign In with Google
-      </a>
-      <p class="login-separator">Or with email</p>
     </div>
-    <form>
-      <input type="email" id="email" name="email" placeholder="Email">
-      <input type="password" id="password" name="password" placeholder="Password">
-      <a href="#" class="button button-fill color-dark">Sign In</a>
+    
+    <!-- Social Login Buttons -->
+    <div class="social-buttons">
+      <button class="button button-fill button-social apple-btn" id="btn-apple-signin">
+        <i class="f7-icons">logo_apple</i>
+        <span>Sign In with Apple</span>
+      </button>
+      <button class="button button-fill button-social google-btn" id="btn-google-signin">
+        <i class="f7-icons">logo_google</i>
+        <span>Sign In with Google</span>
+      </button>
+    </div>
+    
+    <!-- Divider -->
+    <div class="auth-divider">
+      <span>Or with email</span>
+    </div>
+    
+    <!-- Email Login Form -->
+    <form id="login-form" class="auth-form">
+      <div class="form-group">
+        <div class="input-wrapper">
+          <i class="input-icon f7-icons">envelope</i>
+          <input type="email" id="login-email" name="email" placeholder="Email" required>
+        </div>
+        <div class="error-message" id="error-email"></div>
+      </div>
+      <div class="form-group">
+        <div class="input-wrapper">
+          <i class="input-icon f7-icons">lock</i>
+          <input type="password" id="login-password" name="password" placeholder="Password" required>
+        </div>
+        <div class="error-message" id="error-password"></div>
+      </div>
+      <button type="submit" class="button button-fill color-dark auth-submit-btn" id="btn-login">
+        <span class="btn-text">Sign In</span>
+        <span class="btn-loading" style="display:none;">
+          <i class="f7-icons animate-spin">arrow_2_circlepath</i> Loading...
+        </span>
+      </button>
     </form>
-    <div class="signin-links">
-      <a href="/forgot-password/" class="link">Forgot Password?</a>
-      <a href="/signup/" class="link">Sign Up</a>
+    
+    <!-- Links -->
+    <div class="auth-links">
+      <a href="/forgot-password/" class="link forgot-password">Forgot Password?</a>
+      <div class="signup-prompt">
+        Don't have an account? <a href="/signup/" class="link sign-up-link">Sign Up</a>
+      </div>
     </div>
   </div>
 </div>

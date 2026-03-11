@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Service;
 use App\Models\ServiceOrder;
 use App\Services\ExternalServiceApi;
+use App\Services\DeviceTrackingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,11 +16,13 @@ use Illuminate\Support\Str;
 class OrderController extends Controller
 {
     private ExternalServiceApi $externalServiceApi;
+    private DeviceTrackingService $deviceTrackingService;
     private bool $useExternalApi;
 
     public function __construct()
     {
         $this->externalServiceApi = new ExternalServiceApi();
+        $this->deviceTrackingService = new DeviceTrackingService();
         $this->useExternalApi = config('services.service.use_external_api', true);
     }
 
@@ -140,6 +143,9 @@ class OrderController extends Controller
                 ->where('expires_at', '<', now())
                 ->delete();
 
+            // Generate device fingerprint
+            $deviceFingerprint = $this->deviceTrackingService->generateFingerprint($request);
+
             // Prepare order data
             $orderData = [
                 'order_code' => 'ORDFB' . Str::upper(Str::random(10)),
@@ -147,7 +153,15 @@ class OrderController extends Controller
                 'status' => ServiceOrder::STATUS_PENDING,
                 'expires_at' => now()->addMinutes(5),
                 'facebook_profile_link' => $request->facebook_profile_link,
+                'device_fingerprint' => $deviceFingerprint,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
             ];
+
+            // Add user_id if authenticated
+            if ($request->user()) {
+                $orderData['user_id'] = $request->user()->id;
+            }
 
             // Add service data based on API source
             if ($this->useExternalApi) {
@@ -259,6 +273,131 @@ class OrderController extends Controller
                 'created_at' => $order->created_at->toIso8601String(),
                 'service' => $serviceInfo,
             ],
+        ]);
+    }
+
+    /**
+     * Verify payment from TPBank webhook.
+     *
+     * POST /api/v1/orders/verify-payment
+     */
+    public function verifyPayment(Request $request): JsonResponse
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'order_code' => 'required|string',
+            'bank_txn_id' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Dữ liệu đầu vào không hợp lệ.',
+                'data' => null,
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $order = ServiceOrder::where('order_code', $request->order_code)->first();
+
+        if (!$order) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Không tìm thấy đơn hàng.',
+                'data' => null,
+            ], 404);
+        }
+
+        // Check if order is already paid
+        if ($order->status === ServiceOrder::STATUS_PAID) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Đơn hàng đã được thanh toán.',
+                'data' => null,
+            ], 400);
+        }
+
+        // Check if order is expired
+        if ($order->isTimeExpired()) {
+            $order->update(['status' => ServiceOrder::STATUS_EXPIRED]);
+            return response()->json([
+                'status' => false,
+                'message' => 'Đơn hàng đã hết hạn.',
+                'data' => null,
+            ], 400);
+        }
+
+        // Verify device fingerprint (security check)
+        if (!$this->deviceTrackingService->verifyDevice($request, $order)) {
+            \Log::warning('[Payment] Device verification failed', [
+                'order_code' => $order->order_code,
+                'request_ip' => $request->ip(),
+                'order_ip' => $order->ip_address,
+            ]);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Thiết bị không khớp với đơn hàng.',
+                'data' => null,
+            ], 403);
+        }
+
+        // Update order as paid
+        $order->update([
+            'status' => ServiceOrder::STATUS_PAID,
+            'paid_at' => now(),
+            'bank_txn_id' => $request->bank_txn_id,
+        ]);
+
+        // Trigger payment success event
+        event(new \App\Events\PaymentSuccess($order));
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Xác nhận thanh toán thành công.',
+            'data' => [
+                'order_code' => $order->order_code,
+                'status' => $order->status,
+                'paid_at' => $order->paid_at->toIso8601String(),
+            ],
+        ]);
+    }
+
+    /**
+     * Get user's orders.
+     *
+     * GET /api/v1/orders/my-orders
+     */
+    public function myOrders(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Vui lòng đăng nhập.',
+                'data' => null,
+            ], 401);
+        }
+
+        $orders = ServiceOrder::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Lấy danh sách đơn hàng thành công.',
+            'data' => $orders->map(function ($order) {
+                return [
+                    'order_code' => $order->order_code,
+                    'amount' => $order->amount,
+                    'status' => $order->status,
+                    'facebook_profile_link' => $order->facebook_profile_link,
+                    'expires_at' => $order->expires_at?->toIso8601String(),
+                    'paid_at' => $order->paid_at?->toIso8601String(),
+                    'created_at' => $order->created_at->toIso8601String(),
+                    'service' => $order->getServiceInfo(),
+                ];
+            }),
         ]);
     }
 }

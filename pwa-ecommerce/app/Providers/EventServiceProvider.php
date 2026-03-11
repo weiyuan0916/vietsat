@@ -5,9 +5,15 @@ namespace App\Providers;
 use App\Events\OrderCreated;
 use App\Events\ProductCreated;
 use App\Events\VendorCreated;
+use App\Events\PaymentSuccess;
+use App\Events\PaymentPending;
+use App\Events\PaymentExpired;
 use App\Listeners\SendOrderCreatedNotification;
 use App\Listeners\SendProductCreatedNotification;
 use App\Listeners\SendVendorCreatedNotification;
+use App\Listeners\SendPaymentSuccessNotification;
+use App\Listeners\SendPaymentPendingNotification;
+use App\Listeners\SendPaymentExpiredNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 /**
@@ -31,6 +37,15 @@ class EventServiceProvider extends ServiceProvider
         ],
         OrderCreated::class => [
             SendOrderCreatedNotification::class,
+        ],
+        PaymentSuccess::class => [
+            SendPaymentSuccessNotification::class,
+        ],
+        PaymentPending::class => [
+            SendPaymentPendingNotification::class,
+        ],
+        PaymentExpired::class => [
+            SendPaymentExpiredNotification::class,
         ],
     ];
 

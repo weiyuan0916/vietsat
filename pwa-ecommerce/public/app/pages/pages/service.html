@@ -1,5 +1,5 @@
 <div class="page" data-name="service">
-  <div class="navbar">
+  <div class="navbar navbar-large">
     <div class="navbar-bg"></div>
     <div class="navbar-inner">
       <div class="left">
@@ -7,7 +7,9 @@
           <i class="icon f7-icons">arrow_left</i>
         </a>
       </div>
-      <div class="title">Dịch vụ</div>
+      <div class="title-large">
+        <div class="title-large-text">Dịch vụ</div>
+      </div>
       <div class="right">
         <a href="#" class="link icon-only">
           <i class="icon f7-icons">question_circle</i>
@@ -16,281 +18,479 @@
     </div>
   </div>
 
-  <div class="page-content">
-    <!-- Hero Banner -->
-    <div class="service-banner">
-      <div class="service-banner-icon">
-        <i class="icon f7-icons">star_circle_fill</i>
-      </div>
-      <h1>Vietnam Satellite</h1>
-      <p>Dịch vụ vệ tinh chất lượng cao</p>
+  <div class="page-content ptr-content" data-ptr-distance="50">
+    <div class="ptr-preloader">
+      <div class="preloader"></div>
+      <div class="ptr-arrow"></div>
     </div>
 
-    <!-- Section Title -->
-    <div class="section-title">
-      Gói dịch vụ
-      <span class="text-color-gray" style="font-size: 12px; font-weight: normal;">Đang hoạt động</span>
-    </div>
-
-    <!-- Service Card (API Loaded) -->
-    <div class="card" id="service-info">
-      <div class="card-image">
-        <img src="img/cards/1.jpg" alt="Service">
-        <div class="card-image-footer">
-          <div class="card-category bg-color-blue">VIP</div>
-          <h2 id="service-name">Loading...</h2>
-        </div>
-      </div>
-      <div class="card-content card-content-padding">
-        <!-- Service Details -->
-        <div class="stock-list">
-          <div class="stock-item">
-            <div class="stock-item-icon bg-color-blue">
-              <i class="icon f7-icons">calendar</i>
-            </div>
-            <div class="stock-item-details">
-              <div class="stock-item-top">
-                <div class="stock-item-title">Thời hạn</div>
-                <div class="stock-item-value text-color-blue"><span id="service-duration">...</span> ngày</div>
-              </div>
-              <div class="stock-item-bottom">
-                <div class="stock-item-name">Duration</div>
-                <div class="stock-item-change text-color-green">3 tháng sử dụng</div>
-              </div>
-            </div>
-          </div>
-          <div class="stock-item">
-            <div class="stock-item-icon bg-color-green">
-              <i class="icon f7-icons">dollarsign_circle_fill</i>
-            </div>
-            <div class="stock-item-details">
-              <div class="stock-item-top">
-                <div class="stock-item-title">Giá dịch vụ</div>
-                <div class="stock-item-value text-color-green"><span id="service-price">...</span> VND</div>
-              </div>
-              <div class="stock-item-bottom">
-                <div class="stock-item-name">Price</div>
-                <div class="stock-item-change">Giá đã bao gồm thuế</div>
-              </div>
-            </div>
+    <!-- Hero Banner - Modern Gradient -->
+    <div class="service-hero">
+      <div class="service-hero-bg"></div>
+      <div class="service-hero-content">
+        <div class="service-hero-icon">
+          <div class="icon-wrapper">
+            <i class="icon f7-icons">satellite_fill</i>
           </div>
         </div>
-
-        <!-- Features List -->
-        <div class="list accordion-list" style="margin-top: 16px;">
-          <ul>
-            <li class="accordion-item">
-              <a href="#" class="item-link item-content">
-                <div class="item-inner">
-                  <div class="item-title">
-                    <i class="icon f7-icons text-color-blue" style="margin-right: 8px;">checkmark_circle_fill</i>
-                    Tính năng dịch vụ
-                  </div>
-                </div>
-              </a>
-              <div class="accordion-item-content">
-                <div class="block">
-                  <ul style="list-style: none; padding-left: 0;">
-                    <li style="padding: 8px 0; border-bottom: 1px solid #eee;">
-                      <i class="icon f7-icons text-color-green" style="margin-right: 8px;">checkmark</i>
-                      Kênh vệ tinh chất lượng HD
-                    </li>
-                    <li style="padding: 8px 0; border-bottom: 1px solid #eee;">
-                      <i class="icon f7-icons text-color-green" style="margin-right: 8px;">checkmark</i>
-                      Hỗ trợ 24/7
-                    </li>
-                    <li style="padding: 8px 0; border-bottom: 1px solid #eee;">
-                      <i class="icon f7-icons text-color-green" style="margin-right: 8px;">checkmark</i>
-                      Cập nhật kênh miễn phí
-                    </li>
-                    <li style="padding: 8px 0;">
-                      <i class="icon f7-icons text-color-green" style="margin-right: 8px;">checkmark</i>
-                      Bảo hành trọn đời
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </li>
-          </ul>
+        <div class="service-hero-text">
+          <h1>Vietnam Satellite</h1>
+          <p>Dịch vụ vệ tinh chất lượng cao</p>
+        </div>
+        <div class="service-hero-badge">
+          <span class="badge-vip">VIP</span>
+        </div>
+      </div>
+      <div class="service-hero-stats">
+        <div class="stat-item">
+          <span class="stat-value">HD</span>
+          <span class="stat-label">Chất lượng</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-value">24/7</span>
+          <span class="stat-label">Hỗ trợ</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-value">∞</span>
+          <span class="stat-label">Kênh</span>
         </div>
       </div>
     </div>
 
-    <!-- Order Form -->
-    <div class="section-title">Đăng ký dịch vụ</div>
-    
-    <form id="order-form">
-      <div class="card">
-        <div class="card-header">
-          <i class="icon f7-icons" style="margin-right: 8px;">person_circle</i>
-          Thông tin đăng ký
-        </div>
-        <div class="card-content card-content-padding">
-          <!-- Facebook Profile Input -->
-          <div class="list form-list">
-            <ul>
+    <div class="container">
+      <!-- Service Plans Section - Using Card Components -->
+      <div class="section-header">
+        <h3>Gói dịch vụ</h3>
+        <p>Chọn gói phù hợp với bạn</p>
+      </div>
+
+      <!-- Service Cards Slider -->
+      <div class="service-cards-wrapper">
+        <div class="service-card featured">
+          <div class="card-badge">Phổ biến nhất</div>
+          <div class="card-header">
+            <div class="card-icon bg-gradient-purple">
+              <i class="icon f7-icons">crown_fill</i>
+            </div>
+            <div class="card-title-wrap">
+              <h2>Premium Plan</h2>
+              <span class="card-subtitle">Gói cao cấp</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="price-tag">
+              <span class="price-value">100.000</span>
+              <span class="price-currency">VND</span>
+              <span class="price-period">/3 tháng</span>
+            </div>
+            <ul class="feature-checklist">
               <li>
-                <div class="item-content item-input">
-                  <div class="item-media">
-                    <i class="icon f7-icons text-color-blue">logo_facebook</i>
-                  </div>
-                  <div class="item-inner">
-                    <div class="item-title">Facebook Profile</div>
-                    <div class="item-input-wrap">
-                      <input type="url"
-                             name="facebook_profile_link"
-                             placeholder="https://facebook.com/yourprofile"
-                             required
-                             pattern=".*facebook\.com.*">
-                      <span class="input-error-message">Vui lòng nhập link Facebook hợp lệ</span>
-                    </div>
-                  </div>
-                </div>
+                <i class="icon f7-icons text-color-green">checkmark_circle_fill</i>
+                <span>100+ kênh HD</span>
+              </li>
+              <li>
+                <i class="icon f7-icons text-color-green">checkmark_circle_fill</i>
+                <span>Hỗ trợ 24/7</span>
+              </li>
+              <li>
+                <i class="icon f7-icons text-color-green">checkmark_circle_fill</i>
+                <span>Cập nhật miễn phí</span>
+              </li>
+              <li>
+                <i class="icon f7-icons text-color-green">checkmark_circle_fill</i>
+                <span>Bảo hành trọn đời</span>
               </li>
             </ul>
           </div>
-
-          <!-- Info Block -->
-          <div class="information-block" style="margin-top: 16px;">
-            <i class="icon f7-icons text-color-blue" style="font-size: 32px; margin-bottom: 8px;">info_circle</i>
-            <p style="margin: 0;">
-              Vui lòng nhập chính xác link Facebook của bạn.
-              <br>
-              Dịch vụ sẽ được kích hoạt sau khi thanh toán.
-            </p>
+          <div class="card-footer">
+            <button class="button button-fill button-round btn-primary" onclick="selectPlan('premium')">
+              <i class="icon f7-icons">cart_fill</i>
+              Chọn gói
+            </button>
           </div>
+        </div>
 
-          <!-- Submit Button -->
-          <div class="block" style="margin-top: 20px;">
-            <button type="submit" class="button button-fill button-large button-round">
-              <i class="icon f7-icons" style="margin-right: 8px;">creditcard_fill</i>
-              Thanh toán & kích hoạt
+        <div class="service-card">
+          <div class="card-header">
+            <div class="card-icon bg-gradient-blue">
+              <i class="icon f7-icons">bolt_fill</i>
+            </div>
+            <div class="card-title-wrap">
+              <h2>Basic Plan</h2>
+              <span class="card-subtitle">Gói cơ bản</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="price-tag">
+              <span class="price-value">50.000</span>
+              <span class="price-currency">VND</span>
+              <span class="price-period">/1 tháng</span>
+            </div>
+            <ul class="feature-checklist">
+              <li>
+                <i class="icon f7-icons text-color-green">checkmark_circle_fill</i>
+                <span>50+ kênh SD</span>
+              </li>
+              <li>
+                <i class="icon f7-icons text-color-green">checkmark_circle_fill</i>
+                <span>Hỗ trợ giờ hành chính</span>
+              </li>
+              <li>
+                <i class="icon f7-icons text-color-gray">xmark_circle</i>
+                <span class="text-color-gray">Cập nhật có phí</span>
+              </li>
+            </ul>
+          </div>
+          <div class="card-footer">
+            <button class="button button-outline button-round" onclick="selectPlan('basic')">
+              <i class="icon f7-icons">cart</i>
+              Chọn gói
             </button>
           </div>
         </div>
       </div>
-    </form>
 
-    <!-- Payment Info (Hidden until order created) -->
-    <div id="payment-info" style="display: none;">
-      <div class="section-title">Thông tin thanh toán</div>
-      
-      <div class="card">
-        <div class="card-image">
-          <img src="img/cards/3.jpg" alt="Payment">
-          <div class="card-image-footer">
-            <div class="card-category bg-color-green">Đơn hàng mới</div>
-            <h2>Chờ thanh toán</h2>
-          </div>
-        </div>
-        <div class="card-content card-content-padding">
-          <!-- Order Details -->
-          <div class="stock-list">
-            <div class="stock-item">
-              <div class="stock-item-icon bg-color-orange">
-                <i class="icon f7-icons">barcode</i>
+      <!-- Service Features - Using Accordion -->
+      <div class="section-header">
+        <h3>Tính năng</h3>
+        <p>Khám phá các tính năng của dịch vụ</p>
+      </div>
+
+      <div class="list accordion-list full-width service-accordion">
+        <ul>
+          <li class="accordion-item">
+            <a class="item-content item-link" href="#">
+              <div class="item-media">
+                <div class="feature-icon-small bg-gradient-purple">
+                  <i class="icon f7-icons">tv_fill</i>
+                </div>
               </div>
-              <div class="stock-item-details">
-                <div class="stock-item-top">
-                  <div class="stock-item-title">Mã đơn hàng</div>
-                  <div class="stock-item-value" id="order-code" style="font-size: 14px;">...</div>
-                </div>
-                <div class="stock-item-bottom">
-                  <div class="stock-item-name">Order Code</div>
-                  <div class="stock-item-change text-color-orange">Vui lòng thanh toán trong 5 phút</div>
-                </div>
+              <div class="item-inner">
+                <div class="item-title">Kênh truyền hình</div>
+              </div>
+              <div class="item-after">
+                <span class="badge color-green">100+ kênh</span>
+              </div>
+            </a>
+            <div class="accordion-item-content">
+              <div class="accordion-detail">
+                <p>Trải nghiệm xem phim và truyền hình với chất lượng HD sắc nét. Bao gồm các kênh VTV, HTV, VTC, kênh quốc tế và nhiều kênh khác.</p>
+                <ul class="feature-list-detail">
+                  <li><i class="icon f7-icons text-color-blue">play_circle</i> VTV1, VTV2, VTV3, VTV6</li>
+                  <li><i class="icon f7-icons text-color-blue">play_circle</i> HTV1, HTV2, HTV7</li>
+                  <li><i class="icon f7-icons text-color-blue">play_circle</i> Kênh quốc tế: ESPN, CNN, HBO</li>
+                </ul>
               </div>
             </div>
-            <div class="stock-item">
-              <div class="stock-item-icon bg-color-green">
+          </li>
+          <li class="accordion-item">
+            <a class="item-content item-link" href="#">
+              <div class="item-media">
+                <div class="feature-icon-small bg-gradient-green">
+                  <i class="icon f7-icons">headphones</i>
+                </div>
+              </div>
+              <div class="item-inner">
+                <div class="item-title">Hỗ trợ 24/7</div>
+              </div>
+              <div class="item-after">
+                <span class="badge color-teal">Online</span>
+              </div>
+            </a>
+            <div class="accordion-item-content">
+              <div class="accordion-detail">
+                <p>Đội ngũ hỗ trợ luôn sẵn sàng giúp đỡ bạn mọi lúc, mọi nơi qua nhiều kênh liên lạc.</p>
+                <ul class="feature-list-detail">
+                  <li><i class="icon f7-icons text-color-green">phone_fill</i> Hotline: 1900 xxxx</li>
+                  <li><i class="icon f7-icons text-color-blue">messenger</i> Facebook Messenger</li>
+                  <li><i class="icon f7-icons text-color-blue">envelope</i> Email support</li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="accordion-item">
+            <a class="item-content item-link" href="#">
+              <div class="item-media">
+                <div class="feature-icon-small bg-gradient-orange">
+                  <i class="icon f7-icons">arrow_down_circle</i>
+                </div>
+              </div>
+              <div class="item-inner">
+                <div class="item-title">Cập nhật miễn phí</div>
+              </div>
+              <div class="item-after">
+                <span class="badge color-orange">Mới</span>
+              </div>
+            </a>
+            <div class="accordion-item-content">
+              <div class="accordion-detail">
+                <p>Luôn cập nhật các kênh mới nhất và tính năng mới mà không mất thêm phí.</p>
+                <ul class="feature-list-detail">
+                  <li><i class="icon f7-icons text-color-green">checkmark_seal</i> Cập nhật kênh tự động</li>
+                  <li><i class="icon f7-icons text-color-green">checkmark_seal</i> Thêm kênh mới không phụ thu</li>
+                  <li><i class="icon f7-icons text-color-green">checkmark_seal</i> Nâng cấp tính năng miễn phí</li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="accordion-item">
+            <a class="item-content item-link" href="#">
+              <div class="item-media">
+                <div class="feature-icon-small bg-gradient-pink">
+                  <i class="icon f7-icons">shield_lefthalf_fill</i>
+                </div>
+              </div>
+              <div class="item-inner">
+                <div class="item-title">Bảo hành trọn đời</div>
+              </div>
+              <div class="item-after">
+                <span class="badge color-blue">Uy tín</span>
+              </div>
+            </a>
+            <div class="accordion-item-content">
+              <div class="accordion-detail">
+                <p>Dịch vụ được bảo hành trọn đời, bạn có thể yên tâm sử dụng mà không lo về các vấn đề kỹ thuật.</p>
+                <ul class="feature-list-detail">
+                  <li><i class="icon f7-icons text-color-green">checkmark_seal</i> Đổi thiết bị miễn phí</li>
+                  <li><i class="icon f7-icons text-color-green">checkmark_seal</i> Hỗ trợ kỹ thuật free</li>
+                  <li><i class="icon f7-icons text-color-green">checkmark_seal</i> Bảo trì định kỳ</li>
+                </ul>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Service List - Using List Component -->
+      <div class="section-header">
+        <h3>Dịch vụ khác</h3>
+        <p>Các dịch vụ bổ sung</p>
+      </div>
+
+      <div class="list links-list list-outline list-dividers full-width service-list">
+        <ul>
+          <li>
+            <a href="#" class="item-link">
+              <div class="item-media">
+                <div class="service-list-icon bg-gradient-purple">
+                  <i class="icon f7-icons">antenna_radiowaves_left_right</i>
+                </div>
+              </div>
+              <div class="item-inner">
+                <div class="item-title">Lắp đặt thiết bị</div>
+                <div class="item-text">Hỗ trợ lắp đặt tại nhà</div>
+              </div>
+              <div class="item-after">
+                <i class="icon f7-icons text-color-gray">chevron_right</i>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="item-link">
+              <div class="item-media">
+                <div class="service-list-icon bg-gradient-blue">
+                  <i class="icon f7-icons">arrow_2_circlepath</i>
+                </div>
+              </div>
+              <div class="item-inner">
+                <div class="item-title">Đổi thiết bị</div>
+                <div class="item-text">Thay đổi thiết bị mới</div>
+              </div>
+              <div class="item-after">
+                <i class="icon f7-icons text-color-gray">chevron_right</i>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="item-link">
+              <div class="item-media">
+                <div class="service-list-icon bg-gradient-green">
+                  <i class="icon f7-icons">person_2</i>
+                </div>
+              </div>
+              <div class="item-inner">
+                <div class="item-title">Gia hạn dịch vụ</div>
+                <div class="item-text">Gia hạn thời hạn sử dụng</div>
+              </div>
+              <div class="item-after">
+                <i class="icon f7-icons text-color-gray">chevron_right</i>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="item-link">
+              <div class="item-media">
+                <div class="service-list-icon bg-gradient-orange">
+                  <i class="icon f7-icons">question_circle</i>
+                </div>
+              </div>
+              <div class="item-inner">
+                <div class="item-title">Hỗ trợ kỹ thuật</div>
+                <div class="item-text">Giải đáp mọi thắc mắc</div>
+              </div>
+              <div class="item-after">
+                <i class="icon f7-icons text-color-gray">chevron_right</i>
+              </div>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Order Form -->
+      <div class="section-header" id="order-section">
+        <h3>Đăng ký dịch vụ</h3>
+        <p>Nhập thông tin để bắt đầu</p>
+      </div>
+
+      <form id="order-form" class="order-form">
+        <div class="form-card">
+          <div class="form-header">
+            <i class="icon f7-icons">person_crop_circle_badge_plus</i>
+            <span>Thông tin đăng ký</span>
+          </div>
+
+          <div class="form-group">
+            <label for="facebook_profile_link">
+              <i class="icon f7-icons">logo_facebook</i>
+              Facebook Profile
+            </label>
+            <div class="input-wrapper">
+              <input type="url"
+                     id="facebook_profile_link"
+                     name="facebook_profile_link"
+                     placeholder="https://facebook.com/yourprofile"
+                     required
+                     pattern=".*facebook\.com.*">
+              <div class="input-icon">
+                <i class="icon f7-icons">link</i>
+              </div>
+            </div>
+            <span class="input-hint">Vui lòng nhập link Facebook hợp lệ</span>
+          </div>
+
+          <div class="form-info-box">
+            <div class="info-box-icon">
+              <i class="icon f7-icons">info_circle_fill</i>
+            </div>
+            <div class="info-box-content">
+              <strong>Lưu ý quan trọng</strong>
+              <p>Vui lòng nhập chính xác link Facebook của bạn. Dịch vụ sẽ được kích hoạt sau khi thanh toán thành công.</p>
+            </div>
+          </div>
+
+          <button type="submit" class="button button-fill button-large button-round btn-primary">
+            <i class="icon f7-icons">creditcard_fill</i>
+            Thanh toán & kích hoạt
+          </button>
+        </div>
+      </form>
+
+      <!-- Payment Info (Hidden until order created) -->
+      <div id="payment-info" style="display: none;">
+        <div class="section-header success">
+          <i class="icon f7-icons">checkmark_circle_fill</i>
+          <h3>Thông tin thanh toán</h3>
+          <p>Vui lòng thanh toán trong 5 phút</p>
+        </div>
+
+        <div class="payment-card">
+          <div class="payment-header">
+            <div class="payment-status">
+              <span class="status-badge pending">Chờ thanh toán</span>
+            </div>
+            <div class="payment-order-code">
+              <span class="label">Mã đơn hàng</span>
+              <span class="value" id="order-code">...</span>
+            </div>
+          </div>
+
+          <div class="payment-details">
+            <div class="payment-detail-item">
+              <div class="detail-icon bg-gradient-green">
                 <i class="icon f7-icons">dollarsign_circle_fill</i>
               </div>
-              <div class="stock-item-details">
-                <div class="stock-item-top">
-                  <div class="stock-item-title">Số tiền</div>
-                  <div class="stock-item-value text-color-green"><span id="order-amount">...</span> VND</div>
-                </div>
-                <div class="stock-item-bottom">
-                  <div class="stock-item-name">Amount</div>
-                  <div class="stock-item-change">Phí dịch vụ</div>
-                </div>
+              <div class="detail-content">
+                <span class="detail-label">Số tiền</span>
+                <span class="detail-value"><span id="order-amount">...</span> VND</span>
               </div>
             </div>
-            <div class="stock-item">
-              <div class="stock-item-icon bg-color-blue">
-                <i class="icon f7-icons">clock</i>
+
+            <div class="payment-detail-item">
+              <div class="detail-icon bg-gradient-orange">
+                <i class="icon f7-icons">clock_fill</i>
               </div>
-              <div class="stock-item-details">
-                <div class="stock-item-top">
-                  <div class="stock-item-title">Hết hạn</div>
-                  <div class="stock-item-value" id="order-expires">...</div>
-                </div>
-                <div class="stock-item-bottom">
-                  <div class="stock-item-name">Expires At</div>
-                  <div class="stock-item-change text-color-red">Quá hạn đơn sẽ bị hủy</div>
-                </div>
+              <div class="detail-content">
+                <span class="detail-label">Hết hạn</span>
+                <span class="detail-value" id="order-expires">...</span>
               </div>
+              <span class="detail-warning">Quá hạn đơn sẽ bị hủy</span>
             </div>
           </div>
 
-          <!-- QR Code -->
-          <div id="qr-code" style="text-align: center; margin: 24px 0;"></div>
-
-          <!-- Transfer Content -->
-          <div class="block block-strong inset">
-            <p class="text-align-center text-color-gray" style="margin: 0 0 8px 0; font-size: 12px;">Nội dung chuyển khoản:</p>
-            <p class="text-align-center">
-              <strong id="transfer-content" style="font-size: 18px; letter-spacing: 2px; color: #007aff;">...</strong>
-            </p>
+          <div class="qr-section">
+            <div class="qr-label">Quét mã QR</div>
+            <div id="qr-code" class="qr-code"></div>
+            <div class="transfer-info">
+              <span class="transfer-label">Nội dung chuyển khoản:</span>
+              <span class="transfer-content" id="transfer-content">...</span>
+            </div>
           </div>
 
-          <!-- Status Message -->
-          <div class="information-block success-message">
-            <i class="icon f7-icons" style="font-size: 40px; margin-bottom: 12px;">checkmark_circle_fill</i>
-            <h2>Đơn hàng đã tạo!</h2>
-            <p>
-              Vui lòng chuyển khoản chính xác số tiền.
-              <br>
-              Dịch vụ sẽ được kích hoạt tự động sau khi nhận tiền.
-            </p>
+          <div class="payment-success-message">
+            <div class="success-icon">
+              <i class="icon f7-icons">checkmark_seal_fill</i>
+            </div>
+            <h4>Đơn hàng đã tạo!</h4>
+            <p>Vui lòng chuyển khoản chính xác số tiền. Dịch vụ sẽ được kích hoạt tự động sau khi nhận tiền.</p>
+            <div class="pulse-animation"></div>
           </div>
 
-          <!-- Cancel Button -->
-          <div class="block" style="margin-top: 16px;">
-            <button type="button" class="button button-outline button-round" onclick="cancelOrder()">
-              <i class="icon f7-icons" style="margin-right: 8px;">xmark_circle</i>
-              Hủy đơn hàng
-            </button>
-          </div>
+          <button type="button" class="button button-outline button-round btn-cancel" onclick="cancelOrder()">
+            <i class="icon f7-icons">xmark_circle</i>
+            Hủy đơn hàng
+          </button>
         </div>
       </div>
-    </div>
 
-    <!-- Footer -->
-    <div class="block text-align-center" style="padding: 24px 0;">
-      <p class="text-color-gray" style="font-size: 12px;">
-        <i class="icon f7-icons" style="font-size: 12px;">shield_checkerfill</i>
-        Bảo mật thanh toán
-      </p>
-      <p class="text-color-gray" style="font-size: 10px;">
-        © 2026 Vietnam Satellite. All rights reserved.
-      </p>
+      <!-- Footer -->
+      <div class="app-footer">
+        <div class="footer-secure">
+          <i class="icon f7-icons">lock_shield_fill</i>
+          <span>Bảo mật thanh toán</span>
+        </div>
+        <p class="footer-copyright">© 2026 Vietnam Satellite. All rights reserved.</p>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
+function selectPlan(planType) {
+  // Scroll to order form
+  document.getElementById('order-section').scrollIntoView({ behavior: 'smooth' });
+  
+  // Optional: highlight selected plan or store selection
+  console.log('Selected plan:', planType);
+}
+
+function toggleFeatures(header) {
+  const body = header.nextElementSibling;
+  const arrow = header.querySelector('.accordion-arrow');
+  body.classList.toggle('active');
+  arrow.classList.toggle('rotated');
+}
+
 function cancelOrder() {
   app.dialog.confirm('Bạn có chắc muốn hủy đơn hàng này?', 'Xác nhận', function() {
-    // Reset form and hide payment info
     document.getElementById('order-form').style.display = 'block';
     document.getElementById('payment-info').style.display = 'none';
-    
-    // Disconnect WebSocket
+
     if (typeof disconnectReverb === 'function') {
       disconnectReverb();
     }
-    
+
     app.dialog.alert('Đơn hàng đã được hủy.', 'Thông báo');
   });
 }

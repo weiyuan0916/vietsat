@@ -22,5 +22,8 @@ class DatabaseSeeder extends Seeder
 
         // Seed service plans
         $this->call(ServiceSeeder::class);
+
+        // Seed pages
+        $this->call(PageSeeder::class);
     }
 }

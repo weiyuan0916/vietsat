@@ -251,14 +251,20 @@ var app = new Framework7({
       path: "/toggle-button/",
       url: "pages/components/toggle-button.html",
     },
-    // Pages
+    // Pages - Standalone pages outside of tabs
     {
       path: "/signup/",
       url: "pages/pages/signup.html",
+      options: {
+        transition: "f7-slide"
+      }
     },
     {
       path: "/signin/",
       url: "pages/pages/signin.html",
+      options: {
+        transition: "f7-slide"
+      }
     },
     {
       path: "/forgot-password/",
@@ -722,6 +728,15 @@ $$(".switch-theme").on("click", function () {
   $$("body").toggleClass("dark");
 });
 
+// Handle button click to navigate to signup page
+$$(document).on('click', '#btn-show-register', function (e) {
+  e.preventDefault();
+  app.router.navigate('/signup/');
+});
+
+// The routes are defined at the top of the file
+// Navigation will be handled by Framework7 automatically via href links
+
 // 16. Preload Pages
 
 function preloadPages() {
@@ -812,6 +827,192 @@ async function checkOrderStatus(orderCode) {
         return response.json();
     } catch (error) {
         console.error('Error checking order:', error);
+        throw error;
+    }
+}
+
+// ====================
+// Auth API Functions
+// ====================
+
+var AUTH_TOKEN_KEY = 'auth_token';
+var AUTH_USER_KEY = 'auth_user';
+
+/**
+ * Get stored authentication token
+ * @returns {string|null} Token or null
+ */
+function getAuthToken() {
+    return localStorage.getItem(AUTH_TOKEN_KEY);
+}
+
+/**
+ * Store authentication token
+ * @param {string} token - Authentication token
+ */
+function setAuthToken(token) {
+    localStorage.setItem(AUTH_TOKEN_KEY, token);
+}
+
+/**
+ * Get stored user data
+ * @returns {Object|null} User data or null
+ */
+function getAuthUser() {
+    var user = localStorage.getItem(AUTH_USER_KEY);
+    return user ? JSON.parse(user) : null;
+}
+
+/**
+ * Store user data
+ * @param {Object} user - User data
+ */
+function setAuthUser(user) {
+    localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+}
+
+/**
+ * Check if user is logged in
+ * @returns {boolean}
+ */
+function isLoggedIn() {
+    return !!getAuthToken();
+}
+
+/**
+ * Clear authentication data (logout)
+ */
+function clearAuth() {
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(AUTH_USER_KEY);
+}
+
+/**
+ * Register a new user
+ * @param {Object} userData - User registration data
+ * @returns {Promise<Object>} Response with user and token
+ */
+async function registerUser(userData) {
+    try {
+        var response = await fetch(`${API_BASE_URL}/v1/auth/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify(userData),
+        });
+
+        var data = await response.json();
+
+        if (!response.ok) {
+            throw {
+                status: response.status,
+                message: data.message || 'Registration failed',
+                errors: data.errors || {}
+            };
+        }
+
+        return data;
+    } catch (error) {
+        console.error('Registration error:', error);
+        throw error;
+    }
+}
+
+/**
+ * Login user
+ * @param {string} email - User email
+ * @param {string} password - User password
+ * @returns {Promise<Object>} Response with user and token
+ */
+async function loginUser(email, password) {
+    try {
+        var response = await fetch(`${API_BASE_URL}/v1/auth/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password
+            }),
+        });
+
+        var data = await response.json();
+
+        if (!response.ok) {
+            throw {
+                status: response.status,
+                message: data.message || 'Login failed',
+                errors: data.errors || {}
+            };
+        }
+
+        return data;
+    } catch (error) {
+        console.error('Login error:', error);
+        throw error;
+    }
+}
+
+/**
+ * Logout current user
+ * @returns {Promise<void>}
+ */
+async function logoutUser() {
+    try {
+        var token = getAuthToken();
+        if (token) {
+            await fetch(`${API_BASE_URL}/v1/auth/logout`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+            });
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+    } finally {
+        clearAuth();
+    }
+}
+
+/**
+ * Get current user profile
+ * @returns {Promise<Object>} User profile data
+ */
+async function getUserProfile() {
+    try {
+        var token = getAuthToken();
+        if (!token) {
+            throw new Error('Not authenticated');
+        }
+
+        var response = await fetch(`${API_BASE_URL}/v1/auth/profile`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+        });
+
+        var data = await response.json();
+
+        if (!response.ok) {
+            throw {
+                status: response.status,
+                message: data.message || 'Failed to get profile'
+            };
+        }
+
+        return data;
+    } catch (error) {
+        console.error('Get profile error:', error);
         throw error;
     }
 }
@@ -1036,3 +1237,268 @@ function navigateToService(params) {
         app.views.current.router.navigate('/service/');
     }
 }
+
+// ====================
+// Signup Page Initialization
+// ====================
+
+$$(document).on('page:init', '.page[data-name="signup"]', function (e) {
+    var page = e.detail.page;
+    var formEl = page.el.querySelector('#register-form');
+    var btnRegister = page.el.querySelector('#btn-register');
+    var btnText = btnRegister ? btnRegister.querySelector('.btn-text') : null;
+    var btnLoading = btnRegister ? btnRegister.querySelector('.btn-loading') : null;
+
+    // Clear previous error messages
+    function clearErrors() {
+        var errorElements = page.el.querySelectorAll('.error-message');
+        errorElements.forEach(function(el) {
+            el.textContent = '';
+            el.style.display = 'none';
+        });
+        var inputs = page.el.querySelectorAll('input');
+        inputs.forEach(function(input) {
+            input.classList.remove('input-error');
+        });
+    }
+
+    // Show error for a specific field
+    function showError(fieldName, message) {
+        var errorEl = page.el.querySelector('#error-' + fieldName);
+        var inputEl = page.el.querySelector('#reg-' + fieldName);
+        if (errorEl) {
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+        if (inputEl) {
+            inputEl.classList.add('input-error');
+        }
+    }
+
+    // Set button loading state
+    function setLoading(loading) {
+        if (btnRegister) {
+            btnRegister.disabled = loading;
+            if (btnText && btnLoading) {
+                btnText.style.display = loading ? 'none' : 'inline';
+                btnLoading.style.display = loading ? 'inline' : 'none';
+            }
+        }
+    }
+
+    // Handle form submission
+    if (formEl) {
+        formEl.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            clearErrors();
+            setLoading(true);
+
+            var formData = new FormData(formEl);
+            var userData = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                password: formData.get('password'),
+                password_confirmation: formData.get('password_confirmation')
+            };
+
+            // Client-side validation
+            if (!userData.name || userData.name.trim().length < 2) {
+                showError('name', 'Vui lòng nhập họ và tên (ít nhất 2 ký tự)');
+                setLoading(false);
+                return;
+            }
+
+            if (!userData.email || !userData.email.includes('@')) {
+                showError('email', 'Vui lòng nhập địa chỉ email hợp lệ');
+                setLoading(false);
+                return;
+            }
+
+            if (!userData.password || userData.password.length < 6) {
+                showError('password', 'Mật khẩu phải có ít nhất 6 ký tự');
+                setLoading(false);
+                return;
+            }
+
+            if (userData.password !== userData.password_confirmation) {
+                showError('password_confirmation', 'Mật khẩu xác nhận không khớp');
+                setLoading(false);
+                return;
+            }
+
+            registerUser(userData)
+                .then(function(response) {
+                    setLoading(false);
+
+                    if (response.status && response.data) {
+                        // Store token and user data
+                        setAuthToken(response.data.token);
+                        setAuthUser(response.data.user);
+
+                        // Show success notification
+                        app.notification.create({
+                            icon: '<i class="f7-icons">checkmark_circle_fill</i>',
+                            title: 'Đăng ký thành công',
+                            message: 'Chào mừng ' + response.data.user.name + '!',
+                            hold: 3000
+                        }).open();
+
+                        // Show alert and redirect
+                        app.dialog.alert(
+                            'Đăng ký thành công! Chào mừng ' + response.data.user.name,
+                            'Thành công',
+                            function() {
+                                app.views.current.router.back();
+                            }
+                        );
+                    } else {
+                        app.dialog.alert(response.message || 'Đăng ký thất bại. Vui lòng thử lại.', 'Lỗi');
+                    }
+                })
+                .catch(function(error) {
+                    setLoading(false);
+                    console.error('Registration error:', error);
+
+                    if (error.errors) {
+                        // Show validation errors
+                        Object.keys(error.errors).forEach(function(field) {
+                            showError(field, error.errors[field][0]);
+                        });
+                    } else if (error.message) {
+                        app.dialog.alert(error.message, 'Lỗi');
+                    } else {
+                        app.dialog.alert('Đăng ký thất bại. Vui lòng thử lại.', 'Lỗi');
+                    }
+                });
+        });
+    }
+});
+
+// ====================
+// Signin Page Initialization
+// ====================
+
+$$(document).on('page:init', '.page[data-name="signin"]', function (e) {
+    var page = e.detail.page;
+    var formEl = page.el.querySelector('#login-form');
+    var btnLogin = page.el.querySelector('#btn-login');
+    var btnText = btnLogin ? btnLogin.querySelector('.btn-text') : null;
+    var btnLoading = btnLogin ? btnLogin.querySelector('.btn-loading') : null;
+
+    // Check if already logged in
+    if (isLoggedIn()) {
+        app.dialog.alert('Bạn đã đăng nhập!', 'Thông báo', function() {
+            app.views.current.router.back();
+        });
+        return;
+    }
+
+    // Clear previous error messages
+    function clearErrors() {
+        var errorElements = page.el.querySelectorAll('.error-message');
+        errorElements.forEach(function(el) {
+            el.textContent = '';
+            el.style.display = 'none';
+        });
+        var inputs = page.el.querySelectorAll('input');
+        inputs.forEach(function(input) {
+            input.classList.remove('input-error');
+        });
+    }
+
+    // Show error for a specific field
+    function showError(fieldName, message) {
+        var errorEl = page.el.querySelector('#error-' + fieldName);
+        var inputEl = page.el.querySelector('#login-' + fieldName);
+        if (errorEl) {
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+        if (inputEl) {
+            inputEl.classList.add('input-error');
+        }
+    }
+
+    // Set button loading state
+    function setLoading(loading) {
+        if (btnLogin) {
+            btnLogin.disabled = loading;
+            if (btnText && btnLoading) {
+                btnText.style.display = loading ? 'none' : 'inline';
+                btnLoading.style.display = loading ? 'inline' : 'none';
+            }
+        }
+    }
+
+    // Handle form submission
+    if (formEl) {
+        formEl.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            clearErrors();
+            setLoading(true);
+
+            var formData = new FormData(formEl);
+            var email = formData.get('email');
+            var password = formData.get('password');
+
+            // Client-side validation
+            if (!email || !email.includes('@')) {
+                showError('email', 'Vui lòng nhập địa chỉ email hợp lệ');
+                setLoading(false);
+                return;
+            }
+
+            if (!password) {
+                showError('password', 'Vui lòng nhập mật khẩu');
+                setLoading(false);
+                return;
+            }
+
+            loginUser(email, password)
+                .then(function(response) {
+                    setLoading(false);
+
+                    if (response.status && response.data) {
+                        // Store token and user data
+                        setAuthToken(response.data.token);
+                        setAuthUser(response.data.user);
+
+                        // Show success notification
+                        app.notification.create({
+                            icon: '<i class="f7-icons">checkmark_circle_fill</i>',
+                            title: 'Đăng nhập thành công',
+                            message: 'Chào mừng ' + response.data.user.name + '!',
+                            hold: 3000
+                        }).open();
+
+                        // Show alert and redirect
+                        app.dialog.alert(
+                            'Đăng nhập thành công! Chào mừng ' + response.data.user.name,
+                            'Thành công',
+                            function() {
+                                app.views.current.router.back();
+                            }
+                        );
+                    } else {
+                        app.dialog.alert(response.message || 'Đăng nhập thất bại. Vui lòng thử lại.', 'Lỗi');
+                    }
+                })
+                .catch(function(error) {
+                    setLoading(false);
+                    console.error('Login error:', error);
+
+                    if (error.errors) {
+                        Object.keys(error.errors).forEach(function(field) {
+                            showError(field, error.errors[field][0]);
+                        });
+                    } else if (error.message) {
+                        showError('password', error.message);
+                    } else {
+                        app.dialog.alert('Đăng nhập thất bại. Vui lòng thử lại.', 'Lỗi');
+                    }
+                });
+        });
+    }
+});
