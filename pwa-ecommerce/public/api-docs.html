@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - Vietnam Satellite</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header {
+            background: linear-gradient(135deg, #007aff 0%, #5856d6 100%);
+            color: white;
+            padding: 40px 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+        .header h1 { font-size: 32px; margin-bottom: 10px; }
+        .header p { opacity: 0.9; }
+        .content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 { color: #1a1a1a; margin-top: 30px; margin-bottom: 15px; }
+        h1 { margin-top: 0; font-size: 28px; }
+        h2 { font-size: 22px; border-bottom: 2px solid #007aff; padding-bottom: 10px; }
+        h3 { font-size: 18px; color: #007aff; }
+        p { margin-bottom: 15px; }
+        code {
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 14px;
+        }
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+        pre code { background: none; padding: 0; color: inherit; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background: #f5f5f5; font-weight: 600; }
+        tr:nth-child(even) { background: #fafafa; }
+        .endpoint { display: inline-block; padding: 4px 12px; border-radius: 4px; font-weight: 600; font-size: 14px; }
+        .get { background: #007aff; color: white; }
+        .post { background: #34c759; color: white; }
+        .put { background: #ff9500; color: white; }
+        .delete { background: #ff3b30; color: white; }
+        ul, ol { margin-bottom: 20px; padding-left: 30px; }
+        li { margin-bottom: 8px; }
+        .info-box { background: #e3f2fd; border-left: 4px solid #007aff; padding: 15px; margin-bottom: 20px; border-radius: 0 8px 8px 0; }
+        .success-box { background: #e8f5e9; border-left: 4px solid #34c759; padding: 15px; margin-bottom: 20px; border-radius: 0 8px 8px 0; }
+        .error-box { background: #ffebee; border-left: 4px solid #ff3b30; padding: 15px; margin-bottom: 20px; border-radius: 0 8px 8px 0; }
+        .warning-box { background: #fff3e0; border-left: 4px solid #ff9500; padding: 15px; margin-bottom: 20px; border-radius: 0 8px 8px 0; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+        .badge-green { background: #34c759; color: white; }
+        .badge-yellow { background: #ff9500; color: white; }
+        .badge-red { background: #ff3b30; color: white; }
+        .badge-blue { background: #007aff; color: white; }
+        a { color: #007aff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        .nav {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            margin: -30px -30px 30px -30px;
+            z-index: 100;
+        }
+        .nav ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+        .nav a { padding: 8px 16px; background: #f0f0f0; border-radius: 20px; font-size: 14px; transition: all 0.2s; }
+        .nav a:hover { background: #007aff; color: white; }
+        .toc { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+        .toc h3 { margin-top: 0; }
+        .toc ul { margin-bottom: 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Vietnam Satellite API Documentation</h1>
+            <p>Version: v1 | Base URL: <code>https://your-domain.com/api/v1</code></p>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h3>📋 Mục lục</h3>
+                <ul>
+                    <li><a href="#auth-api">🔐 Auth API - Xác thực</a></li>
+                    <li><a href="#licenses-api">🔑 Licenses API - Quản lý license</a></li>
+                    <li><a href="#pc-infos-api">💻 PC Infos API - Thông tin máy</a></li>
+                    <li><a href="#services-api">⚙️ Services API - Dịch vụ</a></li>
+                    <li><a href="#orders-api">📦 Orders API - Đơn hàng</a></li>
+                    <li><a href="#facebook-profiles-api">📘 Facebook Profiles API</a></li>
+                    <li><a href="#broadcasting-api">📡 Broadcasting API - WebSocket</a></li>
+                    <li><a href="#pages-api">📄 Pages API - Trang tĩnh</a></li>
+                    <li><a href="#debug-api">🔧 Debug API</a></li>
+                </ul>
+            </div>
+
+            <!-- AUTH API SECTION -->
+            <h2 id="auth-api">🔐 Auth API - Xác thực</h2>
+            <p>Base URL: <code>/api/v1/auth</code></p>
+            
+            <h3>1. Đăng ký tài khoản</h3>
+            <span class="endpoint post">POST</span> <code>/api/v1/auth/register</code>
+            
+            <h4>Request Body</h4>
+            <table>
+                <tr><th>Tham số</th><th>Kiểu</th><th>Bắt buộc</th><th>Mô tả</th></tr>
+                <tr><td>name</td><td>string</td><td>✅</td><td>Họ tên người dùng</td></tr>
+                <tr><td>email</td><td>string</td><td>✅</td><td>Email (duy nhất)</td></tr>
+                <tr><td>password</td><td>string</td><td>✅</td><td>Mật khẩu (≥6 ký tự)</td></tr>
+                <tr><td>password_confirmation</td><td>string</td><td>✅</td><td>Xác nhận mật khẩu</td></tr>
+            </table>
+            
+            <h4>Response (201)</h4>
+            <pre><code>{
+  "status": true,
+  "message": "Đăng ký thành công.",
+  "data": {
+    "user": { "id": 1, "name": "Nguyễn Văn A", "email": "user@example.com" },
+    "token": "1|abcdef..."
+  }
+}</code></pre>
+
+            <hr>
+
+            <h3>2. Đăng nhập</h3>
+            <span class="endpoint post">POST</span> <code>/api/v1/auth/login</code>
+            
+            <h4>Request Body</h4>
+            <table>
+                <tr><th>Tham số</th><th>Kiểu</th><th>Bắt buộc</th></tr>
+                <tr><td>email</td><td>string</td><td>✅</td></tr>
+                <tr><td>password</td><td>string</td><td>✅</td></tr>
+            </table>
+            
+            <h4>Response (200)</h4>
+            <pre><code>{
+  "status": true,
+  "message": "Đăng nhập thành công.",
+  "data": { "user": {...}, "token": "..." }
+}</code></pre>
+
+            <hr>
+
+            <h3>3. Đăng xuất</h3>
+            <span class="endpoint post">POST</span> <code>/api/v1/auth/logout</code>
+            <span class="badge badge-yellow">Cần token</span>
+            
+            <h4>Mô tả</h4>
+            <p>Đăng xuất và xóa token hiện tại. Token sẽ không còn valid sau khi gọi API này.</p>
+            
+            <h4>Headers</h4>
+            <pre><code>Authorization: Bearer {your_token}
+Accept: application/json</code></pre>
+            
+            <h4>Response thành công (200)</h4>
+            <pre><code>{
+  "status": true,
+  "message": "Đăng xuất thành công."
+}</code></pre>
+            
+            <h4>Response lỗi (401) - Token không hợp lệ</h4>
+            <pre><code>{
+  "status": false,
+  "message": "Unauthenticated."
+}</code></pre>
+            
+            <h4>Ví dụ sử dụng</h4>
+            <pre><code>// JavaScript
+async function logout() {
+  const token = localStorage.getItem('token');
+  
+  const response = await fetch('/api/v1/auth/logout', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/json'
+    }
+  });
+  
+  if (response.ok) {
+    localStorage.removeItem('token');
+    window.location.href = '/login';
+  }
+}
+
+// Flutter
+Future<void> logout() async {
+  final token = await storage.read(key: 'token');
+  
+  await http.post(
+    Uri.parse('https://your-domain.com/api/v1/auth/logout'),
+    headers: {
+      'Authorization': 'Bearer $token',
+      'Accept': 'application/json'
+    }
+  );
+  
+  await storage.delete(key: 'token');
+}</code></pre>
+
+            <hr>
+
+            <h3>4. Lấy thông tin profile</h3>
+            <span class="endpoint get">GET</span> <code>/api/v1/auth/profile</code>
+            <span class="badge badge-yellow">Cần token</span>
+
+            <hr>
+
+            <h3>5. Cập nhật profile</h3>
+            <span class="endpoint put">PUT</span> <code>/api/v1/auth/profile</code>
+            <span class="badge badge-yellow">Cần token</span>
+            
+            <h4>Request Body</h4>
+            <table>
+                <tr><th>Tham số</th><th>Kiểu</th></tr>
+                <tr><td>name</td><td>string</td></tr>
+            </table>
+
+            <hr>
+
+            <h3>6. Xóa tài khoản</h3>
+            <span class="endpoint delete">DELETE</span> <code>/api/v1/auth/account</code>
+            <span class="badge badge-yellow">Cần token</span>
+            
+            <h4>Request Body</h4>
+            <table>
+                <tr><th>Tham số</th><th>Kiểu</th><th>Bắt buộc</th></tr>
+                <tr><td>password</td><td>string</td><td>✅</td></tr>
+            </table>
+
+            <!-- LICENSES API -->
+            <h2 id="licenses-api">🔑 Licenses API - Quản lý license</h2>
+            <p>Base URL: <code>/api/v1/licenses</code></p>
+
+            <h3>1. Kích hoạt license</h3>
+            <span class="endpoint post">POST</span> <code>/api/v1/licenses/activate</code>
+            
+            <h4>Request Body</h4>
+            <pre><code>{
+  "license_key": "LS-XXXX-XXXX-XXXX-XXXX",
+  "machine_id": "unique-machine-identifier",
+  "machine_name": "My Computer",
+  "ip_address": "192.168.1.1",
+  "hardware_info": { "cpu": "Intel i7", "ram": "16GB", "os": "Windows 11" }
+}</code></pre>
+
+            <h3>2. Validate license</h3>
+            <span class="endpoint post">POST</span> <code>/api/v1/licenses/validate</code>
+            
+            <h4>Request Body</h4>
+            <pre><code>{
+  "license_key": "LS-XXXX-XXXX-XXXX-XXXX",
+  "machine_id": "unique-machine-identifier",
+  "app_version": "1.0.0"  // optional
+}</code></pre>
+
+            <h3>3. Kiểm tra license key</h3>
+            <span class="endpoint post">POST</span> <code>/api/v1/licenses/check-key</code>
+            
+            <h4>Request Body</h4>
+            <pre><code>{ "license_key": "LS-XXXX-XXXX-XXXX-XXXX" }</code></pre>
+
+            <h3>4. Kiểm tra trạng thái license</h3>
+            <span class="endpoint post">POST</span> <code>/api/v1/licenses/check-status</code>
+            
+            <h3>5. Kiểm tra cập nhật</h3>
+            <span class="endpoint post">POST</span> <code>/api/v1/licenses/check-update</code>
+            
+            <h4>Request Body</h4>
+            <pre><code>{ "license_key": "LS-XXXX-XXXX-XXXX-XXXX", "app_version": "1.0.0" }</code></pre>
+
+            <h4>Response</h4>
+            <pre><code>{
+  "success": true,
+  "data": {
+    "current_version": "1.0.0",
+    "latest_version": "1.2.0",
+    "has_update": true,
+    "download_url": "https://..."
+  }
+}</code></pre>
+
+            <h3>6. Tải file cập nhật</h3>
+            <span class="endpoint get">GET</span> <code>/api/v1/licenses/download-update/{licenseKey}</code>
+
+            <h3>7. Gia hạn license</h3>
+            <span class="endpoint post">POST</span> <code>/api/v1/licenses/renew</code>
+            
+            <h4>Request Body</h4>
+            <pre><code>{ "license_key": "LS-XXXX-XXXX-XXXX-XXXX", "days": 365 }</code></pre>
+
+            <h3>8. Hủy kích hoạt license</h3>
+            <span class="endpoint post">POST</span> <code>/api/v1/licenses/deactivate</code>
+            
+            <h4>Request Body</h4>
+            <pre><code>{ "license_key": "LS-XXXX-XXXX-XXXX-XXXX", "machine_id": "unique-machine-id" }</code></pre>
+
+            <h3>9. Chi tiết license</h3>
+            <span class="endpoint get">GET</span> <code>/api/v1/licenses/{licenseKey}</code>
+
+            <!-- PC INFOS API -->
+            <h2 id="pc-infos-api">💻 PC Infos API - Thông tin máy</h2>
+            <p>Base URL: <code>/api/v1/pc-infos</code></p>
+
+            <h3>1. Lưu thông tin máy</h3>
+            <span class="endpoint post">POST</span> <code>/api/v1/pc-infos</code>
+            
+            <h4>Request Body</h4>
+            <pre><code>{
+  "host_name": "DESKTOP-ABC123",
+  "user_name": "john_doe",
+  "password": "encrypted_password",
+  "local_ip_address": "192.168.1.100",
+  "public_ip_address": "203.0.113.1"
+}</code></pre>
+
+            <h4>Logic</h4>
+            <ul>
+                <li>Nếu public_ip == local_ip → Cập nhật record hiện có</li>
+                <li>Nếu public_ip != local_ip → Tạo record mới</li>
+            </ul>
+
+            <h3>2. Danh sách máy</h3>
+            <span class="endpoint get">GET</span> <code>/api/v1/pc-infos</code>
+            
+            <h4>Query Parameters</h4>
+            <table>
+                <tr><th>Tham số</th><th>Kiểu</th><th>Mô tả</th></tr>
+                <tr><td>host_name</td><td>string</td><td>Lọc theo tên máy</td></tr>
+                <tr><td>user_name</td><td>string</td><td>Lọc theo tên user</td></tr>
+                <tr><td>sort_by</td><td>string</td><td>Trường sắp xếp (default: created_at)</td></tr>
+                <tr><td>sort_direction</td><td>string</td><td>asc/desc</td></tr>
+                <tr><td>per_page</td><td>integer</td><td>Số item/trang (default: 15)</td></tr>
+            </table>
+
+            <h3>3. Chi tiết máy</h3>
+            <span class="endpoint get">GET</span> <code>/api/v1/pc-infos/{pcInfo}</code>
+
+            <h3>4. Xóa máy</h3>
+            <span class="endpoint delete">DELETE</span> <code>/api/v1/pc-infos/{pcInfo}</code>
+
+            <h3>5. Thống kê</h3>
+            <span class="endpoint get">GET</span> <code>/api/v1/pc-infos/statistics/overview</code>
+
+            <!-- SERVICES API -->
+            <h2 id="services-api">⚙️ Services API - Dịch vụ</h2>
+            <p>Base URL: <code>/api/v1/services</code></p>
+
+            <h3>1. Danh sách dịch vụ</h3>
+            <span class="endpoint get">GET</span> <code>/api/v1/services</code>
+            
+            <h4>Query Parameters</h4>
+            <table>
+                <tr><th>Tham số</th><th>Kiểu</th><th>Mặc định</th></tr>
+                <tr><td>page</td><td>integer</td><td>1</td></tr>
+                <tr><td>per_page</td><td>integer</td><td>10</td></tr>
+            </table>
+
+            <h3>2. Dịch vụ mặc định</h3>
+            <span class="endpoint get">GET</span> <code>/api/v1/services/default</code>
+            
+            <div class="info-box">
+                <strong>ℹ️ Quan trọng:</strong> Frontend phải dùng endpoint này để lấy giá và thời hạn. KHÔNG hardcode!
+            </div>
+            
+            <h4>Response</h4>
+            <pre><code>{
+  "status": true,
+  "data": {
+    "id": 1,
+    "name": "Default Plan",
+    "duration_days": 90,
+    "price": 100000,
+    "formatted_price": "100,000 VND"
+  }
+}</code></pre>
+
+            <h3>3. Chi tiết dịch vụ</h3>
+            <span class="endpoint get">GET</span> <code>/api/v1/services/{id}</code>
+
+            <!-- ORDERS API -->
+            <h2 id="orders-api">📦 Orders API - Đơn hàng</h2>
+            <p>Base URL: <code>/api/v1/orders</code></p>
+
+            <h3>1. Tạo đơn hàng</h3>
+            <span class="endpoint post">POST</span> <code>/api/v1/orders</code>
+            
+            <h4>Request Body</h4>
+            <pre><code>{ "facebook_profile_link": "https://facebook.com/username" }</code></pre>
+            
+            <h4>Response (201)</h4>
+            <pre><code>{
+  "status": true,
+  "data": {
+    "order_code": "ORD-ABC123XYZ9",
+    "amount": 100000,
+    "expires_at": "2026-03-17T10:05:00Z",
+    "qr_content": "bank:ORD-ABC123XYZ9:100000",
+    "status": "pending",
+    "service": { "id": 1, "name": "Default Plan", "duration_days": 90 }
+  }
+}</code></pre>
+
+            <h3>2. Chi tiết đơn hàng</h3>
+            <span class="endpoint get">GET</span> <code>/api/v1/orders/{orderCode}</code>
+
+            <h3>3. Xác minh thanh toán</h3>
+            <span class="endpoint post">POST</span> <code>/api/v1/orders/verify-payment</code>
+            
+            <h4>Request Body</h4>
+            <pre><code>{ "order_code": "ORD-XXXXXXXXXX", "bank_txn_id": "TPB123456789" }</code></pre>
+
+            <h3>4. Danh sách đơn hàng của tôi</h3>
+            <span class="endpoint get">GET</span> <code>/api/v1/orders/my-orders</code>
+            <span class="badge badge-yellow">Cần token</span>
+            
+            <h4>Response</h4>
+            <pre><code>{
+  "status": true,
+  "data": {
+    "items": [...],
+    "meta": { "current_page": 1, "total": 10 }
+  }
+}</code></pre>
+
+            <!-- FACEBOOK PROFILES API -->
+            <h2 id="facebook-profiles-api">📘 Facebook Profiles API</h2>
+            <p>Base URL: <code>/api/v1/facebook-profiles</code></p>
+
+            <h3>1. Validate Facebook URL</h3>
+            <span class="endpoint post">POST</span> <code>/api/v1/facebook-profiles/validate</code>
+            
+            <h4>Request Body</h4>
+            <pre><code>{ "facebook_profile_link": "https://facebook.com/username" }</code></pre>
+            
+            <h4>Response</h4>
+            <pre><code>{
+  "status": true,
+  "data": {
+    "original_url": "https://facebook.com/username",
+    "normalized_url": "https://www.facebook.com/username",
+    "profile_id": "username",
+    "profile_type": "username"
+  }
+}</code></pre>
+
+            <h3>2. Validate hàng loạt</h3>
+            <span class="endpoint post">POST</span> <code>/api/v1/facebook-profiles/validate-batch</code>
+            
+            <h4>Request Body</h4>
+            <pre><code>{ "urls": ["https://facebook.com/user1", "https://facebook.com/user2"] }</code></pre>
+
+            <h3>3. Trích xuất UID</h3>
+            <span class="endpoint post">POST</span> <code>/api/v1/facebook-profiles/extract-uid</code>
+            
+            <h4>Response</h4>
+            <pre><code>{
+  "success": true,
+  "data": { "uid": "100014343376569", ... }
+}</code></pre>
+
+            <h3>4. Kiểm tra nhanh</h3>
+            <span class="endpoint get">GET</span> <code>/api/v1/facebook-profiles/check?url=...</code>
+
+            <!-- BROADCASTING API -->
+            <h2 id="broadcasting-api">📡 Broadcasting API - WebSocket</h2>
+            <p>Base URL: <code>/api/v1</code></p>
+
+            <h3>Xác thực WebSocket</h3>
+            <span class="endpoint post">POST</span> <code>/api/v1/broadcasting/auth</code>
+            
+            <h4>Request Body</h4>
+            <pre><code>{
+  "socket_id": "socket123.456",
+  "channel_name": "private-order.ORD-XXXXXXXXXX"
+}</code></pre>
+            
+            <h4>Response</h4>
+            <pre><code>{
+  "authorized": true,
+  "auth": "socket123.456:signature_hash"
+}</code></pre>
+
+            <h4>WebSocket Events</h4>
+            <table>
+                <tr><th>Channel</th><th>Event</th><th>Mô tả</th></tr>
+                <tr><td>private-order.{orderCode}</td><td>.PaymentPending</td><td>Đơn hàng chờ thanh toán</td></tr>
+                <tr><td>private-order.{orderCode}</td><td>.PaymentSuccess</td><td>Thanh toán thành công</td></tr>
+                <tr><td>private-order.{orderCode}</td><td>.PaymentExpired</td><td>Đơn hàng hết hạn</td></tr>
+            </table>
+
+            <h4>Ví dụ JavaScript</h4>
+            <pre><code>const channel = echo.private(`order.${orderCode}`);
+channel.listen('.PaymentSuccess', (e) => {
+    console.log('Thanh toán thành công!', e.data);
+});</code></pre>
+
+            <!-- PAGES API -->
+            <h2 id="pages-api">📄 Pages API - Trang tĩnh</h2>
+            <p>Base URL: <code>/api/v1/pages</code></p>
+
+            <h3>1. Chính sách bảo mật</h3>
+            <span class="endpoint get">GET</span> <code>/api/v1/pages/privacy</code>
+
+            <h3>2. Điều khoản sử dụng</h3>
+            <span class="endpoint get">GET</span> <code>/api/v1/pages/terms</code>
+
+            <h3>3. Trang theo slug</h3>
+            <span class="endpoint get">GET</span> <code>/api/v1/pages/{slug}</code>
+
+            <!-- DEBUG API -->
+            <h2 id="debug-api">🔧 Debug API</h2>
+            <p>Base URL: <code>/api/v1</code></p>
+            <div class="warning-box">
+                <strong>⚠️ Chỉ sử dụng trong môi trường development!</strong>
+            </div>
+
+            <h3>1. Xem dữ liệu</h3>
+            <span class="endpoint get">GET</span> <code>/api/v1/debug/data</code>
+
+            <h3>2. Test Pusher</h3>
+            <span class="endpoint get">GET</span> <code>/api/v1/debug/pusher-test</code>
+
+            <h3>3. Trigger payment event</h3>
+            <span class="endpoint post">POST</span> <code>/api/v1/debug/trigger-payment</code>
+            
+            <h4>Request Body</h4>
+            <pre><code>{
+  "order_code": "ORD-XXXXXXXXXX",
+  "status": "paid",
+  "message": "Thanh toán thành công",
+  "signature": "hmac_signature"  // optional
+}</code></pre>
+
+            <h3>4. Tạo signature</h3>
+            <span class="endpoint post">POST</span> <code>/api/v1/debug/generate-signature</code>
+
+            <!-- RESPONSE STRUCTURE -->
+            <h2>📝 Cấu trúc Response</h2>
+            
+            <h3>Thành công</h3>
+            <pre><code>{
+  "status": true,
+  "message": "Mô tả",
+  "data": { ... }
+}</code></pre>
+            
+            <h3>Lỗi</h3>
+            <pre><code>{
+  "status": false,
+  "message": "Mô tả lỗi",
+  "errors": { ... }  // optional
+}</code></pre>
+
+            <h3>HTTP Status Codes</h3>
+            <table>
+                <tr><th>Code</th><th>Mô tả</th></tr>
+                <tr><td>200</td><td>Thành công</td></tr>
+                <tr><td>201</td><td>Đã tạo mới</td></tr>
+                <tr><td>401</td><td>Chưa xác thực</td></tr>
+                <tr><td>422</td><td>Dữ liệu không hợp lệ</td></tr>
+                <tr><td>404</td><td>Không tìm thấy</td></tr>
+            </table>
+
+            <!-- AUTHENTICATION -->
+            <h2>🔐 Xác thực</h2>
+            <p>Tất cả API cần token sử dụng <strong>Laravel Sanctum</strong>:</p>
+            
+            <h4>Headers</h4>
+            <pre><code>Authorization: Bearer {your_token}
+Content-Type: application/json
+Accept: application/json</code></pre>
+
+            <h4>Đăng nhập và nhận token:</h4>
+            <pre><code>// Response sau khi login/register
+{
+  "data": {
+    "token": "1|abcdefghijklmnopqrstuvwxyz1234567890"
+  }
+}</code></pre>
+
+            <!-- MOBILE EXAMPLES -->
+            <h2>📱 Ví dụ Mobile App</h2>
+            
+            <h3>Flutter</h3>
+            <pre><code>// Đăng nhập
+final response = await http.post(
+  Uri.parse('https://your-domain.com/api/v1/auth/login'),
+  headers: {'Content-Type': 'application/json'},
+  body: jsonEncode({
+    'email': 'user@example.com',
+    'password': 'password123'
+  })
+);
+
+final token = jsonDecode(response.body)['data']['token'];
+
+// Gọi API có token
+final protectedResponse = await http.get(
+  Uri.parse('https://your-domain.com/api/v1/orders/my-orders'),
+  headers: {'Authorization': 'Bearer $token'}
+);</code></pre>
+
+            <h3>React Native</h3>
+            <pre><code>const api = async (endpoint, options = {}) => {
+  const token = await AsyncStorage.getItem('token');
+  return fetch(`https://your-domain.com/api/v1${endpoint}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
+  });
+};
+
+// Đăng nhập
+const login = async (email, password) => {
+  const res = await api('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+  return res.json();
+};
+
+// Lấy danh sách đơn hàng
+const orders = await api('/orders/my-orders');</code></pre>
+
+            <h3>Swift (iOS)</h3>
+            <pre><code>func login(email: String, password: String) async throws -> AuthResponse {
+    let url = URL(string: "https://your-domain.com/api/v1/auth/login")!
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    
+    let body = ["email": email, "password": password]
+    request.httpBody = try JSONEncoder().encode(body)
+    
+    let (data, _) = try await URLSession.shared.data(for: request)
+    return try JSONDecoder().decode(AuthResponse.self, from: data)
+}</code></pre>
+
+            <h3>Kotlin (Android)</h3>
+            <pre><code>interface ApiService {
+    @POST("auth/login")
+    suspend fun login(@Body request: LoginRequest): Response<AuthResponse>
+    
+    @GET("orders/my-orders")
+    suspend fun getOrders(@Header("Authorization") token: String): Response<OrdersResponse>
+}
+
+data class LoginRequest(val email: String, val password: String)</code></pre>
+
+            <hr>
+            <div class="info-box">
+                <h3>📞 Hỗ trợ</h3>
+                <p>Email: support@vietsat.com</p>
+                <p>Website: https://vietsat.com</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

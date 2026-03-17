@@ -1023,6 +1023,30 @@ Route::prefix('v1')->group(function () {
          */
         Route::put('profile', [AuthController::class, 'updateProfile'])
             ->name('updateProfile');
+
+        /**
+         * DELETE /api/v1/auth/account
+         * Delete user account (requires password confirmation)
+         *
+         * Request Body:
+         * {
+         *   "password": "user_current_password"
+         * }
+         *
+         * Response (200):
+         * {
+         *   "status": true,
+         *   "message": "Xóa tài khoản thành công."
+         * }
+         *
+         * Response (422) - Wrong password:
+         * {
+         *   "status": false,
+         *   "message": "Mật khẩu không đúng."
+         * }
+         */
+        Route::delete('account', [AuthController::class, 'deleteAccount'])
+            ->name('deleteAccount');
     });
 
     // Pages Routes (Public)

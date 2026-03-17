@@ -174,5 +174,54 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Delete user account.
+     * Requires authentication (sanctum)
+     *
+     * This will:
+     * 1. Delete all user's personal tokens
+     * 2. Soft delete the user record
+     */
+    public function deleteAccount(Request $request): JsonResponse
+    {
+        try {
+            $user = $request->user();
+
+            // Validate current password for security
+            $validated = $request->validate([
+                'password' => 'required|string',
+            ]);
+
+            if (!Hash::check($validated['password'], $user->password)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Mật khẩu không đúng.',
+                ], 422);
+            }
+
+            // Delete all personal access tokens
+            $user->tokens()->delete();
+
+            // Soft delete user
+            $user->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Xóa tài khoản thành công.',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Dữ liệu đầu vào không hợp lệ.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Lỗi: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }
 
