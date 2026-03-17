@@ -315,13 +315,14 @@ h6,
 }
 
 .vs-feature-card {
-  background: var(--vs-bg-card);
-  border: 1px solid var(--vs-border-subtle);
+  background: #F4F4F5;
   border-radius: 16px;
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
+  align-items: center;
+  text-align: center;
 }
 
 .vs-feature-icon {
@@ -335,8 +336,8 @@ h6,
 }
 
 .vs-feature-icon.speed {
-  background: var(--vs-accent-light);
-  color: var(--vs-accent);
+  background: #FEF3C7;
+  color: #F59E0B;
 }
 
 .vs-feature-icon.support {
@@ -346,7 +347,7 @@ h6,
 
 .vs-feature-icon.secure {
   background: #DCFCE7;
-  color: var(--vs-accent-green);
+  color: #22C55E;
 }
 
 .vs-feature-icon.save {
@@ -356,13 +357,13 @@ h6,
 
 .vs-feature-title {
   font-family: var(--vs-font-heading);
-  font-size: 15px;
-  font-weight: 700;
-  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
 }
 
 .vs-feature-desc {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--vs-text-secondary);
   margin: 0;
 }

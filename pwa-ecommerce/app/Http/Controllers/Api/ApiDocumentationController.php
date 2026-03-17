@@ -59,7 +59,7 @@ class ApiDocumentationController extends Controller
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Documentation - Vietnam Satellite</title>
+    <title>API Documentation - TiemNhaDuy</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -174,7 +174,7 @@ class ApiDocumentationController extends Controller
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚀 Vietnam Satellite API Documentation</h1>
+            <h1>🚀 TiemNhaDuy API Documentation</h1>
             <p>Version: v1 | Base URL: <code>https://pwa-ecommerce.test/api/v1</code></p>
         </div>
         <div class="content">
@@ -198,9 +198,9 @@ HTML;
         $spec = [
             'openapi' => '3.0.0',
             'info' => [
-                'title' => 'Vietnam Satellite API',
+                'title' => 'TiemNhaDuy API',
                 'version' => '1.0.0',
-                'description' => 'API documentation for Vietnam Satellite service',
+                'description' => 'API documentation for TiemNhaDuy service',
             ],
             'servers' => [
                 ['url' => 'https://pwa-ecommerce.test/api/v1'],

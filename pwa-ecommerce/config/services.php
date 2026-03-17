@@ -62,7 +62,7 @@ return [
     */
 
     'service' => [
-        'use_external_api' => env('USE_EXTERNAL_SERVICE_API', true),
+        'use_external_api' => env('USE_EXTERNAL_SERVICE_API', false),
     ],
 
 ];

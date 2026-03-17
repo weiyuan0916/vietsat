@@ -1,6 +1,6 @@
 {
   "appId": "com.vietsat.app",
-  "appName": "Vietnam Satellite",
+  "appName": "TiemNhaDuy",
   "webDir": "dist",
   "bundledWebRuntime": false,
   "npmClient": "npm",

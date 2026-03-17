@@ -261,7 +261,8 @@
                   "fill": "#FFFFFFCC",
                   "content": "Giảm đến 50% tất cả dịch vụ",
                   "fontFamily": "Inter",
-                  "fontSize": 14
+                  "fontSize": 14,
+                  "fontWeight": "normal"
                 },
                 {
                   "type": "frame",
@@ -397,7 +398,8 @@
                           "fill": "$text-secondary",
                           "content": "1 tháng",
                           "fontFamily": "Inter",
-                          "fontSize": 12
+                          "fontSize": 12,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -426,7 +428,8 @@
                           "fill": "$text-secondary",
                           "content": "đ",
                           "fontFamily": "Inter",
-                          "fontSize": 12
+                          "fontSize": 12,
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -491,7 +494,8 @@
                           "fill": "$text-secondary",
                           "content": "3 tháng",
                           "fontFamily": "Inter",
-                          "fontSize": 12
+                          "fontSize": 12,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -520,7 +524,8 @@
                           "fill": "$text-secondary",
                           "content": "đ",
                           "fontFamily": "Inter",
-                          "fontSize": 12
+                          "fontSize": 12,
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -613,7 +618,8 @@
                           "fill": "$text-secondary",
                           "content": "5 phút",
                           "fontFamily": "Inter",
-                          "fontSize": 11
+                          "fontSize": 11,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -669,7 +675,8 @@
                           "fill": "$text-secondary",
                           "content": "Luôn sẵn sàng",
                           "fontFamily": "Inter",
-                          "fontSize": 11
+                          "fontSize": 11,
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -735,7 +742,8 @@
                           "fill": "$text-secondary",
                           "content": "Bảo mật",
                           "fontFamily": "Inter",
-                          "fontSize": 11
+                          "fontSize": 11,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -791,7 +799,8 @@
                           "fill": "$text-secondary",
                           "content": "Giá tốt nhất",
                           "fontFamily": "Inter",
-                          "fontSize": 11
+                          "fontSize": 11,
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -1158,7 +1167,8 @@
                   "fill": "$text-tertiary",
                   "content": "Tìm kiếm dịch vụ...",
                   "fontFamily": "Inter",
-                  "fontSize": 14
+                  "fontSize": 14,
+                  "fontWeight": "normal"
                 }
               ]
             },
@@ -1237,7 +1247,8 @@
                               "fill": "$text-secondary",
                               "content": "Thời hạn: 30 ngày",
                               "fontFamily": "Inter",
-                              "fontSize": 12
+                              "fontSize": 12,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -1263,7 +1274,8 @@
                       "content": "Xem tất cả kênh truyền hình cơ bản và nâng cao. Hỗ trợ đa thiết bị.",
                       "lineHeight": 1.4,
                       "fontFamily": "Inter",
-                      "fontSize": 13
+                      "fontSize": 13,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "frame",
@@ -1368,7 +1380,8 @@
                               "fill": "$text-secondary",
                               "content": "Thời hạn: 90 ngày",
                               "fontFamily": "Inter",
-                              "fontSize": 12
+                              "fontSize": 12,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -1394,7 +1407,8 @@
                       "content": "Trải nghiệm trọn bộ kênh HD, 4K. Tải về xem offline. Ưu tiên hỗ trợ.",
                       "lineHeight": 1.4,
                       "fontFamily": "Inter",
-                      "fontSize": 13
+                      "fontSize": 13,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "frame",
@@ -1896,7 +1910,8 @@
                       "fill": "$text-secondary",
                       "content": "Thời hạn",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -1932,7 +1947,8 @@
                       "fill": "$text-secondary",
                       "content": "Giá",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -1968,7 +1984,8 @@
                       "fill": "$text-secondary",
                       "content": "Số kênh",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -2004,7 +2021,8 @@
                       "fill": "$text-secondary",
                       "content": "Chất lượng",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
@@ -2077,7 +2095,8 @@
                       "fill": "$text-tertiary",
                       "content": "https://facebook.com/...",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -2309,7 +2328,8 @@
                       "fill": "$text-secondary",
                       "content": "duy@example.com",
                       "fontFamily": "Inter",
-                      "fontSize": 13
+                      "fontSize": 13,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -3100,7 +3120,8 @@
                           "fill": "$text-secondary",
                           "content": "1 tháng",
                           "fontFamily": "Inter",
-                          "fontSize": 13
+                          "fontSize": 13,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -3237,7 +3258,8 @@
                           "fill": "$text-secondary",
                           "content": "Miễn phí giao dịch",
                           "fontFamily": "Inter",
-                          "fontSize": 12
+                          "fontSize": 12,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -3330,7 +3352,8 @@
                           "fill": "$text-secondary",
                           "content": "Giảm 10.000đ cho KH mới",
                           "fontFamily": "Inter",
-                          "fontSize": 12
+                          "fontSize": 12,
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -3400,7 +3423,8 @@
                           "fill": "$text-secondary",
                           "content": "Xác nhận tự động 24/7",
                           "fontFamily": "Inter",
-                          "fontSize": 12
+                          "fontSize": 12,
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -3642,7 +3666,7 @@
                   "id": "zhKnu",
                   "name": "lLogoName",
                   "fill": "$text-primary",
-                  "content": "VietnamSat",
+                  "content": "TiemNhaDuy",
                   "fontFamily": "Outfit",
                   "fontSize": 28,
                   "fontWeight": "800",
@@ -3655,7 +3679,8 @@
                   "fill": "$text-secondary",
                   "content": "Đăng nhập để tiếp tục",
                   "fontFamily": "Inter",
-                  "fontSize": 14
+                  "fontSize": 14,
+                  "fontWeight": "normal"
                 }
               ]
             },
@@ -3714,7 +3739,8 @@
                       "fill": "$text-tertiary",
                       "content": "email@example.com",
                       "fontFamily": "Inter",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -3765,7 +3791,8 @@
                       "fill": "$text-primary",
                       "content": "••••••••",
                       "fontFamily": "Inter",
-                      "fontSize": 15
+                      "fontSize": 15,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "icon_font",
@@ -3839,7 +3866,8 @@
                   "fill": "$text-secondary",
                   "content": "Chưa có tài khoản?",
                   "fontFamily": "Inter",
-                  "fontSize": 14
+                  "fontSize": 14,
+                  "fontWeight": "normal"
                 },
                 {
                   "type": "text",
@@ -3847,6 +3875,484 @@
                   "name": "lRegT2",
                   "fill": "$accent",
                   "content": "Đăng ký ngay",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "PmIw4",
+      "x": 1988,
+      "y": 0,
+      "name": "Signup",
+      "width": 402,
+      "height": 874,
+      "fill": "$bg-primary",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "36d56",
+          "x": 0,
+          "y": 0,
+          "name": "Status Bar",
+          "width": 402,
+          "height": 62,
+          "fill": "$bg-primary",
+          "padding": [
+            22,
+            24,
+            0,
+            24
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "0LKyw",
+              "name": "lTime",
+              "fill": "$text-primary",
+              "content": "9:41",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "T08Iv",
+              "name": "lIcons",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "7AqLp",
+                  "name": "lSig",
+                  "width": 16,
+                  "height": 16,
+                  "iconFontName": "signal",
+                  "iconFontFamily": "lucide",
+                  "fill": "$text-primary"
+                },
+                {
+                  "type": "icon_font",
+                  "id": "dFf1Y",
+                  "name": "lWifi",
+                  "width": 16,
+                  "height": 16,
+                  "iconFontName": "wifi",
+                  "iconFontFamily": "lucide",
+                  "fill": "$text-primary"
+                },
+                {
+                  "type": "icon_font",
+                  "id": "4spG3",
+                  "name": "lBat",
+                  "width": 16,
+                  "height": 16,
+                  "iconFontName": "battery-full",
+                  "iconFontFamily": "lucide",
+                  "fill": "$text-primary"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Caf8h",
+          "x": 0,
+          "y": 62,
+          "name": "Content",
+          "width": 402,
+          "height": 812,
+          "layout": "vertical",
+          "gap": 32,
+          "padding": [
+            40,
+            24,
+            24,
+            24
+          ],
+          "justifyContent": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "C7tc9",
+              "name": "lLogo",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "xc2lU",
+                  "name": "lLogoFrame",
+                  "width": 64,
+                  "height": 64,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#6366F1",
+                        "position": 0
+                      },
+                      {
+                        "color": "#818CF8",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 18,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "N2LzS",
+                      "name": "lLogoIcon",
+                      "width": 32,
+                      "height": 32,
+                      "iconFontName": "satellite",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-white"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "fWT2G",
+                  "name": "lLogoName",
+                  "fill": "$text-primary",
+                  "content": "TiemNhaDuy",
+                  "fontFamily": "Outfit",
+                  "fontSize": 28,
+                  "fontWeight": "800",
+                  "letterSpacing": -1
+                },
+                {
+                  "type": "text",
+                  "id": "F2n4A",
+                  "name": "lLogoSub",
+                  "fill": "$text-secondary",
+                  "content": "Tạo tài khoản mới",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "8IP5P",
+              "name": "lForm",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 14,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "BxN4D",
+                  "name": "sNameLabel",
+                  "fill": "#71717A",
+                  "content": "Họ và tên",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "frame",
+                  "id": "q6pK0",
+                  "name": "sNameInput",
+                  "width": "fill_container",
+                  "height": 52,
+                  "fill": "#F4F4F5",
+                  "cornerRadius": 14,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#D4D4D8"
+                  },
+                  "gap": 10,
+                  "padding": [
+                    0,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "anuI8",
+                      "name": "sNameIcon",
+                      "width": 20,
+                      "height": 20,
+                      "iconFontName": "user",
+                      "iconFontFamily": "lucide",
+                      "fill": "#A1A1AA"
+                    },
+                    {
+                      "type": "text",
+                      "id": "qKxg6",
+                      "name": "sNamePlaceholder",
+                      "fill": "#A1A1AA",
+                      "content": "Nguyễn Văn A",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "whhEs",
+                  "name": "lEmailLabel",
+                  "fill": "$text-secondary",
+                  "content": "Email",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "frame",
+                  "id": "6A4Ph",
+                  "name": "lEmailInput",
+                  "width": "fill_container",
+                  "height": 52,
+                  "fill": "$bg-card",
+                  "cornerRadius": 14,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "$border-strong"
+                  },
+                  "gap": 10,
+                  "padding": [
+                    0,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "m66Uy",
+                      "name": "lEmailIcon",
+                      "width": 20,
+                      "height": 20,
+                      "iconFontName": "mail",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-tertiary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "xJAJU",
+                      "name": "lEmailPlaceholder",
+                      "fill": "$text-tertiary",
+                      "content": "email@example.com",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "JAXT7",
+                  "name": "lPassLabel",
+                  "fill": "$text-secondary",
+                  "content": "Mật khẩu",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "frame",
+                  "id": "S2GCu",
+                  "name": "lPassInput",
+                  "width": "fill_container",
+                  "height": 52,
+                  "fill": "$bg-card",
+                  "cornerRadius": 14,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "$border-strong"
+                  },
+                  "gap": 10,
+                  "padding": [
+                    0,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "31r5W",
+                      "name": "lPassIcon",
+                      "width": 20,
+                      "height": 20,
+                      "iconFontName": "lock",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-tertiary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "LKcgV",
+                      "name": "lPassPlaceholder",
+                      "fill": "$text-primary",
+                      "content": "••••••••",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "3ocSX",
+                      "name": "lPassEye",
+                      "width": 20,
+                      "height": 20,
+                      "iconFontName": "eye-off",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-tertiary"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "cbGK8",
+                  "name": "sConfirmLabel",
+                  "fill": "#71717A",
+                  "content": "Nhập lại mật khẩu",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "frame",
+                  "id": "KIxj8",
+                  "name": "sConfirmInput",
+                  "width": "fill_container",
+                  "height": 52,
+                  "fill": "#F4F4F5",
+                  "cornerRadius": 14,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#D4D4D8"
+                  },
+                  "gap": 10,
+                  "padding": [
+                    0,
+                    16
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "K4APi",
+                      "name": "sConfirmLeft",
+                      "width": "fill_container",
+                      "gap": 10,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "kkYQS",
+                          "name": "sConfirmIcon",
+                          "width": 20,
+                          "height": 20,
+                          "iconFontName": "lock",
+                          "iconFontFamily": "lucide",
+                          "fill": "#A1A1AA"
+                        },
+                        {
+                          "type": "text",
+                          "id": "ufjar",
+                          "name": "sConfirmPlaceholder",
+                          "fill": "#18181B",
+                          "content": "••••••••",
+                          "fontFamily": "Inter",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "NnBjK",
+                      "name": "sConfirmEye",
+                      "width": 20,
+                      "height": 20,
+                      "iconFontName": "eye-off",
+                      "iconFontFamily": "lucide",
+                      "fill": "#A1A1AA"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "D5ISU",
+              "name": "sSignupBtn",
+              "width": "fill_container",
+              "height": 52,
+              "fill": "$accent",
+              "cornerRadius": 14,
+              "gap": 8,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "TjulQ",
+                  "name": "lLoginBtnT",
+                  "fill": "$text-white",
+                  "content": "Đăng ký",
+                  "fontFamily": "Outfit",
+                  "fontSize": 16,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "htkTs",
+              "name": "sLoginLink",
+              "width": "fill_container",
+              "gap": 6,
+              "justifyContent": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "1Rvhj",
+                  "name": "lRegT1",
+                  "fill": "$text-secondary",
+                  "content": "Đã có tài khoản?",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "NgJYL",
+                  "name": "lRegT2",
+                  "fill": "$accent",
+                  "content": "Đăng nhập",
                   "fontFamily": "Inter",
                   "fontSize": 14,
                   "fontWeight": "600"

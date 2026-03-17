@@ -64,7 +64,7 @@
       try {
         const api = new window.ApiService(window.AppConfig.apiBaseUrl);
         const queryString = new URLSearchParams(params).toString();
-        const endpoint = queryString ? `/orders/my-orders?${queryString}` : '/orders/my-orders';
+        const endpoint = queryString ? `/orders?${queryString}` : '/orders';
         return await api.get(endpoint);
       } catch (error) {
         console.error('Error listing orders:', error);

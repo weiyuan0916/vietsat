@@ -19,7 +19,7 @@
     apiBaseUrl: backendConfig.apiBaseUrl || window.__API_BASE_URL__ || 'https://pwa-ecommerce.test/api',
     
     // App Info
-    appName: 'Vietnam Satellite',
+    appName: 'TiemNhaDuy',
     appVersion: '1.0.0',
     
     // Payment Settings

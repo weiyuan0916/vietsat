@@ -29,7 +29,7 @@
     apiBaseUrl: apiBaseUrl,
     
     // App Info
-    appName: 'Vietnam Satellite',
+    appName: 'TiemNhaDuy',
     appVersion: '1.0.0',
     
     // Payment Settings

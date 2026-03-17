@@ -12,16 +12,6 @@ class ApiService {
     };
   }
 
-  _getAuthHeaders() {
-    try {
-      const token = window.localStorage ? window.localStorage.getItem('token') : null;
-      if (token) {
-        return { Authorization: `Bearer ${token}` };
-      }
-    } catch (_) {}
-    return {};
-  }
-
   /**
    * Make a GET request
    * @param {string} endpoint - API endpoint
@@ -32,7 +22,7 @@ class ApiService {
     const url = `${this.baseUrl}${endpoint}`;
     const config = {
       method: 'GET',
-      headers: { ...this.defaultHeaders, ...this._getAuthHeaders(), ...options.headers },
+      headers: { ...this.defaultHeaders, ...options.headers },
       ...options,
     };
 
@@ -56,7 +46,7 @@ class ApiService {
     const url = `${this.baseUrl}${endpoint}`;
     const config = {
       method: 'POST',
-      headers: { ...this.defaultHeaders, ...this._getAuthHeaders(), ...options.headers },
+      headers: { ...this.defaultHeaders, ...options.headers },
       body: JSON.stringify(data),
       ...options,
     };
@@ -81,7 +71,7 @@ class ApiService {
     const url = `${this.baseUrl}${endpoint}`;
     const config = {
       method: 'PUT',
-      headers: { ...this.defaultHeaders, ...this._getAuthHeaders(), ...options.headers },
+      headers: { ...this.defaultHeaders, ...options.headers },
       body: JSON.stringify(data),
       ...options,
     };
@@ -105,7 +95,7 @@ class ApiService {
     const url = `${this.baseUrl}${endpoint}`;
     const config = {
       method: 'DELETE',
-      headers: { ...this.defaultHeaders, ...this._getAuthHeaders(), ...options.headers },
+      headers: { ...this.defaultHeaders, ...options.headers },
       ...options,
     };
 

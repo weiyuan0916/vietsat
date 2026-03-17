@@ -112,7 +112,7 @@ var navigationHistory = ['home'];
 
 // Handle link clicks within page container
 document.addEventListener('click', function(e) {
-  var link = e.target.closest('a.link');
+  var link = e.target.closest('a');
   if (!link) return;
   
   var href = link.getAttribute('href');
@@ -157,6 +157,13 @@ document.addEventListener('click', function(e) {
     if (path === '/signin/' || path === '/signin') {
       navigationHistory.push('signin');
       loadPage('pages/pages/signin.html');
+      return;
+    }
+
+    // Handle signup page
+    if (path === '/signup/' || path === '/signup') {
+      navigationHistory.push('signup');
+      loadPage('pages/pages/signup.html');
       return;
     }
     
@@ -224,6 +231,7 @@ function loadPage(url) {
     .then(function(html) {
       pageContainer.innerHTML = html;
       app.preloader.hide();
+      afterPageLoaded(url, pageContainer);
     })
     .catch(function(error) {
       app.preloader.hide();
@@ -231,6 +239,279 @@ function loadPage(url) {
       console.error('loadPage error:', error);
     });
 }
+
+function afterPageLoaded(url, pageContainer) {
+  if (!pageContainer) return;
+
+  if (url.includes('signin.html') || url.includes('signup.html')) {
+    initPasswordToggles(pageContainer);
+    initAuthForms(pageContainer);
+  }
+}
+
+function initPasswordToggles(root) {
+  if (!root) return;
+
+  var toggles = root.querySelectorAll('.js-toggle-password');
+  toggles.forEach(function(toggleEl) {
+    if (toggleEl.dataset && toggleEl.dataset.bound === '1') return;
+
+    var wrapper = toggleEl.closest('div') || root;
+    var passwordInput =
+      wrapper.querySelector('.js-password-input') ||
+      wrapper.querySelector('input[type="password"]') ||
+      wrapper.querySelector('input[name="password"]');
+
+    if (!passwordInput) return;
+
+    function setVisible(visible) {
+      passwordInput.type = visible ? 'text' : 'password';
+      toggleEl.textContent = visible ? 'eye' : 'eye_slash';
+      toggleEl.setAttribute('aria-label', visible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu');
+    }
+
+    function toggle() {
+      setVisible(passwordInput.type === 'password');
+    }
+
+    toggleEl.addEventListener('click', function(evt) {
+      evt.preventDefault();
+      toggle();
+    });
+
+    toggleEl.addEventListener('keydown', function(evt) {
+      if (evt.key === 'Enter' || evt.key === ' ') {
+        evt.preventDefault();
+        toggle();
+      }
+    });
+
+    if (toggleEl.dataset) toggleEl.dataset.bound = '1';
+  });
+}
+
+function initAuthForms(root) {
+  if (!root) return;
+
+  var signinForm = root.querySelector('#login-form');
+  if (signinForm && !(signinForm.dataset && signinForm.dataset.bound === '1')) {
+    signinForm.addEventListener('submit', function(evt) {
+      evt.preventDefault();
+      var fd = new FormData(signinForm);
+      var email = fd.get('email');
+      var password = fd.get('password');
+
+      app.dialog.preloader('Đang đăng nhập...');
+      window.AuthApi.login({ email: email, password: password })
+        .then(function(res) {
+          app.dialog.close();
+          var user = res?.data?.user || res?.data?.data?.user || res?.data?.user;
+          var token = res?.data?.token || res?.data?.data?.token || res?.data?.token;
+          if (res && res.status && res.data) {
+            user = res.data.user;
+            token = res.data.token;
+          }
+          if (!token) {
+            app.dialog.alert('Không nhận được token đăng nhập.', 'Lỗi');
+            return;
+          }
+          window.AuthStore.setAuth(user || null, token);
+          switchTab('home', null);
+        })
+        .catch(function(err) {
+          app.dialog.close();
+          app.dialog.alert(err?.data?.message || err?.message || 'Đăng nhập thất bại.', 'Lỗi');
+        });
+    });
+    if (signinForm.dataset) signinForm.dataset.bound = '1';
+  }
+
+  var signupForm = root.querySelector('#signup-form');
+  if (signupForm && !(signupForm.dataset && signupForm.dataset.bound === '1')) {
+    signupForm.addEventListener('submit', function(evt) {
+      evt.preventDefault();
+      var fd = new FormData(signupForm);
+      var payload = {
+        name: fd.get('name'),
+        email: fd.get('email'),
+        password: fd.get('password'),
+        password_confirmation: fd.get('password_confirmation'),
+      };
+
+      app.dialog.preloader('Đang đăng ký...');
+      window.AuthApi.register(payload)
+        .then(function(res) {
+          app.dialog.close();
+          var user = res?.data?.user;
+          var token = res?.data?.token;
+          if (!token) {
+            app.dialog.alert('Không nhận được token đăng ký.', 'Lỗi');
+            return;
+          }
+          window.AuthStore.setAuth(user || null, token);
+          switchTab('home', null);
+        })
+        .catch(function(err) {
+          app.dialog.close();
+          var msg = err?.data?.message || err?.message || 'Đăng ký thất bại.';
+          app.dialog.alert(msg, 'Lỗi');
+        });
+    });
+    if (signupForm.dataset) signupForm.dataset.bound = '1';
+  }
+}
+
+function ensureAuthedOrRedirect() {
+  if (window.AuthStore && window.AuthStore.isAuthenticated) return true;
+  navigationHistory.push('signin');
+  loadPage('pages/pages/signin.html');
+  return false;
+}
+
+function initProfilePage() {
+  if (!ensureAuthedOrRedirect()) return;
+
+  var nameEl = document.getElementById('profile-name');
+  var emailEl = document.getElementById('profile-email');
+
+  function render(user) {
+    if (!nameEl || !emailEl) return;
+    nameEl.textContent = user?.name || '—';
+    emailEl.textContent = user?.email || '—';
+  }
+
+  render(window.AuthStore.user);
+  window.AuthStore.refreshProfile()
+    .then(function(user) { render(user); })
+    .catch(function(err) {
+      if (err && err.status === 401) {
+        window.AuthStore.clear();
+        navigationHistory.push('signin');
+        loadPage('pages/pages/signin.html');
+      }
+    });
+}
+
+function initOrdersPage() {
+  if (!ensureAuthedOrRedirect()) return;
+
+  var loadingEl = document.getElementById('orders-loading');
+  var errorEl = document.getElementById('orders-error');
+  var emptyEl = document.getElementById('orders-empty');
+  var listEl = document.getElementById('orders-list');
+
+  function setState(state) {
+    if (loadingEl) loadingEl.style.display = state === 'loading' ? 'block' : 'none';
+    if (errorEl) errorEl.style.display = state === 'error' ? 'block' : 'none';
+    if (emptyEl) emptyEl.style.display = state === 'empty' ? 'block' : 'none';
+    if (listEl) listEl.style.display = state === 'list' ? 'block' : 'none';
+  }
+
+  function escapeHtml(text) {
+    var div = document.createElement('div');
+    div.textContent = text || '';
+    return div.innerHTML;
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    var d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('vi-VN');
+  }
+
+  function renderOrders(orders) {
+    if (!listEl) return;
+    var html = orders.map(function(o) {
+      var serviceName = o?.service?.name || o?.service_name || o?.service_data?.name || 'Dịch vụ';
+      var amount = o?.amount || 0;
+      var amountText = Number(amount).toLocaleString('vi-VN') + 'đ';
+      var createdAt = fmtDate(o?.created_at);
+      var expiresAt = fmtDate(o?.expires_at);
+      var status = o?.status || 'pending';
+      var isActive = status === 'paid' || status === 'processing';
+      var badgeBg = isActive ? 'rgba(34, 197, 94, 0.1)' : 'var(--vs-bg-secondary)';
+      var badgeColor = isActive ? 'var(--vs-success)' : 'var(--vs-text-secondary)';
+      var icon = isActive ? 'checkmark_alt_circle' : 'time';
+      var iconBg = isActive ? 'rgba(34, 197, 94, 0.1)' : 'var(--vs-bg-secondary)';
+      var iconColor = isActive ? 'var(--vs-success)' : 'var(--vs-text-secondary)';
+      var badgeText = isActive ? 'Đang hoạt động' : (status === 'expired' ? 'Đã hết hạn' : 'Chờ thanh toán');
+
+      return (
+        '<div class="vs-service-card detailed" style="margin-bottom: 16px;' + (isActive ? '' : 'opacity:0.75;') + '">' +
+          '<div class="vs-service-card-top" style="align-items: flex-start;">' +
+            '<div class="vs-service-icon-wrap">' +
+              '<div class="vs-service-icon" style="background: ' + iconBg + '; color: ' + iconColor + ';">' +
+                '<i class="icon f7-icons">' + icon + '</i>' +
+              '</div>' +
+              '<div class="text-align-left">' +
+                '<h3 class="vs-service-name" style="margin-bottom: 4px;">' + escapeHtml(serviceName) + '</h3>' +
+                '<p class="vs-service-duration" style="font-size: 13px;">Ngày mua: ' + createdAt + '</p>' +
+                '<p class="vs-service-duration" style="font-size: 13px; color: var(--vs-text-primary);">Hết hạn: <span style="font-weight: 600;">' + expiresAt + '</span></p>' +
+              '</div>' +
+            '</div>' +
+            '<div class="text-align-right">' +
+              '<div class="vs-service-price" style="font-size: 15px;">' + amountText + '</div>' +
+              '<span class="badge" style="background: ' + badgeBg + '; color: ' + badgeColor + '; margin-top: 4px; padding: 4px 8px; border-radius: 8px;">' + escapeHtml(badgeText) + '</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+    listEl.innerHTML = html;
+  }
+
+  window.retryLoadOrders = function() {
+    load();
+  };
+
+  function load() {
+    setState('loading');
+    window.OrderApi.list()
+      .then(function(res) {
+        var orders = [];
+        if (Array.isArray(res)) orders = res;
+        else if (res && res.status && Array.isArray(res.data)) orders = res.data;
+        else if (res && res.data && Array.isArray(res.data.items)) orders = res.data.items;
+        else if (res && res.data && Array.isArray(res.data.data)) orders = res.data.data;
+        else if (res && res.data && Array.isArray(res.data)) orders = res.data;
+        if (!orders || orders.length === 0) {
+          setState('empty');
+          return;
+        }
+        renderOrders(orders);
+        setState('list');
+      })
+      .catch(function(err) {
+        if (err && err.status === 401) {
+          window.AuthStore.clear();
+          navigationHistory.push('signin');
+          loadPage('pages/pages/signin.html');
+          return;
+        }
+        setState('error');
+      });
+  }
+
+  load();
+}
+
+window.logoutAndGoSignin = function() {
+  var doLogout = function() {
+    window.AuthStore.clear();
+    navigationHistory.push('signin');
+    loadPage('pages/pages/signin.html');
+  };
+
+  if (!window.AuthStore || !window.AuthStore.isAuthenticated) {
+    doLogout();
+    return;
+  }
+
+  window.AuthApi.logout()
+    .then(function() { doLogout(); })
+    .catch(function() { doLogout(); });
+};
 
 function switchTab(tabName, element) {
   if (tabName === currentTab && pageCache[tabName]) {
@@ -303,6 +584,12 @@ function afterTabLoaded(tabName) {
       break;
     case 'services':
       initServicesListPage();
+      break;
+    case 'orders':
+      initOrdersPage();
+      break;
+    case 'profile':
+      initProfilePage();
       break;
   }
 }

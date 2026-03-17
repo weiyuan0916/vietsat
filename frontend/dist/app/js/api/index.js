@@ -29,8 +29,7 @@
         window.AppConfig.apiBaseUrl && 
         window.ApiService && 
         window.ServiceApi && 
-        window.OrderApi &&
-        window.AuthApi
+        window.OrderApi
       );
     },
 
@@ -44,12 +43,10 @@
         baseService: !!window.ApiService,
         serviceApi: !!window.ServiceApi,
         orderApi: !!window.OrderApi,
-        authApi: !!window.AuthApi,
         ready: this.check()
       };
     }
   };
 
   console.log('API Modules loaded:', window.ApiReady.status());
-  console.log('AppConfig:', window.AppConfig);
 })();

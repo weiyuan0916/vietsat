@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Service;
 use App\Services\ExternalServiceApi;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Str;
 
 class ServiceController extends Controller
 {
@@ -15,6 +17,25 @@ class ServiceController extends Controller
     {
         $this->externalServiceApi = new ExternalServiceApi();
         $this->useExternalApi = config('services.service.use_external_api', true);
+    }
+
+    private function canUseExternalApi(): bool
+    {
+        if (! $this->useExternalApi) {
+            return false;
+        }
+
+        $baseUrl = rtrim((string) config('services.external_api.base_url', ''), '/');
+        if ($baseUrl === '') {
+            return false;
+        }
+
+        $appUrl = rtrim((string) config('app.url', ''), '/');
+        if ($appUrl !== '' && Str::startsWith($baseUrl, $appUrl)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -42,24 +63,58 @@ class ServiceController extends Controller
         $perPage = min((int) request('per_page', 10), 100);
         $page = (int) request('page', 1);
 
-        // Use external API
-        $services = $this->externalServiceApi->getServices($page, $perPage);
-
-        if ($services === null) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Không thể kết nối đến dịch vụ.',
-                'data' => null,
-            ], 503);
+        if ($this->canUseExternalApi()) {
+            $services = $this->externalServiceApi->getServices($page, $perPage);
+            if ($services !== null) {
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Lấy danh sách dịch vụ thành công.',
+                    'data' => [
+                        'items' => $services['items'],
+                        'meta' => $services['meta'],
+                        'links' => $services['links'],
+                    ],
+                ]);
+            }
         }
+
+        $paginator = Service::query()
+            ->orderByDesc('is_active')
+            ->orderBy('id')
+            ->paginate(perPage: $perPage, page: $page);
+
+        $items = collect($paginator->items())->map(function (Service $service) {
+            return [
+                'id' => $service->id,
+                'name' => $service->name,
+                'duration_days' => $service->duration_days,
+                'price' => $service->price,
+                'formatted_price' => number_format($service->price) . ' VND',
+                'is_active' => (bool) $service->is_active,
+                'created_at' => optional($service->created_at)->toIso8601String(),
+                'updated_at' => optional($service->updated_at)->toIso8601String(),
+            ];
+        })->values();
 
         return response()->json([
             'status' => true,
             'message' => 'Lấy danh sách dịch vụ thành công.',
             'data' => [
-                'items' => $services['items'],
-                'meta' => $services['meta'],
-                'links' => $services['links'],
+                'items' => $items,
+                'meta' => [
+                    'current_page' => $paginator->currentPage(),
+                    'last_page' => $paginator->lastPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                    'from' => $paginator->firstItem(),
+                    'to' => $paginator->lastItem(),
+                ],
+                'links' => [
+                    'first' => $paginator->url(1),
+                    'last' => $paginator->url($paginator->lastPage()),
+                    'prev' => $paginator->previousPageUrl(),
+                    'next' => $paginator->nextPageUrl(),
+                ],
             ],
         ]);
     }
@@ -91,7 +146,27 @@ class ServiceController extends Controller
      */
     public function default(): JsonResponse
     {
-        $service = $this->externalServiceApi->getDefaultService();
+        if ($this->canUseExternalApi()) {
+            $service = $this->externalServiceApi->getDefaultService();
+            if ($service) {
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Lấy thông tin dịch vụ thành công.',
+                    'data' => [
+                        'id' => $service['id'],
+                        'name' => $service['name'],
+                        'duration_days' => $service['duration_days'],
+                        'price' => $service['price'],
+                        'formatted_price' => $service['formatted_price'],
+                    ],
+                ]);
+            }
+        }
+
+        $service = Service::query()
+            ->where('is_active', true)
+            ->orderBy('id')
+            ->first();
 
         if (! $service) {
             return response()->json([
@@ -105,11 +180,11 @@ class ServiceController extends Controller
             'status' => true,
             'message' => 'Lấy thông tin dịch vụ thành công.',
             'data' => [
-                'id' => $service['id'],
-                'name' => $service['name'],
-                'duration_days' => $service['duration_days'],
-                'price' => $service['price'],
-                'formatted_price' => $service['formatted_price'],
+                'id' => $service->id,
+                'name' => $service->name,
+                'duration_days' => $service->duration_days,
+                'price' => $service->price,
+                'formatted_price' => number_format($service->price) . ' VND',
             ],
         ]);
     }
@@ -144,8 +219,18 @@ class ServiceController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        $service = $this->externalServiceApi->getServiceById($id);
+        if ($this->canUseExternalApi()) {
+            $service = $this->externalServiceApi->getServiceById($id);
+            if ($service) {
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Lấy thông tin dịch vụ thành công.',
+                    'data' => $service,
+                ]);
+            }
+        }
 
+        $service = Service::query()->find($id);
         if (! $service) {
             return response()->json([
                 'status' => false,
@@ -157,7 +242,16 @@ class ServiceController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Lấy thông tin dịch vụ thành công.',
-            'data' => $service,
+            'data' => [
+                'id' => $service->id,
+                'name' => $service->name,
+                'duration_days' => $service->duration_days,
+                'price' => $service->price,
+                'formatted_price' => number_format($service->price) . ' VND',
+                'is_active' => (bool) $service->is_active,
+                'created_at' => optional($service->created_at)->toIso8601String(),
+                'updated_at' => optional($service->updated_at)->toIso8601String(),
+            ],
         ]);
     }
 }
