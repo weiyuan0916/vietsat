@@ -1,148 +1,77 @@
-<div class="page" data-name="profile" data-url="/profile/">
-  <div class="navbar">
-    <div class="navbar-bg"></div>
-    <div class="navbar-inner">
-      <div class="title">Profile</div>
-      <div class="right">
-        <a href="/settings/" class="link icon-only">
-          <i class="icon f7-icons">gear</i>
-        </a>
-      </div>
-    </div>
-  </div>
-
+<div class="page vs-profile-page" data-name="profile" data-url="/profile/">
   <div class="page-content">
-    <!-- Auth Section - Show when not logged in -->
-    <div id="auth-section">
-      <!-- Login/Register Options -->
-      <div class="profile-auth-header">
-        <div class="profile-auth-icon">
-          <i class="icon f7-icons">person_crop_circle_fill</i>
-        </div>
-        <h2>Chào mừng!</h2>
-        <p>Đăng nhập hoặc đăng ký để sử dụng dịch vụ</p>
-      </div>
 
-      <!-- Auth Buttons -->
-      <div class="profile-auth-buttons">
-        <a href="/signin/" class="button button-fill button-large button-round">
-          <i class="icon f7-icons" style="margin-right: 8px;">lock_fill</i>
-          Đăng nhập
-        </a>
-        <a href="/signup/" class="button button-fill button-large button-round button-outline" style="margin-top: 12px;">
-          <i class="icon f7-icons" style="margin-right: 8px;">person_plus_fill</i>
-          Đăng ký
-        </a>
-      </div>
-
-      <!-- Features when logged in preview -->
-      <div class="section-title">
-        Dịch vụ của bạn
-      </div>
-      
-      <div class="list links-list">
-        <ul>
-          <li>
-            <a href="/signin/">
-              <div class="item-media">
-                <i class="icon f7-icons text-color-blue">tv_fill</i>
-              </div>
-              <div class="item-inner">
-                <div class="item-title">Dịch vụ đã đăng ký</div>
-                <div class="item-after text-color-gray">Xem chi tiết</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a href="/signin/">
-              <div class="item-media">
-                <i class="icon f7-icons text-color-green">clock_fill</i>
-              </div>
-              <div class="item-inner">
-                <div class="item-title">Thời hạn sử dụng</div>
-                <div class="item-after text-color-gray">Xem ngày hết hạn</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a href="/signin/">
-              <div class="item-media">
-                <i class="icon f7-icons text-color-orange">creditcard_fill</i>
-              </div>
-              <div class="item-inner">
-                <div class="item-title">Lịch sử giao dịch</div>
-                <div class="item-after text-color-gray">Xem tất cả</div>
-              </div>
-            </a>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Divider -->
-      <div class="block" style="padding: 16px 0;">
-        <div class="divider"></div>
-      </div>
-
-      <!-- General Links -->
-      <div class="section-title">
-        Thông tin
-      </div>
-
-      <div class="list links-list">
-        <ul>
-          <li>
-            <a href="/signup/">
-              <div class="item-media">
-                <i class="icon f7-icons text-color-blue">question_circle_fill</i>
-              </div>
-              <div class="item-inner">
-                <div class="item-title">Trung tâm hỗ trợ</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a href="/signup/">
-              <div class="item-media">
-                <i class="icon f7-icons text-color-blue">doc_text_fill</i>
-              </div>
-              <div class="item-inner">
-                <div class="item-title">Điều khoản dịch vụ</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a href="/signup/">
-              <div class="item-media">
-                <i class="icon f7-icons text-color-blue">shield_fill</i>
-              </div>
-              <div class="item-inner">
-                <div class="item-title">Chính sách bảo mật</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a href="/signup/">
-              <div class="item-media">
-                <i class="icon f7-icons text-color-blue">envelope_fill</i>
-              </div>
-              <div class="item-inner">
-                <div class="item-title">Liên hệ</div>
-              </div>
-            </a>
-          </li>
-        </ul>
-      </div>
+    <div class="vs-header" style="padding-top: 24px;">
+      <h1 class="vs-header-title">Tài khoản</h1>
     </div>
 
-    <!-- Footer -->
-    <div class="block text-align-center" style="padding: 24px 0;">
-      <p class="text-color-gray" style="font-size: 12px;">
-        <i class="icon f7-icons" style="font-size: 12px;">shield_checkerfill</i>
-        Bảo mật thanh toán
-      </p>
-      <p class="text-color-gray" style="font-size: 10px;">
-        © 2026 Vietnam Satellite. All rights reserved.
-      </p>
+    <div class="vs-content">
+
+      <!-- User Profile Card -->
+      <div class="vs-profile-card">
+        <div class="vs-avatar">
+          <i class="icon f7-icons" style="font-size: 28px;">person</i>
+        </div>
+        <div class="vs-profile-info">
+          <h2 class="vs-profile-name">Nguyễn Anh Duy</h2>
+          <p class="vs-profile-email">duy@example.com</p>
+        </div>
+        <a href="#" class="vs-edit-btn">
+          <i class="icon f7-icons" style="font-size: 14px;">pencil</i>
+        </a>
+      </div>
+
+      <!-- Main Menu -->
+      <div class="vs-menu-list">
+        <a href="#" class="vs-menu-item" onclick="switchTab('orders', null); return false;">
+          <div class="vs-menu-left">
+            <i class="icon f7-icons">bag</i> Đơn hàng của tôi
+          </div>
+          <i class="icon f7-icons chevron">chevron_right</i>
+        </a>
+        <a href="#" class="vs-menu-item">
+          <div class="vs-menu-left">
+            <i class="icon f7-icons">creditcard</i> Phương thức thanh toán
+          </div>
+          <i class="icon f7-icons chevron">chevron_right</i>
+        </a>
+        <a href="#" class="vs-menu-item">
+          <div class="vs-menu-left">
+            <i class="icon f7-icons">bell</i> Thông báo
+          </div>
+          <i class="icon f7-icons chevron">chevron_right</i>
+        </a>
+        <a href="#" class="vs-menu-item">
+          <div class="vs-menu-left">
+            <i class="icon f7-icons">gear</i> Cài đặt
+          </div>
+          <i class="icon f7-icons chevron">chevron_right</i>
+        </a>
+      </div>
+
+      <!-- Support Menu -->
+      <div class="vs-menu-list">
+        <a href="#" class="vs-menu-item">
+          <div class="vs-menu-left">
+            <i class="icon f7-icons">question_circle</i> Trợ giúp & Hỗ trợ
+          </div>
+          <i class="icon f7-icons chevron">chevron_right</i>
+        </a>
+        <a href="#" class="vs-menu-item">
+          <div class="vs-menu-left">
+            <i class="icon f7-icons">info_circle</i> Về chúng tôi
+          </div>
+          <i class="icon f7-icons chevron">chevron_right</i>
+        </a>
+      </div>
+
+      <!-- Logout -->
+      <div style="margin-top: 32px;">
+        <button class="button vs-btn-danger-light" onclick="loadPage('pages/pages/signin.html')">
+          <i class="icon f7-icons">square_arrow_right</i> Đăng xuất
+        </button>
+      </div>
+
     </div>
   </div>
 </div>

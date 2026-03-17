@@ -1,0 +1,37 @@
+---
+description: Yêu cầu sử dụng Pencil để thiết kế giao diện trước khi viết code
+alwaysApply: true
+---
+
+# Thiết Kế Giao Diện Với Pencil
+
+## Quy Trình Bắt Buộc
+
+Mỗi khi cần thiết kế giao diện (UI/UX), bạn PHẢI:
+
+1. **Sử dụng Pencil**: Vẽ giao diện bằng Pencil trước
+2. **Chờ duyệt**: Chờ user xem và duyệt thiết kế
+3. **Sau đó mới code**: Chỉ sau khi user approve mới bắt đầu implement
+
+## Khi Nào Áp Dụng
+
+- Thiết kế trang mới
+- Thay đổi layout
+- Thiết kế component
+- Tạo form, modal, dialog
+- Bất kỳ UI mới nào cần hiển thị cho user
+
+## Không Áp Dụng
+
+- Chỉnh sửa logic code không liên quan đến UI
+- Fix bug không thay đổi giao diện
+- Tối ưu performance
+- Các task không có yếu tố giao diện
+
+## Workflow
+
+```
+[Yêu cầu thiết kế UI] → [Vẽ Pencil] → [User duyệt] → [Implement code]
+```
+
+Nếu user chưa duyệt, KHÔNG được tiến hành viết code.

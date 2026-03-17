@@ -73,10 +73,17 @@ var app = new Framework7({
         init: true
       }
     },
-    // Service Page
     {
       path: '/service/',
       url: 'pages/pages/service.html',
+    },
+    {
+      path: '/services/',
+      url: 'pages/pages/services.html',
+    },
+    {
+      path: '/orders/',
+      url: 'pages/pages/orders.html',
     },
     // Profile Page
     {
@@ -101,34 +108,159 @@ var app = new Framework7({
 // ====================
 var currentTab = 'home';
 var pageCache = {};
+var navigationHistory = ['home'];
+
+// Handle link clicks within page container
+document.addEventListener('click', function(e) {
+  var link = e.target.closest('a.link');
+  if (!link) return;
+  
+  var href = link.getAttribute('href');
+  if (!href) return;
+  
+  // Only handle internal links that start with /
+  if (href.startsWith('/') && !href.startsWith('//')) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Parse query string if any
+    var path = href.split('?')[0];
+    var query = {};
+    if (href.includes('?')) {
+      href.split('?')[1].split('&').forEach(function(param) {
+        var parts = param.split('=');
+        query[parts[0]] = parts[1];
+      });
+    }
+    
+    // Handle service page with service ID
+    if (path === '/service/' || path === '/service') {
+      navigationHistory.push('service');
+      loadServicePage(query.service);
+      return;
+    }
+    
+    // Handle tab-level routes
+    var tabMap = {
+      '/': 'home',
+      '/services/': 'services',
+      '/orders/': 'orders',
+      '/profile/': 'profile'
+    };
+    
+    if (tabMap[path]) {
+      switchTab(tabMap[path], null);
+      return;
+    }
+    
+    // Handle signin page
+    if (path === '/signin/' || path === '/signin') {
+      navigationHistory.push('signin');
+      loadPage('pages/pages/signin.html');
+      return;
+    }
+    
+    console.log('Navigation to:', path, query);
+  }
+});
+
+// Go back to previous page
+function goBack() {
+  // Show tab bar
+  var tabBarWrap = document.querySelector('.vs-tab-bar-wrap');
+  if (tabBarWrap) tabBarWrap.style.display = '';
+  
+  if (navigationHistory.length > 1) {
+    navigationHistory.pop();
+    var prevPage = navigationHistory[navigationHistory.length - 1];
+    
+    if (prevPage === 'home' || prevPage === 'services' || prevPage === 'orders' || prevPage === 'profile') {
+      switchTab(prevPage, null);
+    } else {
+      switchTab('home', null);
+    }
+  } else {
+    switchTab('home', null);
+  }
+  navigationHistory = [currentTab];
+}
+
+function loadServicePage(serviceId) {
+  var pageContainer = document.getElementById('page-container');
+  if (!pageContainer) return;
+  
+  // Hide tab bar on detail page
+  var tabBarWrap = document.querySelector('.vs-tab-bar-wrap');
+  if (tabBarWrap) tabBarWrap.style.display = 'none';
+  
+  app.preloader.show();
+  
+  fetch('pages/pages/service.html')
+    .then(function(response) { return response.text(); })
+    .then(function(html) {
+      pageContainer.innerHTML = html;
+      app.preloader.hide();
+      initServicePage(serviceId);
+    })
+    .catch(function(error) {
+      app.preloader.hide();
+      app.dialog.alert('Không thể tải trang dịch vụ.', 'Lỗi');
+      console.error('loadServicePage error:', error);
+    });
+}
+
+function loadPage(url) {
+  var pageContainer = document.getElementById('page-container');
+  if (!pageContainer) return;
+  
+  // Hide tab bar on non-tab pages
+  var tabBarWrap = document.querySelector('.vs-tab-bar-wrap');
+  if (tabBarWrap) tabBarWrap.style.display = 'none';
+  
+  app.preloader.show();
+  
+  fetch(url)
+    .then(function(response) { return response.text(); })
+    .then(function(html) {
+      pageContainer.innerHTML = html;
+      app.preloader.hide();
+    })
+    .catch(function(error) {
+      app.preloader.hide();
+      app.dialog.alert('Không thể tải trang.', 'Lỗi');
+      console.error('loadPage error:', error);
+    });
+}
 
 function switchTab(tabName, element) {
-  debugLog('C', 'app.js:switchTab', 'Switching tab', {tab: tabName, current: currentTab});
-  
-  // Prevent switching to the same tab
   if (tabName === currentTab && pageCache[tabName]) {
     return;
   }
   
-  // Update tab link active states
-  var tabLinks = document.querySelectorAll('.tab-link');
+  // Show tab bar
+  var tabBarWrap = document.querySelector('.vs-tab-bar-wrap');
+  if (tabBarWrap) tabBarWrap.style.display = '';
+  
+  var tabLinks = document.querySelectorAll('.vs-tab-item');
   tabLinks.forEach(function(link) {
-    link.classList.remove('tab-link-active');
+    link.classList.remove('active');
     if (link.getAttribute('data-tab') === tabName) {
-      link.classList.add('tab-link-active');
+      link.classList.add('active');
     }
   });
   
   var pageContainer = document.getElementById('page-container');
   var url = '';
   
-  // Determine the URL based on tab
   switch(tabName) {
     case 'home':
       url = 'pages/pages/home.html';
       break;
-    case 'service':
-      url = 'pages/pages/service.html';
+    case 'services':
+      url = 'pages/pages/services.html';
+      break;
+    case 'orders':
+      url = 'pages/pages/orders.html';
       break;
     case 'profile':
       url = 'pages/pages/profile.html';
@@ -137,20 +269,15 @@ function switchTab(tabName, element) {
       url = 'pages/pages/home.html';
   }
   
-  // Check cache first
   if (pageCache[tabName]) {
     pageContainer.innerHTML = pageCache[tabName];
     currentTab = tabName;
-    // Reinitialize Framework7 for the new page
-    app.pageData.init(pageContainer.querySelector('.page'));
-    debugLog('C', 'app.js:switchTab', 'Loaded from cache', {tab: tabName});
+    afterTabLoaded(tabName);
     return;
   }
   
-  // Show loading
   app.preloader.show();
   
-  // Fetch page content
   fetch(url)
     .then(function(response) {
       return response.text();
@@ -160,29 +287,45 @@ function switchTab(tabName, element) {
       pageContainer.innerHTML = html;
       currentTab = tabName;
       app.preloader.hide();
-      
-      // Reinitialize Framework7 components
-      var pageEl = pageContainer.querySelector('.page');
-      if (pageEl) {
-        app.pageData.init(pageEl);
-      }
-      debugLog('C', 'app.js:switchTab', 'Loaded and cached', {tab: tabName});
+      afterTabLoaded(tabName);
     })
     .catch(function(error) {
       app.preloader.hide();
-      app.dialog.alert('Failed to load page. Please try again.', 'Error');
-      debugLog('C', 'app.js:switchTab', 'Load error', {error: error.message});
+      app.dialog.alert('Không thể tải trang. Vui lòng thử lại.', 'Lỗi');
+      console.error('switchTab error:', error);
     });
 }
 
+function afterTabLoaded(tabName) {
+  switch(tabName) {
+    case 'home':
+      initHomePage();
+      break;
+    case 'services':
+      initServicesListPage();
+      break;
+  }
+}
+
 // Load home page on initial load
-document.addEventListener('DOMContentLoaded', function() {
+function initApp() {
+  console.log('App: initApp called, readyState:', document.readyState);
   debugLog('D', 'app.js:DOMContentLoaded', 'DOM ready', {});
   setTimeout(function() {
+    console.log('App: Calling switchTab(home)');
     debugLog('D', 'app.js:timeout', 'Calling switchTab', {});
     switchTab('home', null);
   }, 500);
-});
+}
+
+// Run immediately or on DOMContentLoaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  // DOM already ready
+  console.log('App: DOM already ready, readyState:', document.readyState);
+  initApp();
+}
 
 // 2. Dialog
 
@@ -556,6 +699,11 @@ $$(document).on("page:init", function (e) {
   });
 });
 
+// Debug: Log all page init events
+$$(document).on('page:init', function(e) {
+  console.log('F7 page:init:', e.detail);
+});
+
 // 15. Switch Theme
 
 $$(".switch-theme").on("click", function () {
@@ -563,12 +711,15 @@ $$(".switch-theme").on("click", function () {
   $$(".page").transitionEnd(function(){
     $$(".page").toggleClass("page-theme-transition");
   });
-  if ($$("body").hasClass("dark")) {
-    $$(".switch-theme i").text("moon_stars");
-  } else {
-    $$(".switch-theme i").text("sun_max");
-  }
+  var isDark = $$("body").hasClass("dark");
   $$("body").toggleClass("dark");
+  $$("html").toggleClass("dark");
+  if (isDark) {
+    $$(".switch-theme i").text("sun_max");
+  } else {
+    $$(".switch-theme i").text("moon_stars");
+  }
+  document.dispatchEvent(new CustomEvent('theme:change'));
 });
 
 // 16. Preload Pages
@@ -596,8 +747,22 @@ preloadPages();
 // ====================
 // API Configuration
 // ====================
-// Point to Laravel backend API
-var API_BASE_URL = 'https://pwa-ecommerce.test/api';
+// Use config from config.js - with safety check
+function getApiBaseUrl() {
+  if (window.AppConfig && window.AppConfig.apiBaseUrl) {
+    return window.AppConfig.apiBaseUrl;
+  }
+  // Fallback for development
+  var host = window.location.hostname;
+  if (host === 'localhost' || host === '127.0.0.1') {
+    // For local dev, you may need to change this to your actual API URL
+    // Or make sure Laravel is running
+    return 'https://tiemnhaduy.com/api/v1';
+  }
+  return 'https://tiemnhaduy.com/api/v1';
+}
+var API_BASE_URL = getApiBaseUrl();
+console.log('API Base URL:', API_BASE_URL);
 
 // ====================
 // Service API Functions
@@ -836,38 +1001,65 @@ function isReverbConnected() {
 // ====================
 
 $$(document).on('page:init', '.page[data-name="service"]', function (e) {
-    var page = e.detail.page;
-    var serviceInfoEl = page.el.querySelector('#service-info');
-    var orderFormEl = page.el.querySelector('#order-form');
-    var paymentInfoEl = page.el.querySelector('#payment-info');
+    var serviceId = e.detail.route.query.service;
+    initServicePage(serviceId);
+});
+
+function initServicePage(serviceId) {
+    var pageEl = document.querySelector('.page[data-name="service"]');
+    if (!pageEl) return;
+
+    var serviceInfoEl = pageEl.querySelector('#service-order-view');
+    var orderFormEl = pageEl.querySelector('#order-form');
+    var paymentInfoEl = pageEl.querySelector('#payment-info');
     var currentOrderCode = null;
     
-    // Load service information from API
     function loadServiceInfo() {
         app.preloader.show();
         
-        ServiceApi.getDefault()
+        var apiCall = serviceId ? ServiceApi.getById(serviceId) : ServiceApi.getDefault();
+        
+        apiCall
             .then(function(service) {
-                // Update service info UI
-                page.el.querySelector('#service-name').textContent = service.name;
-                page.el.querySelector('#service-duration').textContent = service.duration_days;
-                page.el.querySelector('#service-price').textContent = service.price.toLocaleString('vi-VN');
+                var nameEl = document.getElementById('service-name');
+                var durationEl = document.getElementById('service-duration');
+                var priceEl = document.getElementById('service-price');
+                var durationInfoEl = document.getElementById('info-duration');
+                var priceInfoEl = document.getElementById('info-price');
+                var btnPriceEl = document.getElementById('btn-price');
+                var summaryNameEl = document.getElementById('summary-name');
+                var summaryDurationEl = document.getElementById('summary-duration');
+                var summaryPriceEl = document.getElementById('summary-price-top');
+                var summaryTotalEl = document.getElementById('summary-total');
+                var bottomTotalEl = document.getElementById('bottom-total');
                 
-                // Show service info
-                if (serviceInfoEl) {
-                    serviceInfoEl.style.display = 'block';
-                }
+                var priceText = service.price.toLocaleString('vi-VN');
                 
+                if (nameEl) nameEl.textContent = service.name;
+                if (durationEl) durationEl.textContent = service.duration_days;
+                if (priceEl) priceEl.textContent = priceText;
+                
+                if (durationInfoEl) durationInfoEl.textContent = service.duration_days;
+                if (priceInfoEl) priceInfoEl.textContent = priceText;
+                
+                if (btnPriceEl) btnPriceEl.textContent = priceText;
+                
+                if (summaryNameEl) summaryNameEl.textContent = service.name;
+                if (summaryDurationEl) summaryDurationEl.textContent = service.duration_days + ' ngày';
+                if (summaryPriceEl) summaryPriceEl.textContent = priceText;
+                if (summaryTotalEl) summaryTotalEl.textContent = priceText;
+                if (bottomTotalEl) bottomTotalEl.textContent = priceText;
+                
+                if (serviceInfoEl) serviceInfoEl.style.display = 'block';
                 app.preloader.hide();
             })
             .catch(function(error) {
                 app.preloader.hide();
-                app.dialog.alert('Unable to load service information. Please try again.', 'Error');
+                app.dialog.alert('Không thể tải thông tin dịch vụ.', 'Lỗi');
                 console.error('Service load error:', error);
             });
     }
     
-    // Handle order form submission
     if (orderFormEl) {
         orderFormEl.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -876,62 +1068,53 @@ $$(document).on('page:init', '.page[data-name="service"]', function (e) {
             var facebookLink = formData.get('facebook_profile_link');
             
             if (!facebookLink || !facebookLink.includes('facebook.com')) {
-                app.dialog.alert('Please enter a valid Facebook profile link', 'Invalid Input');
+                app.dialog.alert('Vui lòng nhập link Facebook hợp lệ', 'Lỗi');
                 return;
             }
             
-            // Show loading
-            app.dialog.preloader('Creating order...');
+            app.dialog.preloader('Đang tạo đơn hàng...');
             
             OrderApi.create(facebookLink)
                 .then(function(orderData) {
                     app.dialog.close();
                     
-                    // Store order code for WebSocket subscription
                     currentOrderCode = orderData.order_code;
                     
-                    // Update payment info UI
-                    page.el.querySelector('#order-code').textContent = orderData.order_code;
-                    page.el.querySelector('#order-amount').textContent = orderData.amount.toLocaleString('vi-VN');
+                    var orderCodeEl = document.getElementById('order-code');
+                    var orderAmountEl = document.getElementById('order-amount');
+                    var orderExpiresEl = document.getElementById('order-expires');
+                    var qrContainer = document.getElementById('qr-code');
+                    var transferContentEl = document.getElementById('transfer-content');
                     
-                    // Format expiration date
+                    if (orderCodeEl) orderCodeEl.textContent = orderData.order_code;
+                    if (orderAmountEl) orderAmountEl.textContent = orderData.amount.toLocaleString('vi-VN');
+                    
                     var expiresDate = new Date(orderData.expires_at);
-                    page.el.querySelector('#order-expires').textContent = expiresDate.toLocaleString('vi-VN');
+                    if (orderExpiresEl) orderExpiresEl.textContent = expiresDate.toLocaleString('vi-VN');
                     
-                    // Generate QR code (placeholder - replace with actual QR generation)
-                    var qrContainer = page.el.querySelector('#qr-code');
                     if (qrContainer && orderData.qr_content) {
                         qrContainer.innerHTML = '<img src="' + orderData.qr_content + '" alt="QR Code" style="max-width: 200px;">';
                     }
+                    if (transferContentEl) transferContentEl.textContent = orderData.order_code;
                     
-                    // Set transfer content
-                    page.el.querySelector('#transfer-content').textContent = orderData.order_code;
-                    
-                    // Hide form, show payment info
                     orderFormEl.style.display = 'none';
-                    paymentInfoEl.style.display = 'block';
+                    if (paymentInfoEl) paymentInfoEl.style.display = 'block';
                     
-                    // Subscribe to realtime payment updates
                     subscribeToOrder(orderData.order_code);
-                    
-                    // Start polling for order status as fallback
                     startStatusPolling(orderData.order_code);
                 })
                 .catch(function(error) {
                     app.dialog.close();
-                    app.dialog.alert(error.message || 'Failed to create order. Please try again.', 'Error');
+                    app.dialog.alert(error.message || 'Không thể tạo đơn hàng.', 'Lỗi');
                     console.error('Order creation error:', error);
                 });
         });
     }
     
-    // Polling function for order status (fallback when WebSocket is not available)
     var pollingInterval = null;
     
     function startStatusPolling(orderCode) {
-        if (pollingInterval) {
-            clearInterval(pollingInterval);
-        }
+        if (pollingInterval) clearInterval(pollingInterval);
 
         pollingInterval = setInterval(function() {
             OrderApi.getStatus(orderCode)
@@ -939,76 +1122,247 @@ $$(document).on('page:init', '.page[data-name="service"]', function (e) {
                     if (orderData.status === 'paid') {
                         clearInterval(pollingInterval);
                         pollingInterval = null;
-
-                        // Hide expiration section (countdown timer)
-                        var expirationSection = document.getElementById('expiration-section');
-                        if (expirationSection) {
-                            expirationSection.style.display = 'none';
-                        }
-
-                        // Hide payment instruction
-                        var paymentInstruction = document.getElementById('payment-instruction');
-                        if (paymentInstruction) {
-                            paymentInstruction.style.display = 'none';
-                        }
-
-                        // Show success section
-                        var successSection = document.getElementById('success-section');
-                        if (successSection) {
-                            successSection.style.display = 'flex';
-                        }
-
-                        // Update card header status
-                        var statusBadge = document.getElementById('order-status-badge');
-                        var statusText = document.getElementById('order-status-text');
-                        if (statusBadge) {
-                            statusBadge.textContent = 'Đã thanh toán';
-                            statusBadge.classList.remove('bg-color-green');
-                            statusBadge.classList.add('bg-color-blue');
-                        }
-                        if (statusText) {
-                            statusText.textContent = 'Thanh toán thành công';
-                        }
-
-                        // Update success message
-                        var successMessageEl = document.querySelector('.success-message');
-                        if (successMessageEl) {
-                            successMessageEl.innerHTML = `
-                                <i class="icon f7-icons" style="font-size: 40px; margin-bottom: 12px; color: #4CAF50;">checkmark_circle_fill</i>
-                                <h2>Thanh toán thành công!</h2>
-                                <p>
-                                    Dịch vụ của bạn đã được kích hoạt.
-                                    <br>
-                                    Cảm ơn bạn đã sử dụng dịch vụ.
-                                </p>
-                            `;
-                        }
-
-                        // Hide cancel button
-                        var cancelButton = document.querySelector('button[onclick="cancelOrder()"]');
-                        if (cancelButton) {
-                            cancelButton.style.display = 'none';
-                        }
+                        handlePaymentSuccess();
                     }
                 })
                 .catch(function(error) {
                     console.error('Polling error:', error);
                 });
-        }, 5000); // Poll every 5 seconds
+        }, 5000);
     }
     
-    // Cleanup on page leave
-    page.el.addEventListener('page:beforeout', function() {
-        disconnectReverb();
-        if (pollingInterval) {
-            clearInterval(pollingInterval);
-            pollingInterval = null;
+    function handlePaymentSuccess() {
+        var expirationSection = document.getElementById('expiration-section');
+        var paymentInstruction = document.getElementById('payment-instruction');
+        var successSection = document.getElementById('success-section');
+        var statusBadge = document.getElementById('order-status-badge');
+        var statusText = document.getElementById('order-status-text');
+        
+        if (expirationSection) expirationSection.style.display = 'none';
+        if (paymentInstruction) paymentInstruction.style.display = 'none';
+        if (successSection) successSection.style.display = 'flex';
+        if (statusBadge) {
+            statusBadge.textContent = 'Đã thanh toán';
+            statusBadge.classList.remove('bg-color-green');
+            statusBadge.classList.add('bg-color-blue');
         }
+        if (statusText) statusText.textContent = 'Thanh toán thành công';
+        
+        var cancelButton = document.querySelector('button[onclick="cancelOrder()"]');
+        if (cancelButton) cancelButton.style.display = 'none';
+    }
+    
+    loadServiceInfo();
+}
+
+// ====================
+// Home Page Initialization
+// ====================
+
+var _homeUnsubscribe = null;
+
+function initHomePage() {
+    console.log('initHomePage: called');
+    
+    var containerEl = document.getElementById('services-container');
+    var loadingEl = document.getElementById('services-loading');
+    var errorEl = document.getElementById('services-error');
+    
+    if (!containerEl || !loadingEl || !errorEl) {
+        console.error('initHomePage: DOM elements not found');
+        return;
+    }
+    
+    function formatDuration(days) {
+        if (days >= 30) return Math.round(days / 30) + ' tháng';
+        return days + ' ngày';
+    }
+    
+    function formatPrice(price) {
+        return price.toLocaleString('vi-VN');
+    }
+    
+    function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function renderServices(state) {
+        console.log('initHomePage: renderServices called', state);
+        
+        if (state.loading) return;
+        
+        loadingEl.style.display = 'none';
+        
+        if (state.error) {
+            errorEl.style.display = 'flex';
+            containerEl.style.display = 'none';
+            return;
+        }
+
+        var services = state.services || [];
+        if (services.length === 0) {
+            containerEl.innerHTML = '<p class="home-no-services">Chưa có dịch vụ nào</p>';
+            containerEl.style.display = 'block';
+            errorEl.style.display = 'none';
+            return;
+        }
+        
+        var isDark = document.body.classList.contains('dark');
+
+        var servicesHtml = services.map(function(service) {
+            var durationText = formatDuration(service.duration_days);
+            var priceText = formatPrice(service.price);
+            
+            // Check if service is premium based on price or name as a simple heuristic
+            var isPremium = service.price > 100000;
+            var iconClass = isPremium ? 'vs-service-icon premium' : 'vs-service-icon';
+            var iconName = isPremium ? 'star_fill' : 'tv';
+            
+            return '<a href="/service/?service=' + service.id + '" class="vs-service-card link">' +
+                '<div class="vs-service-card-top">' +
+                    '<div class="' + iconClass + '">' +
+                        '<i class="icon f7-icons">' + iconName + '</i>' +
+                    '</div>' +
+                    '<div class="vs-service-details">' +
+                        '<div class="vs-service-title-row">' +
+                            '<h3 class="vs-service-name">' + escapeHtml(service.name) + '</h3>' +
+                            '<div class="vs-service-price">' + priceText + 'đ</div>' +
+                        '</div>' +
+                        '<p class="vs-service-duration">Thời hạn: ' + durationText + '</p>' +
+                    '</div>' +
+                '</div>' +
+                '<p class="vs-service-desc">' + escapeHtml(service.description || 'Xem tất cả kênh truyền hình cơ bản và nâng cao. Hỗ trợ đa thiết bị.') + '</p>' +
+            '</a>';
+        }).join('');
+        
+        containerEl.innerHTML = servicesHtml;
+        containerEl.style.display = 'block';
+        errorEl.style.display = 'none';
+    }
+    
+    if (_homeUnsubscribe) {
+        _homeUnsubscribe();
+        _homeUnsubscribe = null;
+    }
+    
+    _homeUnsubscribe = ServiceStore.subscribe(function(state) {
+        renderServices(state);
     });
     
-    // Initialize service info
-    loadServiceInfo();
-});
+    loadingEl.style.display = 'flex';
+    containerEl.style.display = 'none';
+    errorEl.style.display = 'none';
+    
+    window.retryLoadHomeServices = function() {
+        loadingEl.style.display = 'flex';
+        containerEl.style.display = 'none';
+        errorEl.style.display = 'none';
+        ServiceStore.reset();
+        ServiceStore.loadServices().catch(function(err) {
+            console.error('retryLoadHomeServices error:', err);
+            loadingEl.style.display = 'none';
+            errorEl.style.display = 'flex';
+        });
+    };
+    
+    ServiceStore.reset();
+    ServiceStore.loadServices().catch(function(err) {
+        console.error('initHomePage: loadServices error:', err);
+        loadingEl.style.display = 'none';
+        errorEl.style.display = 'flex';
+    });
+}
+
+var _servicesListUnsubscribe = null;
+
+function initServicesListPage() {
+    console.log('initServicesListPage: called');
+    
+    var containerEl = document.getElementById('services-list-container');
+    if (!containerEl) {
+        console.error('initServicesListPage: Container not found');
+        return;
+    }
+    
+    function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function renderServicesList(state) {
+        if (state.loading) {
+            containerEl.innerHTML = '<div class="text-align-center" style="padding: 40px;"><div class="preloader"></div><p style="margin-top: 10px; color: var(--vs-text-secondary);">Đang tải dịch vụ...</p></div>';
+            return;
+        }
+        
+        if (state.error) {
+            containerEl.innerHTML = '<p class="text-align-center" style="padding: 40px; color: var(--vs-text-secondary);">Không thể tải danh sách dịch vụ.</p>';
+            return;
+        }
+        
+        var services = state.services || [];
+        if (services.length === 0) {
+            containerEl.innerHTML = '<p class="text-align-center" style="padding: 40px; color: var(--vs-text-secondary);">Chưa có dịch vụ nào.</p>';
+            return;
+        }
+        
+        var servicesHtml = services.map(function(service) {
+            var durationDays = service.duration_days || 30;
+            var durationText = 'Thời hạn: ' + (durationDays >= 30 ? Math.round(durationDays / 30) * 30 + ' ngày' : durationDays + ' ngày');
+            var priceText = service.price ? service.price.toLocaleString('vi-VN') : '0';
+            
+            var isPremium = service.price > 100000;
+            var iconClass = isPremium ? 'vs-service-icon premium' : 'vs-service-icon';
+            var iconName = isPremium ? 'star_fill' : 'tv';
+            var desc = escapeHtml(service.description || 'Xem tất cả kênh truyền hình cơ bản và nâng cao. Hỗ trợ đa thiết bị.');
+            
+            return '<div class="vs-service-card-detailed">' +
+                '<div class="vs-service-card-top">' +
+                    '<div class="' + iconClass + '">' +
+                        '<i class="icon f7-icons">' + iconName + '</i>' +
+                    '</div>' +
+                    '<div class="vs-service-details">' +
+                        '<div class="vs-service-title-row">' +
+                            '<h3 class="vs-service-name">' + escapeHtml(service.name) + '</h3>' +
+                            '<div class="vs-service-price">' + priceText + 'đ</div>' +
+                        '</div>' +
+                        '<p class="vs-service-duration">' + durationText + '</p>' +
+                    '</div>' +
+                '</div>' +
+                '<p class="vs-service-desc">' + desc + '</p>' +
+                '<a href="/service/?service=' + service.id + '" class="vs-service-register-btn link">' +
+                    'Đăng ký ngay <i class="icon f7-icons" style="font-size: 16px;">arrow_right</i>' +
+                '</a>' +
+            '</div>';
+        }).join('');
+        
+        containerEl.innerHTML = servicesHtml;
+    }
+
+    if (_servicesListUnsubscribe) {
+        _servicesListUnsubscribe();
+        _servicesListUnsubscribe = null;
+    }
+
+    _servicesListUnsubscribe = ServiceStore.subscribe(function(state) {
+        renderServicesList(state);
+    });
+
+    if (ServiceStore.isLoaded) {
+        renderServicesList({
+            services: ServiceStore.services,
+            loading: ServiceStore.loading,
+            error: ServiceStore.error
+        });
+    } else {
+        ServiceStore.loadServices().catch(function(err) {
+            console.error('initServicesListPage: loadServices error:', err);
+        });
+    }
+}
 
 // ====================
 // Helper Functions

@@ -49,4 +49,5 @@
   };
 
   console.log('API Modules loaded:', window.ApiReady.status());
+  console.log('AppConfig:', window.AppConfig);
 })();
