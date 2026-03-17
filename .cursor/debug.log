@@ -1,0 +1,14 @@
+{"hypothesisId":"D","location":"app.js:DOMContentLoaded","message":"DOM ready","data":{},"timestamp":1773735954902}
+{"hypothesisId":"D","location":"app.js:timeout","message":"Calling switchTab","data":{},"timestamp":1773735955404}
+{"hypothesisId":"C","location":"app.js:switchTab","message":"Switching tab","data":{"tab":"home","current":"home"},"timestamp":1773735955404}
+{"hypothesisId":"C","location":"app.js:switchTab","message":"Load error","data":{"error":"Cannot read properties of undefined (reading 'init')"},"timestamp":1773735955426}
+{"hypothesisId":"C","location":"app.js:switchTab","message":"Switching tab","data":{"tab":"service","current":"home"},"timestamp":1773735957912}
+{"hypothesisId":"A","location":"app.js:tab-click","message":"Tab clicked","data":{"href":"#","active":true},"timestamp":1773735957913}
+{"hypothesisId":"C","location":"app.js:switchTab","message":"Load error","data":{"error":"Cannot read properties of undefined (reading 'init')"},"timestamp":1773735957934}
+{"hypothesisId":"C","location":"app.js:switchTab","message":"Switching tab","data":{"tab":"home","current":"service"},"timestamp":1773735960147}
+{"hypothesisId":"A","location":"app.js:tab-click","message":"Tab clicked","data":{"href":"#","active":true},"timestamp":1773735960149}
+{"hypothesisId":"C","location":"app.js:switchTab","message":"Switching tab","data":{"tab":"service","current":"home"},"timestamp":1773735973300}
+{"hypothesisId":"A","location":"app.js:tab-click","message":"Tab clicked","data":{"href":"#","active":true},"timestamp":1773735973301}
+{"hypothesisId":"C","location":"app.js:switchTab","message":"Switching tab","data":{"tab":"profile","current":"service"},"timestamp":1773735974138}
+{"hypothesisId":"A","location":"app.js:tab-click","message":"Tab clicked","data":{"href":"#","active":true},"timestamp":1773735974138}
+{"hypothesisId":"C","location":"app.js:switchTab","message":"Load error","data":{"error":"Cannot read properties of undefined (reading 'init')"},"timestamp":1773735974157}
