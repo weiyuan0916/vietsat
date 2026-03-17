@@ -1,0 +1,25 @@
+{
+  "name": "vietsat-frontend",
+  "version": "1.0.0",
+  "description": "Vietnam Satellite - Framework7 PWA Frontend",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "sync": "npm run build && cp -r js/* ../pwa-ecommerce/public/app/js/ && cp index.html ../pwa-ecommerce/public/app/",
+    "ios": "capacitor run ios",
+    "android": "capacitor run android",
+    "ios:build": "capacitor build ios",
+    "android:build": "capacitor build android"
+  },
+  "dependencies": {
+    "framework7": "^8.0.0",
+    "framework7-icons": "^3.0.0",
+    "cordova-res": "^0.15.4"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0",
+    "@capacitor/cli": "^5.7.0"
+  }
+}

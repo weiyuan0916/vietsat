@@ -26,162 +26,345 @@
 
 var $$ = Dom7;
 
-// #region Debug logging - Hypothesis testing
-var DEBUG_LOG_ENDPOINT = 'http://127.0.0.1:7242/ingest/3ba32230-ec0a-40a1-bfce-6b4197209b56';
-function debugLog(hypothesisId, location, message, data) {
-  fetch(DEBUG_LOG_ENDPOINT, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      hypothesisId: hypothesisId,
-      location: location,
-      message: message,
-      data: data,
-      timestamp: Date.now()
-    })
-  }).catch(function() {});
-}
-// Debug tab navigation
-$$(document).on('click', '.tab-link', function(e) {
-  var href = $$(this).attr('href');
-  debugLog('A', 'app.js:tab-click', 'Tab clicked', {href: href, active: $$(this).hasClass('tab-link-active')});
-});
-
-// #endregion
-
 var app = new Framework7({
   el: "#app",
   name: "Yui",
   theme: "ios",
   iosTranslucentBars: false,
   iosTranslucentModals: false,
-  // Initialize tabs
-  tabs: {
-    swipeable: true,
-  },
   view: {
     browserHistory: true,
-    browserHistoryAnimate: Framework7.device.ios ? false : true,
-    main: true,
+    browserHistoryAnimate: Framework7.device.ios ? false : true
   },
   routes: [
-    // Home Page (Landing Page) - init true for initial load
+    // Features
     {
-      path: '/',
-      url: 'pages/pages/home.html',
+      path: "/action-sheet/",
+      url: "pages/features/action-sheet.html",
+    },
+    {
+      path: "/columns/",
+      url: "pages/features/columns.html",
+    },
+    {
+      path: "/dialog/",
+      url: "pages/features/dialog.html",
+    },
+    {
+      path: "/icons/",
+      url: "pages/features/icons.html",
+    },
+    {
+      path: "/infinite-scroll/",
+      url: "pages/features/infinite-scroll.html",
+    },
+    {
+      path: "/notification/",
+      url: "pages/features/notification.html",
+    },
+    {
+      path: "/page/",
+      url: "pages/features/page.html",
+    },
+    {
+      path: "/panel/",
+      url: "pages/features/panel.html",
+    },
+    {
+      path: "/photo-browser/",
+      url: "pages/features/photo-browser.html",
+    },
+    {
+      path: "/popover/",
+      url: "pages/features/popover.html",
+    },
+    {
+      path: "/popup/",
+      url: "pages/features/popup.html",
+    },
+    {
+      path: "/pull-to-refresh/",
+      url: "pages/features/pull-to-refresh.html",
+    },
+    {
+      path: "/sheet-modal/",
+      url: "pages/features/sheet-modal.html",
+    },
+    {
+      path: "/swipe-to-delete/",
+      url: "pages/features/swipe-to-delete.html",
+    },
+    {
+      path: "/tabs/",
+      url: "pages/features/tabs.html",
+    },
+    {
+      path: "/text-editor/",
+      url: "pages/features/text-editor.html",
+    },
+    {
+      path: "/toast/",
+      url: "pages/features/toast.html",
+    },
+    {
+      path: "/tooltip/",
+      url: "pages/features/tooltip.html",
+    },
+    {
+      path: "/typography/",
+      url: "pages/features/typography.html",
+    },
+    // Components
+    {
+      path: "/accordion/",
+      url: "pages/components/accordion.html",
+    },
+    {
+      path: "/album-list/",
+      url: "pages/components/album-list.html",
+    },
+    {
+      path: "/author-list/",
+      url: "pages/components/author-list.html",
+    },
+    {
+      path: "/badge/",
+      url: "pages/components/badge.html",
+    },
+    {
+      path: "/button/",
+      url: "pages/components/button.html",
+    },
+    {
+      path: "/checkbox/",
+      url: "pages/components/checkbox.html",
+    },
+    {
+      path: "/card/",
+      url: "pages/components/card.html",
+    },
+    {
+      path: "/card-footer/",
+      url: "pages/components/card-footer.html",
+    },
+    {
+      path: "/card-big-footer/",
+      url: "pages/components/card-big-footer.html",
+    },
+    {
+      path: "/comments/",
+      url: "pages/components/comments.html",
+    },
+    {
+      path: "/event-list/",
+      url: "pages/components/event-list.html",
+    },
+    {
+      path: "/history-timeline/",
+      url: "pages/components/history-timeline.html",
+    },
+    {
+      path: "/information-block/",
+      url: "pages/components/information-block.html",
+    },
+    {
+      path: "/link-banner/",
+      url: "pages/components/link-banner.html",
+    },
+    {
+      path: "/list/",
+      url: "pages/components/list.html",
+    },
+    {
+      path: "/list-icon/",
+      url: "pages/components/list-icon.html",
+    },
+    {
+      path: "/picker/",
+      url: "pages/components/picker.html",
+    },
+    {
+      path: "/post-list/",
+      url: "pages/components/post-list.html",
+    },
+    {
+      path: "/preloader/",
+      url: "pages/components/preloader.html",
+    },
+    {
+      path: "/progress-bar/",
+      url: "pages/components/progress-bar.html",
+    },
+    {
+      path: "/radio/",
+      url: "pages/components/radio.html",
+    },
+    {
+      path: "/range-slider/",
+      url: "pages/components/range-slider.html",
+    },
+    {
+      path: "/rating/",
+      url: "pages/components/rating.html",
+    },
+    {
+      path: "/slider-cards/",
+      url: "pages/components/slider-cards.html",
+    },
+    {
+      path: "/slider-cards-footer/",
+      url: "pages/components/slider-cards-footer.html",
+    },
+    {
+      path: "/slider-categories/",
+      url: "pages/components/slider-categories.html",
+    },
+    {
+      path: "/slider-authors/",
+      url: "pages/components/slider-authors.html",
+    },
+    {
+      path: "/slider-albums/",
+      url: "pages/components/slider-albums.html",
+    },
+    {
+      path: "/slider-movies/",
+      url: "pages/components/slider-movies.html",
+    },
+    {
+      path: "/stepper/",
+      url: "pages/components/stepper.html",
+    },
+    {
+      path: "/stocks/",
+      url: "pages/components/stocks.html",
+    },
+    {
+      path: "/text-input/",
+      url: "pages/components/text-input.html",
+    },
+    {
+      path: "/ticket/",
+      url: "pages/components/ticket.html",
+    },
+    {
+      path: "/toggle-button/",
+      url: "pages/components/toggle-button.html",
+    },
+    // Pages
+    {
+      path: "/signup/",
+      url: "pages/pages/signup.html",
+    },
+    {
+      path: "/signin/",
+      url: "pages/pages/signin.html",
+    },
+    {
+      path: "/forgot-password/",
+      url: "pages/pages/forgot-password.html",
+    },
+    {
+      path: "/messages/",
+      url: "pages/pages/messages.html",
+    },
+    {
+      path: "/chat/",
+      url: "pages/pages/chat.html",
+    },
+    {
+      path: "/single/",
+      url: "pages/pages/single.html",
+    },
+    {
+      path: "/create-post/",
+      url: "pages/pages/create-post.html",
+    },
+    {
+      path: "/movie/",
+      url: "pages/pages/movie.html",
+    },
+    {
+      path: "/album/",
+      url: "pages/pages/album.html",
+    },
+    {
+      path: "/calendar/",
+      url: "pages/pages/calendar.html",
+    },
+    {
+      path: "/help-center/",
+      url: "pages/pages/help-center.html",
+    },
+    {
+      path: "/contact/",
+      url: "pages/pages/contact.html",
+    },
+    {
+      path: "/settings/",
+      url: "pages/pages/settings.html",
+    },
+    {
+      path: "/categories/",
+      url: "pages/pages/categories.html",
+    },
+    {
+      path: "/profile/",
+      url: "pages/pages/profile.html",
+    },
+    {
+      path: "/search/",
+      url: "pages/pages/search.html",
+    },
+    {
+      path: "/notifications/",
+      url: "pages/pages/notifications.html",
+    },
+    {
+      path: "/onboarding/",
+      url: "pages/pages/onboarding.html",
       options: {
-        init: true
-      }
+        transition: "f7-dive",
+      },
     },
     // Service Page
     {
-      path: '/service/',
-      url: 'pages/pages/service.html',
+      path: "/service/",
+      url: "pages/pages/service.html",
     },
-    // Profile Page
+    // Home Page (Landing Page)
     {
-      path: '/profile/',
-      url: 'pages/pages/profile.html',
-    },
-    // Sign In Page
-    {
-      path: '/signin/',
-      url: 'pages/pages/signin.html',
-    },
-    // Sign Up Page
-    {
-      path: '/signup/',
-      url: 'pages/pages/signup.html',
+      path: "/home/",
+      url: "pages/pages/home.html",
     },
   ],
 });
 
-// ====================
-// Tab Navigation
-// ====================
-var currentTab = 'home';
-var pageCache = {};
+// Initialize tabs properly when Framework7 is ready
+app.on('ready', function() {
+  // Get each tab view
+  var homeView = app.views.get('#view-home');
+  var serviceView = app.views.get('#view-service');
+  var profileView = app.views.get('#view-profile');
 
-function switchTab(tabName, element) {
-  debugLog('C', 'app.js:switchTab', 'Switching tab', {tab: tabName, current: currentTab});
-  
-  // Prevent switching to the same tab
-  if (tabName === currentTab && pageCache[tabName]) {
-    return;
-  }
-  
-  // Update tab link active states
-  var tabLinks = document.querySelectorAll('.tab-link');
-  tabLinks.forEach(function(link) {
-    link.classList.remove('tab-link-active');
-    if (link.getAttribute('data-tab') === tabName) {
-      link.classList.add('tab-link-active');
+  // Function to load pages in tabs
+  function loadTabPages() {
+    // Load Home page into view-home
+    if (homeView) {
+      homeView.router.load({ url: '/app/home/', animate: false });
     }
-  });
-  
-  var pageContainer = document.getElementById('page-container');
-  var url = '';
-  
-  // Determine the URL based on tab
-  switch(tabName) {
-    case 'home':
-      url = 'pages/pages/home.html';
-      break;
-    case 'service':
-      url = 'pages/pages/service.html';
-      break;
-    case 'profile':
-      url = 'pages/pages/profile.html';
-      break;
-    default:
-      url = 'pages/pages/home.html';
+    // Load Service page into view-service
+    if (serviceView) {
+      serviceView.router.load({ url: '/app/service/', animate: false });
+    }
+    // Load Profile page into view-profile
+    if (profileView) {
+      profileView.router.load({ url: '/app/profile/', animate: false });
+    }
   }
-  
-  // Check cache first
-  if (pageCache[tabName]) {
-    pageContainer.innerHTML = pageCache[tabName];
-    currentTab = tabName;
-    // Reinitialize Framework7 for the new page
-    app.pageData.init(pageContainer.querySelector('.page'));
-    debugLog('C', 'app.js:switchTab', 'Loaded from cache', {tab: tabName});
-    return;
-  }
-  
-  // Show loading
-  app.preloader.show();
-  
-  // Fetch page content
-  fetch(url)
-    .then(function(response) {
-      return response.text();
-    })
-    .then(function(html) {
-      pageCache[tabName] = html;
-      pageContainer.innerHTML = html;
-      currentTab = tabName;
-      app.preloader.hide();
-      
-      // Reinitialize Framework7 components
-      var pageEl = pageContainer.querySelector('.page');
-      if (pageEl) {
-        app.pageData.init(pageEl);
-      }
-      debugLog('C', 'app.js:switchTab', 'Loaded and cached', {tab: tabName});
-    })
-    .catch(function(error) {
-      app.preloader.hide();
-      app.dialog.alert('Failed to load page. Please try again.', 'Error');
-      debugLog('C', 'app.js:switchTab', 'Load error', {error: error.message});
-    });
-}
 
-// Load home page on initial load
-document.addEventListener('DOMContentLoaded', function() {
-  debugLog('D', 'app.js:DOMContentLoaded', 'DOM ready', {});
-  setTimeout(function() {
-    debugLog('D', 'app.js:timeout', 'Calling switchTab', {});
-    switchTab('home', null);
-  }, 500);
+  // Initial load
+  setTimeout(loadTabPages, 100);
 });
 
 // 2. Dialog

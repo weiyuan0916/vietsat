@@ -1,0 +1,23 @@
+{
+  "appId": "com.vietsat.app",
+  "appName": "Vietnam Satellite",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "cordova": {
+    "preferences": {
+      "ScrollEnabled": "true",
+      "Orientation": "portrait",
+      "StatusBarOverlaysWebView": "false",
+      "StatusBarBackgroundColor": "#000000"
+    }
+  },
+  "ios": {
+    "xcodeVersion": "15.0",
+    "cordovaLinkerFlags": ["-ObjC"]
+  },
+  "android": {
+    "minSdkVersion": 22,
+    "targetSdkVersion": "34"
+  }
+}
