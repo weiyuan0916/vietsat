@@ -101,6 +101,37 @@ app.views.create('.view-main', {
 });
 
 // ====================
+// Browser History Sync - Fix Back Button Issue
+// ====================
+
+// Framework7 với hash navigation (#!) sẽ tự xử lý browser history
+// Không cần thêm popstate handler vì F7 đã quản lý
+
+// Get base URL for fetching pages - handles both dev and production
+function getPageBaseUrl() {
+  return '/app/';
+}
+
+// Helper function to navigate using Framework7 router
+function navigateToPage(path) {
+  if (!app || !app.views || !app.views.main) return;
+  app.views.main.router.navigate(path);
+}
+
+// Helper function to go back using Framework7 router
+function navigateBack() {
+  if (!app || !app.views || !app.views.main) return;
+
+  var router = app.views.main.router;
+  if (router.history.length > 1) {
+    router.back();
+  } else {
+    // Nếu không có history, chuyển về tab home
+    switchTab('home', null);
+  }
+}
+
+// ====================
 // Tab Navigation
 // ====================
 var currentTab = 'home';
@@ -175,28 +206,26 @@ function goBack() {
 
   if (app && app.views && app.views.main) {
     var router = app.views.main.router;
-    
-    // If Framework7 has full history, use native back
+
+    // Use Framework7's back method - it handles URL automatically
     if (router.history.length > 1) {
       router.back();
-      return;
-    } else if (router.history.length === 1) {
-      // If history is 1, it means we opened a deep page directly over the tabs
-      // Force remove the F7 page safely to reveal tabs underneath
+    } else if (router.history.length <= 1) {
+      // If history is 1 or 0, force remove the F7 page to reveal tabs underneath
       var $page = $$('.page-current');
       if ($page.length > 0) {
-        // Explicitly apply slide-out animation (left to right)
+        // Apply slide-out animation
         $page.css('transition-duration', '400ms');
         $page.css('transform', 'translate3d(100%, 0, 0)');
-        
+
         setTimeout(function() {
           $page.remove();
-        }, 400); // Wait for transition
-        
-        // Reset router state
+        }, 400);
+
+        // Redirect effectively by manually setting router bounds and firing tab switch
         router.history = [];
         router.url = '';
-        
+
         // Show tab bar
         var tabBarWrap = document.querySelector('.vs-tab-bar-wrap');
         if (tabBarWrap) {
@@ -204,8 +233,12 @@ function goBack() {
           tabBarWrap.style.opacity = '1';
           tabBarWrap.style.display = '';
         }
+        if (typeof switchTab === 'function') switchTab('home', null);
+      } else {
+        router.history = [];
+        router.url = '';
+        if (typeof switchTab === 'function') switchTab('home', null);
       }
-      return;
     }
   }
 }
@@ -213,14 +246,17 @@ function goBack() {
 function loadServicePage(serviceId) {
   var pageContainer = document.getElementById('page-container');
   if (!pageContainer) return;
-  
+
   // Hide tab bar on detail page
   var tabBarWrap = document.querySelector('.vs-tab-bar-wrap');
   if (tabBarWrap) tabBarWrap.style.display = 'none';
-  
+
+  // Prepend base URL to handle routing from subdirectories
+  var fullUrl = getPageBaseUrl() + 'pages/pages/service.html';
+
   app.preloader.show();
-  
-  fetch('pages/pages/service.html')
+
+  fetch(fullUrl)
     .then(function(response) { return response.text(); })
     .then(function(html) {
       pageContainer.innerHTML = html;
@@ -235,27 +271,18 @@ function loadServicePage(serviceId) {
 }
 
 function loadPage(url) {
-  var pageContainer = document.getElementById('page-container');
-  if (!pageContainer) return;
-  
-  // Hide tab bar on non-tab pages
-  var tabBarWrap = document.querySelector('.vs-tab-bar-wrap');
-  if (tabBarWrap) tabBarWrap.style.display = 'none';
-  
-  app.preloader.show();
-  
-  fetch(url)
-    .then(function(response) { return response.text(); })
-    .then(function(html) {
-      pageContainer.innerHTML = html;
-      app.preloader.hide();
-      afterPageLoaded(url, pageContainer);
-    })
-    .catch(function(error) {
-      app.preloader.hide();
-      app.dialog.alert('Không thể tải trang.', 'Lỗi');
-      console.error('loadPage error:', error);
-    });
+  // Thay vì loadPage, sử dụng F7 router để điều hướng.
+  // Đảm bảo URL route khớp với cấu hình trong routes
+  if (app && app.views && app.views.main) {
+    // Chuyển đổi từ URL file thành route path nếu cần
+    var path = url;
+    if (url.includes('signin.html')) path = '/signin/';
+    else if (url.includes('signup.html')) path = '/signup/';
+    else if (url.includes('service.html')) path = '/service/';
+    else if (url.includes('cart.html')) path = '/cart/';
+    
+    app.views.main.router.navigate(path);
+  }
 }
 
 function afterPageLoaded(url, pageContainer) {
@@ -308,81 +335,82 @@ function initPasswordToggles(root) {
   });
 }
 
+// Setup generic delegate for auth forms
+$$(document).on('submit', '#login-form', function(evt) {
+  evt.preventDefault();
+  var signinForm = evt.target;
+  var fd = new FormData(signinForm);
+  var email = fd.get('email');
+  var password = fd.get('password');
+
+  app.dialog.preloader('Đang đăng nhập...');
+  window.AuthApi.login({ email: email, password: password })
+    .then(function(res) {
+      app.dialog.close();
+      var user = res?.data?.user || res?.data?.data?.user || res?.data?.user;
+      var token = res?.data?.token || res?.data?.data?.token || res?.data?.token;
+      if (res && res.status && res.data) {
+        user = res.data.user;
+        token = res.data.token;
+      }
+      if (!token) {
+        app.dialog.alert('Không nhận được token đăng nhập.', 'Lỗi');
+        return;
+      }
+      window.AuthStore.setAuth(user || null, token);
+      
+      // Clear F7 router state and switch to home tab
+      app.views.main.router.history = [];
+      app.views.main.router.url = '';
+      switchTab('home', null);
+    })
+    .catch(function(err) {
+      app.dialog.close();
+      app.dialog.alert(err?.data?.message || err?.message || 'Đăng nhập thất bại.', 'Lỗi');
+    });
+});
+
+$$(document).on('submit', '#signup-form', function(evt) {
+  evt.preventDefault();
+  var signupForm = evt.target;
+  var fd = new FormData(signupForm);
+  var payload = {
+    name: fd.get('name'),
+    email: fd.get('email'),
+    password: fd.get('password'),
+    password_confirmation: fd.get('password_confirmation'),
+  };
+
+  app.dialog.preloader('Đang đăng ký...');
+  window.AuthApi.register(payload)
+    .then(function(res) {
+      app.dialog.close();
+      app.toast.create({
+        text: 'Đăng ký thành công! Vui lòng đăng nhập.',
+        position: 'top',
+        closeTimeout: 3000,
+        cssClass: 'color-green'
+      }).open();
+      if (app && app.views && app.views.main) {
+        app.views.main.router.navigate('/signin/');
+      }
+    })
+    .catch(function(err) {
+      app.dialog.close();
+      var msg = err?.data?.message || err?.message || 'Đăng ký thất bại.';
+      app.dialog.alert(msg, 'Lỗi');
+    });
+});
+
 function initAuthForms(root) {
-  if (!root) return;
-
-  var signinForm = root.querySelector('#login-form');
-  if (signinForm && !(signinForm.dataset && signinForm.dataset.bound === '1')) {
-    signinForm.addEventListener('submit', function(evt) {
-      evt.preventDefault();
-      var fd = new FormData(signinForm);
-      var email = fd.get('email');
-      var password = fd.get('password');
-
-      app.dialog.preloader('Đang đăng nhập...');
-      window.AuthApi.login({ email: email, password: password })
-        .then(function(res) {
-          app.dialog.close();
-          var user = res?.data?.user || res?.data?.data?.user || res?.data?.user;
-          var token = res?.data?.token || res?.data?.data?.token || res?.data?.token;
-          if (res && res.status && res.data) {
-            user = res.data.user;
-            token = res.data.token;
-          }
-          if (!token) {
-            app.dialog.alert('Không nhận được token đăng nhập.', 'Lỗi');
-            return;
-          }
-          window.AuthStore.setAuth(user || null, token);
-          switchTab('home', null);
-        })
-        .catch(function(err) {
-          app.dialog.close();
-          app.dialog.alert(err?.data?.message || err?.message || 'Đăng nhập thất bại.', 'Lỗi');
-        });
-    });
-    if (signinForm.dataset) signinForm.dataset.bound = '1';
-  }
-
-  var signupForm = root.querySelector('#signup-form');
-  if (signupForm && !(signupForm.dataset && signupForm.dataset.bound === '1')) {
-    signupForm.addEventListener('submit', function(evt) {
-      evt.preventDefault();
-      var fd = new FormData(signupForm);
-      var payload = {
-        name: fd.get('name'),
-        email: fd.get('email'),
-        password: fd.get('password'),
-        password_confirmation: fd.get('password_confirmation'),
-      };
-
-      app.dialog.preloader('Đang đăng ký...');
-      window.AuthApi.register(payload)
-        .then(function(res) {
-          app.dialog.close();
-          var user = res?.data?.user;
-          var token = res?.data?.token;
-          if (!token) {
-            app.dialog.alert('Không nhận được token đăng ký.', 'Lỗi');
-            return;
-          }
-          window.AuthStore.setAuth(user || null, token);
-          switchTab('home', null);
-        })
-        .catch(function(err) {
-          app.dialog.close();
-          var msg = err?.data?.message || err?.message || 'Đăng ký thất bại.';
-          app.dialog.alert(msg, 'Lỗi');
-        });
-    });
-    if (signupForm.dataset) signupForm.dataset.bound = '1';
-  }
+  // Logic migrated to delegated events above to prevent race conditions
 }
 
 function ensureAuthedOrRedirect() {
   if (window.AuthStore && window.AuthStore.isAuthenticated) return true;
-  navigationHistory.push('signin');
-  loadPage('pages/pages/signin.html');
+  if (app && app.views && app.views.main) {
+    app.views.main.router.navigate('/signin/');
+  }
   return false;
 }
 
@@ -404,8 +432,9 @@ function initProfilePage() {
     .catch(function(err) {
       if (err && err.status === 401) {
         window.AuthStore.clear();
-        navigationHistory.push('signin');
-        loadPage('pages/pages/signin.html');
+        if (app && app.views && app.views.main) {
+          app.views.main.router.navigate('/signin/');
+        }
       }
     });
 }
@@ -503,8 +532,9 @@ function initOrdersPage() {
       .catch(function(err) {
         if (err && err.status === 401) {
           window.AuthStore.clear();
-          navigationHistory.push('signin');
-          loadPage('pages/pages/signin.html');
+          if (app && app.views && app.views.main) {
+            app.views.main.router.navigate('/signin/');
+          }
           return;
         }
         if (err && err.status === 404) {
@@ -520,9 +550,28 @@ function initOrdersPage() {
 
 window.logoutAndGoSignin = function() {
   var doLogout = function() {
-    window.AuthStore.clear();
-    navigationHistory.push('signin');
-    loadPage('pages/pages/signin.html');
+    // Clear auth store
+    if (window.AuthStore) {
+      window.AuthStore.clear();
+    }
+    // Clear all auth-related localStorage
+    try {
+      localStorage.removeItem('token');
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+    } catch (e) {}
+
+    // Reset stores
+    if (window.ServiceStore) {
+      window.ServiceStore.reset();
+    }
+    if (window.OrderStore) {
+      window.OrderStore.reset();
+    }
+
+    if (app && app.views && app.views.main) {
+      app.views.main.router.navigate('/signin/');
+    }
   };
 
   if (!window.AuthStore || !window.AuthStore.isAuthenticated) {
@@ -597,7 +646,9 @@ function getTabHtml(tabName) {
     return Promise.resolve(pageCache[tabName]);
   }
   var url = tabUrlMap[tabName] || tabUrlMap.home;
-  return fetch(url)
+  // Prepend base URL to handle routing from subdirectories
+  var fullUrl = getPageBaseUrl() + url;
+  return fetch(fullUrl)
     .then(function(response) {
       return response.text();
     })
@@ -633,7 +684,7 @@ function ensureTabLoaded(tabName) {
 
 function switchTab(tabName, element) {
   var targetTab = tabUrlMap[tabName] ? tabName : 'home';
-  
+
   var tabBarWrap = document.querySelector('.vs-tab-bar-wrap');
   if (tabBarWrap) tabBarWrap.style.display = '';
 
@@ -642,11 +693,13 @@ function switchTab(tabName, element) {
     window.NavigationStore.push(targetTab, {});
   }
 
+  // Let Framework7 router handle URL updates
+
   var targetIndex = getTabIndex(targetTab);
   if (tabSwiper) {
     if (targetTab === currentTab) {
       ensureTabLoaded(targetTab);
-      return; 
+      return;
     }
     tabSwiper.slideTo(targetIndex, tabTransitionMs);
   }
@@ -1129,7 +1182,9 @@ function preloadPages() {
   const pages = app.routes.map((route) => route.url);
 
   for (const page of pages) {
-    fetch(page)
+    // Prepend base URL to handle routing from subdirectories
+    const fullUrl = getPageBaseUrl() + page;
+    fetch(fullUrl)
       .then((response) => response.text())
       .then((content) => {
         const xhrEntry = {
@@ -1139,7 +1194,7 @@ function preloadPages() {
         };
         app.router.cache.xhr.push(xhrEntry);
       })
-      .catch((error) => console.error(error));
+      .catch((error) => console.error('preloadPages error:', error));
   }
 }
 
@@ -1394,10 +1449,7 @@ function isReverbConnected() {
 // Service Page Initialization
 // ====================
 
-$$(document).on('page:init', '.page[data-name="service"]', function (e) {
-    var serviceId = e.detail.route.query.service;
-    initServicePage(serviceId);
-});
+// NOTE: Moved page:init handle to the global section at bottom to prevent duplicates
 
 function initServicePage(serviceId) {
     var pageEl = document.querySelector('.page[data-name="service"]');
@@ -1688,49 +1740,71 @@ function initHomePage() {
 }
 
 var _servicesListUnsubscribe = null;
+var _servicesSearchTimeout = null;
 
 function initServicesListPage() {
     console.log('initServicesListPage: called');
-    
+
     var containerEl = document.getElementById('services-list-container');
+    var searchInput = document.querySelector('.vs-services-page .vs-search-input');
     if (!containerEl) {
         console.error('initServicesListPage: Container not found');
         return;
     }
-    
+
     function escapeHtml(text) {
         var div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
 
+    function filterServicesByQuery(services, query) {
+        if (!query || query.trim() === '') {
+            return services;
+        }
+        var lowerQuery = query.toLowerCase().trim();
+        return services.filter(function(service) {
+            var nameMatch = service.name && service.name.toLowerCase().includes(lowerQuery);
+            var descMatch = service.description && service.description.toLowerCase().includes(lowerQuery);
+            var priceMatch = service.price && service.price.toString().includes(lowerQuery);
+            var durationMatch = service.duration_days && service.duration_days.toString().includes(lowerQuery);
+            return nameMatch || descMatch || priceMatch || durationMatch;
+        });
+    }
+
     function renderServicesList(state) {
+        var searchInputEl = document.querySelector('.vs-services-page .vs-search-input');
+        var searchQuery = searchInputEl ? searchInputEl.value : '';
+        var services = filterServicesByQuery(state.services || [], searchQuery);
+
         if (state.loading) {
             containerEl.innerHTML = '<div class="text-align-center" style="padding: 40px;"><div class="preloader"></div><p style="margin-top: 10px; color: var(--vs-text-secondary);">Đang tải dịch vụ...</p></div>';
             return;
         }
-        
+
         if (state.error) {
             containerEl.innerHTML = '<p class="text-align-center" style="padding: 40px; color: var(--vs-text-secondary);">Không thể tải danh sách dịch vụ.</p>';
             return;
         }
-        
-        var services = state.services || [];
+
         if (services.length === 0) {
-            containerEl.innerHTML = '<p class="text-align-center" style="padding: 40px; color: var(--vs-text-secondary);">Chưa có dịch vụ nào.</p>';
+            var noResultMsg = searchQuery.trim() !== ''
+                ? 'Không tìm thấy dịch vụ nào phù hợp với "' + escapeHtml(searchQuery) + '"'
+                : 'Chưa có dịch vụ nào.';
+            containerEl.innerHTML = '<p class="text-align-center" style="padding: 40px; color: var(--vs-text-secondary);">' + noResultMsg + '</p>';
             return;
         }
-        
+
         var servicesHtml = services.map(function(service) {
             var durationDays = service.duration_days || 30;
             var durationText = 'Thời hạn: ' + (durationDays >= 30 ? Math.round(durationDays / 30) * 30 + ' ngày' : durationDays + ' ngày');
             var priceText = service.price ? service.price.toLocaleString('vi-VN') : '0';
-            
+
             var isPremium = service.price > 100000;
             var iconClass = isPremium ? 'vs-service-icon premium' : 'vs-service-icon';
             var iconName = isPremium ? 'crown' : 'tv';
             var desc = escapeHtml(service.description || 'Xem tất cả kênh truyền hình cơ bản và nâng cao. Hỗ trợ đa thiết bị.');
-            
+
             return '<div class="vs-service-card-detailed">' +
                 '<div class="vs-service-card-top">' +
                     '<div class="' + iconClass + '">' +
@@ -1755,8 +1829,30 @@ function initServicesListPage() {
                 '</div>' +
             '</div>';
         }).join('');
-        
+
         containerEl.innerHTML = servicesHtml;
+    }
+
+    // Setup search input with debounce
+    if (searchInput && !searchInput.dataset.bound) {
+        searchInput.addEventListener('input', function(e) {
+            var query = e.target.value;
+            // Clear previous timeout
+            if (_servicesSearchTimeout) {
+                clearTimeout(_servicesSearchTimeout);
+            }
+            // Debounce 300ms
+            _servicesSearchTimeout = setTimeout(function() {
+                if (ServiceStore.isLoaded) {
+                    renderServicesList({
+                        services: ServiceStore.services,
+                        loading: ServiceStore.loading,
+                        error: ServiceStore.error
+                    });
+                }
+            }, 300);
+        });
+        searchInput.dataset.bound = '1';
     }
 
     if (_servicesListUnsubscribe) {
@@ -1887,6 +1983,19 @@ if (app) {
     if (tabBarWrap) {
       tabBarWrap.style.display = isTab ? '' : 'none';
     }
+    
+    // Fix for browser back button leaving lingering pages
+    if (isTab) {
+       setTimeout(function() {
+          var f7Pages = document.querySelectorAll('.page');
+          f7Pages.forEach(function(el) {
+             // If we're on a tab, remove any page that is NOT the main view container
+             if (el && el.parentNode && !el.classList.contains('page-current') && !el.closest('.tabs')) {
+                el.parentNode.removeChild(el); 
+             }
+          });
+       }, 300);
+    }
   });
 }
 
@@ -2006,12 +2115,7 @@ function updateCartBadge(count) {
   });
 }
 
-function openCartPage() {
-  var tabBarWrap = document.querySelector('.vs-tab-bar-wrap');
-  if (tabBarWrap) tabBarWrap.style.display = 'none';
-  app.views.current.router.navigate('/cart/');
-  setTimeout(function() { loadCartPage(); }, 200);
-}
+// openCartPage is defined above using F7 router (window.openCartPage)
 
 function loadCartPage() {
   var loading = document.getElementById('cart-loading');
@@ -2148,5 +2252,20 @@ setTimeout(function() {
         updateCartBadge(res.data.count || 0);
       }
     })
-    .catch(function() {});
+    .catch(function(err) {
+      console.error('Cart count fetch error:', err);
+    });
 }, 500);
+
+// Ensure Tab Bar logic is applied correctly after initial page load routing completes 
+function enforceTabBarVisibility() {
+  var hash = window.location.hash || '';
+  var isAuth = hash.includes('/signin') || hash.includes('/signup');
+  var tabBarWrap = document.querySelector('.vs-tab-bar-wrap');
+  if (tabBarWrap) {
+    tabBarWrap.style.display = isAuth ? 'none' : '';
+  }
+}
+window.addEventListener('hashchange', enforceTabBarVisibility);
+window.addEventListener('load', enforceTabBarVisibility);
+enforceTabBarVisibility();

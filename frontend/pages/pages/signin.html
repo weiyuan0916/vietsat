@@ -1,6 +1,6 @@
 <div class="page no-navbar no-toolbar vs-auth-page" data-name="signin">
   <div class="page-content" style="background: var(--vs-bg-primary);">
-    <a href="#" class="link back icon-only"
+    <a href="#" class="link icon-only" onclick="goBack(); return false;"
       style="position: absolute; top: 16px; left: 16px; color: var(--vs-text-primary);">
       <i class="icon f7-icons">arrow_left</i>
     </a>
@@ -35,13 +35,9 @@
               style="position: absolute; left: 16px; top: 14px; color: var(--vs-text-secondary); font-size: 20px;">lock</i>
             <input type="password" name="password" class="vs-input js-password-input" placeholder="........"
               style="padding-left: 48px; padding-right: 48px;" required>
-            <i
-              class="icon f7-icons js-toggle-password active-state"
-              role="button"
-              tabindex="0"
+            <i class="icon f7-icons js-toggle-password active-state" role="button" tabindex="0"
               aria-label="Hiện mật khẩu"
-              style="position: absolute; right: 16px; top: 14px; color: var(--vs-text-secondary); font-size: 20px; cursor: pointer;"
-            >eye_slash</i>
+              style="position: absolute; right: 16px; top: 14px; color: var(--vs-text-secondary); font-size: 20px; cursor: pointer;">eye_slash</i>
           </div>
         </div>
 
