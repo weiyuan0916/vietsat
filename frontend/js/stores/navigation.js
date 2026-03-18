@@ -8,6 +8,9 @@ class NavigationStore {
     this.history = [];
     this.currentIndex = -1;
     this.MAX_HISTORY = 50; // Prevent memory leak
+    this.storageKey = '__nav_history';
+    this.sessionKey = '__nav_session_id';
+    this.sessionId = this._getOrCreateSessionId();
   }
 
   /**
@@ -16,9 +19,17 @@ class NavigationStore {
    * @param {object} params - Route parameters
    */
   push(route, params = {}) {
-    // Remove any forward history when pushing new route
     this.history = this.history.slice(0, this.currentIndex + 1);
-    
+
+    const current = this.getCurrent();
+    if (current && current.route === route) {
+      current.params = params;
+      current.timestamp = Date.now();
+      this._persist();
+      console.log('Navigation pushed:', route, 'Index:', this.currentIndex);
+      return;
+    }
+
     this.history.push({
       route,
       params,
@@ -43,8 +54,13 @@ class NavigationStore {
    */
   back() {
     if (this.currentIndex > 0) {
+      const currentRoute = this.history[this.currentIndex]?.route || null;
       this.currentIndex--;
-      const previousRoute = this.history[this.currentIndex];
+      while (this.currentIndex > 0 && this.history[this.currentIndex]?.route === currentRoute) {
+        this.currentIndex--;
+      }
+      const previousRoute = this.history[this.currentIndex] || null;
+      this._persist();
       console.log('Navigation back to:', previousRoute.route);
       return previousRoute;
     }
@@ -96,9 +112,10 @@ class NavigationStore {
    */
   _persist() {
     try {
-      window.localStorage.setItem('__nav_history', JSON.stringify({
+      window.localStorage.setItem(this.storageKey, JSON.stringify({
         history: this.history,
-        currentIndex: this.currentIndex
+        currentIndex: this.currentIndex,
+        marker: this._createMarker()
       }));
     } catch (e) {
       console.warn('Failed to persist navigation history:', e);
@@ -110,16 +127,49 @@ class NavigationStore {
    */
   _restore() {
     try {
-      const stored = window.localStorage.getItem('__nav_history');
+      const stored = window.localStorage.getItem(this.storageKey);
       if (stored) {
         const data = JSON.parse(stored);
-        this.history = data.history || [];
-        this.currentIndex = data.currentIndex || -1;
+        const marker = data && data.marker ? data.marker : null;
+        if (!this._isMarkerValid(marker)) {
+          this.clear();
+          return;
+        }
+        this.history = Array.isArray(data.history) ? data.history : [];
+        this.currentIndex = Number.isInteger(data.currentIndex) ? data.currentIndex : -1;
+        if (this.currentIndex >= this.history.length) {
+          this.currentIndex = this.history.length - 1;
+        }
         console.log('Navigation history restored:', this.history.length, 'items');
       }
     } catch (e) {
       console.warn('Failed to restore navigation history:', e);
     }
+  }
+
+  _getOrCreateSessionId() {
+    try {
+      const existing = window.sessionStorage.getItem(this.sessionKey);
+      if (existing) return existing;
+      const created = String(Date.now()) + '-' + Math.random().toString(36).slice(2, 8);
+      window.sessionStorage.setItem(this.sessionKey, created);
+      return created;
+    } catch (_) {
+      return 'no-session';
+    }
+  }
+
+  _createMarker() {
+    const path = (window.location && window.location.pathname) ? window.location.pathname : '';
+    return { path, sessionId: this.sessionId };
+  }
+
+  _isMarkerValid(marker) {
+    if (!marker || typeof marker !== 'object') return false;
+    const currentPath = (window.location && window.location.pathname) ? window.location.pathname : '';
+    if (marker.path !== currentPath) return false;
+    if (marker.sessionId !== this.sessionId) return false;
+    return true;
   }
 }
 

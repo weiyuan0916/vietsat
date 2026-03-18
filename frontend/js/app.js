@@ -72,22 +72,18 @@ var app = new Framework7({
       path: '/orders/',
       url: 'pages/pages/orders.html',
     },
-    // Profile Page
     {
       path: '/profile/',
       url: 'pages/pages/profile.html',
     },
-    // Sign In Page
     {
       path: '/signin/',
       url: 'pages/pages/signin.html',
     },
-    // Sign Up Page
     {
       path: '/signup/',
       url: 'pages/pages/signup.html',
     },
-    // Cart Page
     {
       path: '/cart/',
       url: 'pages/pages/cart.html',
@@ -104,12 +100,24 @@ app.views.create('.view-main', {
 // Browser History Sync - Fix Back Button Issue
 // ====================
 
-// Framework7 với hash navigation (#!) sẽ tự xử lý browser history
-// Không cần thêm popstate handler vì F7 đã quản lý
+window.addEventListener('popstate', function(event) {
+  if (!app || !app.views || !app.views.main) return;
+});
 
 // Get base URL for fetching pages - handles both dev and production
 function getPageBaseUrl() {
-  return '/app/';
+  // Get the path up to /app/ or / (where the app is served from)
+  var path = window.location.pathname;
+  var lastSlash = path.lastIndexOf('/');
+  if (lastSlash > 0) {
+    return path.substring(0, lastSlash + 1);
+  }
+  return '/';
+}
+
+// Alias for getPageBaseUrl - used by preloadPages
+function getBaseUrl() {
+  return getPageBaseUrl();
 }
 
 // Helper function to navigate using Framework7 router
@@ -152,8 +160,49 @@ var tabUrlMap = {
   orders: 'pages/pages/orders.html',
   profile: 'pages/pages/profile.html'
 };
+var tabRouteMap = {
+  home: '/',
+  services: '/services/',
+  orders: '/orders/',
+  profile: '/profile/'
+};
+var routeTabMap = {
+  '/': 'home',
+  '/services/': 'services',
+  '/orders/': 'orders',
+  '/profile/': 'profile'
+};
 var tabTransitionMs = 260;
 var tabSwiper = null;
+var isSyncingTabFromRoute = false;
+var isSyncingHashFromTab = false;
+
+function getTabByHash() {
+  var raw = String(window.location.hash || '').trim();
+  if (!raw) return 'home';
+  var normalized = raw.replace(/^#!/, '').replace(/^#/, '');
+  if (!normalized || normalized === '/' || normalized === '/app' || normalized === '/app/') return 'home';
+  normalized = normalizeRoutePath(normalized);
+  return routeTabMap[normalized] || 'home';
+}
+
+function syncHashForTab(tabName) {
+  if (isSyncingHashFromTab) return;
+  var route = tabRouteMap[tabName] || '/';
+  var nextHash = '#!' + (route === '/' ? '/' : route);
+  if (window.location.hash === nextHash) return;
+  isSyncingHashFromTab = true;
+  window.history.replaceState(null, '', nextHash);
+  isSyncingHashFromTab = false;
+}
+
+window.addEventListener('hashchange', function() {
+  if (isSyncingHashFromTab) return;
+  var targetTab = getTabByHash();
+  if (targetTab !== currentTab) {
+    switchTab(targetTab, null, { syncHash: false });
+  }
+});
 
 // Handle link clicks within page container
 document.addEventListener('click', function(e) {
@@ -167,6 +216,16 @@ document.addEventListener('click', function(e) {
     return;
   }
   
+  var dataHref = link.getAttribute('data-href');
+  if (dataHref && dataHref.startsWith('/')) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (app && app.views && app.views.main) {
+      app.views.main.router.navigate(dataHref);
+    }
+    return;
+  }
+
   var href = link.getAttribute('href');
   if (!href) return;
   
@@ -198,48 +257,62 @@ document.addEventListener('click', function(e) {
 });
 
 // Go back to previous page
+function clearMainViewOverlayPages() {
+  var mainView = document.getElementById('main-view');
+  if (!mainView) return;
+
+  Array.prototype.slice.call(mainView.children).forEach(function(child) {
+    if (child && child.classList && child.classList.contains('page')) {
+      child.parentNode.removeChild(child);
+    }
+  });
+
+  if (app && app.views && app.views.main && app.views.main.router) {
+    var router = app.views.main.router;
+    router.history = [];
+    router.url = '';
+  }
+}
+
 function goBack() {
-  // Keep navigation store in sync
+  var previous = null;
   if (window.NavigationStore) {
-    window.NavigationStore.back();
+    previous = window.NavigationStore.back();
   }
 
   if (app && app.views && app.views.main) {
     var router = app.views.main.router;
+    var currentRoute = normalizeRoutePath(
+      (router.currentRoute && router.currentRoute.url) || router.url || window.location.hash.replace(/^#!/, '')
+    );
+    var isCartRoute = currentRoute === '/cart/' || (window.location.hash || '').includes('/cart/');
+    var currentPage = document.querySelector('.page-current');
+    var currentPageName = currentPage ? currentPage.getAttribute('data-name') : '';
 
-    // Use Framework7's back method - it handles URL automatically
+    if (isCartRoute || currentPageName === 'cart') {
+      if (router.history.length > 1) {
+        router.back();
+        setTimeout(function() {
+          clearMainViewOverlayPages();
+          switchTab('home', null);
+        }, 0);
+        return;
+      }
+      clearMainViewOverlayPages();
+      switchTab('home', null);
+      return;
+    }
+
     if (router.history.length > 1) {
       router.back();
-    } else if (router.history.length <= 1) {
-      // If history is 1 or 0, force remove the F7 page to reveal tabs underneath
-      var $page = $$('.page-current');
-      if ($page.length > 0) {
-        // Apply slide-out animation
-        $page.css('transition-duration', '400ms');
-        $page.css('transform', 'translate3d(100%, 0, 0)');
-
-        setTimeout(function() {
-          $page.remove();
-        }, 400);
-
-        // Redirect effectively by manually setting router bounds and firing tab switch
-        router.history = [];
-        router.url = '';
-
-        // Show tab bar
-        var tabBarWrap = document.querySelector('.vs-tab-bar-wrap');
-        if (tabBarWrap) {
-          tabBarWrap.style.transition = 'opacity 400ms';
-          tabBarWrap.style.opacity = '1';
-          tabBarWrap.style.display = '';
-        }
-        if (typeof switchTab === 'function') switchTab('home', null);
-      } else {
-        router.history = [];
-        router.url = '';
-        if (typeof switchTab === 'function') switchTab('home', null);
-      }
+      return;
     }
+
+    var fallbackTab = 'home';
+    if (previous && previous.route && tabUrlMap[previous.route]) {
+      fallbackTab = previous.route;
+    }
+    if (typeof switchTab === 'function') switchTab(fallbackTab, null);
   }
 }
 
@@ -271,18 +344,30 @@ function loadServicePage(serviceId) {
 }
 
 function loadPage(url) {
-  // Thay vì loadPage, sử dụng F7 router để điều hướng.
-  // Đảm bảo URL route khớp với cấu hình trong routes
-  if (app && app.views && app.views.main) {
-    // Chuyển đổi từ URL file thành route path nếu cần
-    var path = url;
-    if (url.includes('signin.html')) path = '/signin/';
-    else if (url.includes('signup.html')) path = '/signup/';
-    else if (url.includes('service.html')) path = '/service/';
-    else if (url.includes('cart.html')) path = '/cart/';
-    
-    app.views.main.router.navigate(path);
-  }
+  var pageContainer = document.getElementById('page-container');
+  if (!pageContainer) return;
+
+  // Hide tab bar on non-tab pages
+  var tabBarWrap = document.querySelector('.vs-tab-bar-wrap');
+  if (tabBarWrap) tabBarWrap.style.display = 'none';
+
+  // Prepend base URL to handle routing from subdirectories
+  var fullUrl = getPageBaseUrl() + url;
+
+  app.preloader.show();
+
+  fetch(fullUrl)
+    .then(function(response) { return response.text(); })
+    .then(function(html) {
+      pageContainer.innerHTML = html;
+      app.preloader.hide();
+      afterPageLoaded(url, pageContainer);
+    })
+    .catch(function(error) {
+      app.preloader.hide();
+      app.dialog.alert('Không thể tải trang.', 'Lỗi');
+      console.error('loadPage error:', error);
+    });
 }
 
 function afterPageLoaded(url, pageContainer) {
@@ -358,10 +443,7 @@ $$(document).on('submit', '#login-form', function(evt) {
         return;
       }
       window.AuthStore.setAuth(user || null, token);
-      
-      // Clear F7 router state and switch to home tab
-      app.views.main.router.history = [];
-      app.views.main.router.url = '';
+      clearMainViewOverlayPages();
       switchTab('home', null);
     })
     .catch(function(err) {
@@ -403,11 +485,12 @@ $$(document).on('submit', '#signup-form', function(evt) {
 });
 
 function initAuthForms(root) {
-  // Logic migrated to delegated events above to prevent race conditions
+  // Logic migrated to delegated events above
 }
 
 function ensureAuthedOrRedirect() {
   if (window.AuthStore && window.AuthStore.isAuthenticated) return true;
+  navigationHistory.push('signin');
   if (app && app.views && app.views.main) {
     app.views.main.router.navigate('/signin/');
   }
@@ -432,6 +515,7 @@ function initProfilePage() {
     .catch(function(err) {
       if (err && err.status === 401) {
         window.AuthStore.clear();
+        navigationHistory.push('signin');
         if (app && app.views && app.views.main) {
           app.views.main.router.navigate('/signin/');
         }
@@ -532,6 +616,7 @@ function initOrdersPage() {
       .catch(function(err) {
         if (err && err.status === 401) {
           window.AuthStore.clear();
+          navigationHistory.push('signin');
           if (app && app.views && app.views.main) {
             app.views.main.router.navigate('/signin/');
           }
@@ -569,8 +654,11 @@ window.logoutAndGoSignin = function() {
       window.OrderStore.reset();
     }
 
+    // Navigate to signin page using Framework7 router
     if (app && app.views && app.views.main) {
       app.views.main.router.navigate('/signin/');
+    } else {
+      window.location.hash = '#!/signin/';
     }
   };
 
@@ -682,26 +770,41 @@ function ensureTabLoaded(tabName) {
   });
 }
 
-function switchTab(tabName, element) {
+function normalizeRoutePath(url) {
+  if (!url) return '/';
+  var clean = String(url).split('?')[0].split('#')[0];
+  if (!clean || clean === '') return '/';
+  if (!clean.startsWith('/')) clean = '/' + clean;
+  if (clean !== '/' && !clean.endsWith('/')) clean += '/';
+  return clean;
+}
+
+function switchTab(tabName, element, options) {
+  options = options || {};
   var targetTab = tabUrlMap[tabName] ? tabName : 'home';
+
+  if (options.clearOverlay !== false) {
+    clearMainViewOverlayPages();
+  }
 
   var tabBarWrap = document.querySelector('.vs-tab-bar-wrap');
   if (tabBarWrap) tabBarWrap.style.display = '';
 
-  // Track navigation
   if (window.NavigationStore && targetTab !== currentTab) {
     window.NavigationStore.push(targetTab, {});
   }
-
-  // Let Framework7 router handle URL updates
 
   var targetIndex = getTabIndex(targetTab);
   if (tabSwiper) {
     if (targetTab === currentTab) {
       ensureTabLoaded(targetTab);
-      return;
+    } else {
+      tabSwiper.slideTo(targetIndex, tabTransitionMs);
     }
-    tabSwiper.slideTo(targetIndex, tabTransitionMs);
+  }
+
+  if (options.syncHash !== false) {
+    syncHashForTab(targetTab);
   }
 }
 
@@ -755,6 +858,10 @@ function initTabSwiper() {
           var tabBarWrap = document.querySelector('.vs-tab-bar-wrap');
           if (tabBarWrap) tabBarWrap.style.display = '';
         }
+
+        if (!isSyncingTabFromRoute) {
+          syncHashForTab(targetTab);
+        }
       }
     }
   });
@@ -766,9 +873,10 @@ function initApp() {
   debugLog('D', 'app.js:DOMContentLoaded', 'DOM ready', {});
   initTabSwiper();
   setTimeout(function() {
-    console.log('App: Loading initial tab (home)');
-    debugLog('D', 'app.js:timeout', 'Calling ensureTabLoaded for home', {});
-    ensureTabLoaded('home');
+    var initialTab = getTabByHash();
+    console.log('App: Loading initial tab', initialTab);
+    debugLog('D', 'app.js:timeout', 'Calling switchTab for initial tab', { tab: initialTab });
+    switchTab(initialTab, null);
   }, 100);
 }
 
@@ -1144,11 +1252,11 @@ $$(document).on("page:init", '.page[data-name="onboarding"]', function (e) {
 
 // 14. Swiper
 
-$$("swiper-slide a").on("click", function () {
+$$(".swiper-slide a[data-href]").on("click", function () {
   app.views.current.router.navigate($$(this).attr("data-href"));
 });
 $$(document).on("page:init", function (e) {
-  $$("swiper-slide a").on("click", function () {
+  $$(".swiper-slide a[data-href]").on("click", function () {
     app.views.current.router.navigate($$(this).attr("data-href"));
   });
 });
@@ -1183,7 +1291,7 @@ function preloadPages() {
 
   for (const page of pages) {
     // Prepend base URL to handle routing from subdirectories
-    const fullUrl = getPageBaseUrl() + page;
+    const fullUrl = getBaseUrl() + page;
     fetch(fullUrl)
       .then((response) => response.text())
       .then((content) => {
@@ -1449,7 +1557,13 @@ function isReverbConnected() {
 // Service Page Initialization
 // ====================
 
-// NOTE: Moved page:init handle to the global section at bottom to prevent duplicates
+$$(document).on('page:init', '.page[data-name="service"]', function (e) {
+    var serviceId = e.detail.route.query.service;
+    initServicePage(serviceId);
+});
+/**
+ * PAGE INITIALIZATIONS
+ */
 
 function initServicePage(serviceId) {
     var pageEl = document.querySelector('.page[data-name="service"]');
@@ -1551,7 +1665,7 @@ function initServicePage(serviceId) {
                     orderFormEl.style.display = 'none';
                     if (paymentInfoEl) paymentInfoEl.style.display = 'block';
                     
-                    subscribeToOrder(orderData.order_code);
+                    // subscribeToOrder(orderData.order_code); // Missing in direct scripts?
                     startStatusPolling(orderData.order_code);
                 })
                 .catch(function(error) {
@@ -1615,10 +1729,6 @@ function initServicePage(serviceId) {
     
     loadServiceInfo();
 }
-
-// ====================
-// Home Page Initialization
-// ====================
 
 var _homeUnsubscribe = null;
 
@@ -1878,146 +1988,34 @@ function initServicesListPage() {
 }
 
 // ====================
-// Helper Functions
+// Shopping Cart & Utilities
 // ====================
 
-/**
- * Format currency to Vietnamese Dong
- * @param {number} amount - Amount in VND
- * @returns {string} Formatted amount
- */
-function formatCurrency(amount) {
-    return new Intl.NumberFormat('vi-VN', {
-        style: 'currency',
-        currency: 'VND',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    }).format(amount);
-}
+// Initialize cart badge count on app load
+const updateCartBadge = (count) => {
+  const badge = document.querySelector('.vs-tab-item[data-tab="orders"] .badge');
+  if (badge) {
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'flex' : 'none';
+  }
+};
 
-/**
- * Navigate to service page
- * @param {Object} [params] - Optional parameters
- */
-function navigateToService(params) {
-    if (params) {
-        app.views.current.router.navigate('/service/', { props: params });
-    } else {
-        app.views.current.router.navigate('/service/');
-    }
-}
-
-// ====================
-// Shopping Cart
-// ====================
-var cartSessionId = (function() {
-  try {
-    var sid = localStorage.getItem('vs_cart_session');
-    if (!sid) {
-      sid = 'cs_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('vs_cart_session', sid);
-    }
-    return sid;
-  } catch(e) { return ''; }
-})();
-
-function cartApiHeaders() {
-  var headers = {
+const cartApiHeaders = () => {
+  const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
+  return {
+    'Authorization': token ? `Bearer ${token}` : '',
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   };
-  if (cartSessionId) headers['X-Cart-Session'] = cartSessionId;
-  try {
-    var token = localStorage.getItem('token');
-    if (token) headers['Authorization'] = 'Bearer ' + token;
-  } catch(e) {}
-  return headers;
-}
-
-var CART_API = API_BASE_URL + '/cart';
-
-// Framework7 Route Events
-$$(document).on('page:init', '.page[data-name="service"]', function (e) {
-  var serviceId = e.detail.route.query.service;
-  initServicePage(serviceId);
-});
-
-$$(document).on('page:init', '.page[data-name="cart"]', function (e) {
-  // Track navigation to cart
-  if (window.NavigationStore) {
-    window.NavigationStore.push('cart', {});
-  }
-  
-  // Handle cart back button
-  var pageEl = e.detail.el;
-  if (pageEl) {
-    var backBtn = pageEl.querySelector('.cart-back-btn');
-    if (backBtn) {
-      backBtn.addEventListener('click', function(evt) {
-        evt.preventDefault();
-        evt.stopPropagation();
-        goBack();
-      });
-    }
-  }
-  
-  loadCartPage();
-});
-
-$$(document).on('page:init', '.page[data-name="signin"]', function (e) {
-  initPasswordToggles(e.detail.el);
-  initAuthForms(e.detail.el);
-});
-
-$$(document).on('page:init', '.page[data-name="signup"]', function (e) {
-  initPasswordToggles(e.detail.el);
-  initAuthForms(e.detail.el);
-});
-
-// Handle Tab Bar Visibility globally using routeChange
-if (app) {
-  app.on('routeChange', function (newRoute, previousRoute, router) {
-    var path = newRoute.path;
-    var isTab = !path || path === '/' || path === '/home/' || path === '/services/' || path === '/orders/' || path === '/profile/';
-    var tabBarWrap = document.querySelector('.vs-tab-bar-wrap');
-    if (tabBarWrap) {
-      tabBarWrap.style.display = isTab ? '' : 'none';
-    }
-    
-    // Fix for browser back button leaving lingering pages
-    if (isTab) {
-       setTimeout(function() {
-          var f7Pages = document.querySelectorAll('.page');
-          f7Pages.forEach(function(el) {
-             // If we're on a tab, remove any page that is NOT the main view container
-             if (el && el.parentNode && !el.classList.contains('page-current') && !el.closest('.tabs')) {
-                el.parentNode.removeChild(el); 
-             }
-          });
-       }, 300);
-    }
-  });
-}
-
-window.openCartPage = function() {
-  if (app && app.views && app.views.main) {
-    // Track navigation to cart
-    if (window.NavigationStore) {
-      window.NavigationStore.push('cart', {});
-    }
-    app.views.main.router.navigate('/cart/');
-  }
 };
+
+const CART_API = API_BASE_URL + '/cart';
 
 function fetchCart() {
   return fetch(CART_API, { headers: cartApiHeaders() })
     .then(function(r) { return r.json(); })
     .then(function(res) {
       if (res.status && res.data) {
-        if (res.data.session_id) {
-          cartSessionId = res.data.session_id;
-          try { localStorage.setItem('vs_cart_session', cartSessionId); } catch(e) {}
-        }
         updateCartBadge(res.data.items_count || 0);
         return res.data;
       }
@@ -2030,9 +2028,8 @@ function fetchCart() {
 }
 
 function addToCart(serviceId, quantity, btnEl) {
-  if (btnEl) {
-    flyToCartAnimation(btnEl);
-  }
+  if (btnEl && typeof flyToCartAnimation === 'function') flyToCartAnimation(btnEl);
+  
   return fetch(CART_API + '/items', {
     method: 'POST',
     headers: cartApiHeaders(),
@@ -2041,110 +2038,35 @@ function addToCart(serviceId, quantity, btnEl) {
     .then(function(r) { return r.json(); })
     .then(function(res) {
       if (res.status && res.data) {
-        if (res.data.session_id) {
-          cartSessionId = res.data.session_id;
-          try { localStorage.setItem('vs_cart_session', cartSessionId); } catch(e) {}
-        }
         updateCartBadge(res.data.items_count || 0);
         app.toast.create({ text: 'Đã thêm vào giỏ hàng!', position: 'top', closeTimeout: 1500, cssClass: 'color-green' }).open();
         return res.data;
-      } else {
-        app.toast.create({ text: res.message || 'Không thể thêm vào giỏ.', position: 'top', closeTimeout: 2000 }).open();
-        return null;
       }
+      return null;
     })
     .catch(function(err) {
-      console.error('addToCart error:', err);
-      app.toast.create({ text: 'Lỗi kết nối. Vui lòng thử lại.', position: 'top', closeTimeout: 2000 }).open();
+      app.toast.create({ text: 'Lỗi kết nối.', position: 'top', closeTimeout: 2000 }).open();
       return null;
     });
 }
 
-function updateCartItem(itemId, quantity) {
-  return fetch(CART_API + '/items/' + itemId, {
-    method: 'PUT',
-    headers: cartApiHeaders(),
-    body: JSON.stringify({ quantity: quantity })
-  })
-    .then(function(r) { return r.json(); })
-    .then(function(res) {
-      if (res.status && res.data) {
-        updateCartBadge(res.data.items_count || 0);
-        return res.data;
-      }
-      return null;
-    });
+function openCartPage() {
+  if (app && app.views && app.views.main) {
+    app.views.main.router.navigate('/cart/');
+  }
 }
+window.openCartPage = openCartPage;
 
-function removeCartItem(itemId) {
-  return fetch(CART_API + '/items/' + itemId, {
-    method: 'DELETE',
-    headers: cartApiHeaders()
-  })
-    .then(function(r) { return r.json(); })
-    .then(function(res) {
-      if (res.status && res.data) {
-        updateCartBadge(res.data.items_count || 0);
-        return res.data;
-      }
-      return null;
-    });
-}
-
-function clearCart() {
-  app.dialog.confirm('Bạn có chắc muốn xoá toàn bộ giỏ hàng?', 'Xoá giỏ hàng', function() {
-    fetch(CART_API, { method: 'DELETE', headers: cartApiHeaders() })
-      .then(function(r) { return r.json(); })
-      .then(function(res) {
-        updateCartBadge(0);
-        renderCartPage({ items: [], subtotal: 0, total: 0, items_count: 0 });
-        app.toast.create({ text: 'Đã xoá giỏ hàng.', position: 'top', closeTimeout: 1500 }).open();
-      });
-  });
-}
-
-function updateCartBadge(count) {
-  var badges = document.querySelectorAll('.vs-cart-badge');
-  badges.forEach(function(badge) {
-    if (count > 0) {
-      badge.textContent = count > 99 ? '99+' : count;
-      badge.style.display = 'flex';
-    } else {
-      badge.style.display = 'none';
-    }
-  });
-}
-
-// openCartPage is defined above using F7 router (window.openCartPage)
-
-function loadCartPage() {
-  var loading = document.getElementById('cart-loading');
-  var empty = document.getElementById('cart-empty');
-  var list = document.getElementById('cart-items-list');
-  var bottomBar = document.getElementById('cart-bottom-bar');
-  var clearBtn = document.getElementById('cart-clear-btn');
-
-  if (loading) loading.style.display = '';
-  if (empty) empty.style.display = 'none';
-  if (list) list.style.display = 'none';
-  if (bottomBar) bottomBar.style.display = 'none';
-  if (clearBtn) clearBtn.style.display = 'none';
-
-  fetchCart().then(function(data) {
-    if (loading) loading.style.display = 'none';
-    renderCartPage(data);
-  });
+function formatPrice(amount) {
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount || 0);
 }
 
 function renderCartPage(data) {
   var empty = document.getElementById('cart-empty');
   var list = document.getElementById('cart-items-list');
   var bottomBar = document.getElementById('cart-bottom-bar');
-  var totalPrice = document.getElementById('cart-total-price');
   var clearBtn = document.getElementById('cart-clear-btn');
-  var loading = document.getElementById('cart-loading');
-
-  if (loading) loading.style.display = 'none';
+  var totalPrice = document.getElementById('cart-total-price');
 
   if (!data || !data.items || data.items.length === 0) {
     if (empty) empty.style.display = '';
@@ -2161,103 +2083,111 @@ function renderCartPage(data) {
 
   var html = '';
   data.items.forEach(function(item) {
-    var priceFormatted = formatPrice(item.price);
-    var subtotalFormatted = formatPrice(item.subtotal);
-    var durationText = item.duration_days ? item.duration_days + ' ngày' : '';
-
-    html += '<div class="vs-cart-item" id="cart-item-' + item.id + '">' +
-      '<div class="vs-cart-item-icon"><i class="icon f7-icons">tv</i></div>' +
-      '<div class="vs-cart-item-info">' +
-        '<h3 class="vs-cart-item-name">' + escapeHtml(item.service_name) + '</h3>' +
-        (durationText ? '<p class="vs-cart-item-duration">' + durationText + '</p>' : '') +
-        '<div class="vs-cart-item-bottom">' +
-          '<span class="vs-cart-item-price">' + subtotalFormatted + 'đ</span>' +
-          '<div class="vs-qty-controls">' +
-            '<button class="vs-qty-btn' + (item.quantity <= 1 ? ' disabled' : '') + '" onclick="changeCartQty(' + item.id + ', ' + (item.quantity - 1) + ')">−</button>' +
-            '<span class="vs-qty-value">' + item.quantity + '</span>' +
-            '<button class="vs-qty-btn' + (item.quantity >= 10 ? ' disabled' : '') + '" onclick="changeCartQty(' + item.id + ', ' + (item.quantity + 1) + ')">+</button>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-      '<button class="vs-cart-item-delete" onclick="deleteCartItem(' + item.id + ')"><i class="icon f7-icons">trash</i></button>' +
-    '</div>';
+    var price = item.price || 0;
+    var qty = item.quantity || 1;
+    var itemTotal = price * qty;
+    html += '<div class="vs-cart-item" data-id="' + item.id + '">';
+    html += '<div class="vs-cart-item-info">';
+    html += '<div class="vs-cart-item-name">' + (item.name || 'Dịch vụ') + '</div>';
+    html += '<div class="vs-cart-item-price">' + formatPrice(itemTotal) + '</div>';
+    html += '</div>';
+    html += '<div class="vs-cart-item-qty">';
+    html += '<button onclick="updateCartItem(' + item.id + ', ' + (qty - 1) + ')" class="vs-qty-btn">-</button>';
+    html += '<span>' + qty + '</span>';
+    html += '<button onclick="updateCartItem(' + item.id + ', ' + (qty + 1) + ')" class="vs-qty-btn">+</button>';
+    html += '</div>';
+    html += '</div>';
   });
 
   if (list) list.innerHTML = html;
-  if (totalPrice) totalPrice.textContent = formatPrice(data.total) + 'đ';
+  if (totalPrice) totalPrice.textContent = formatPrice(data.total || 0);
 }
 
-function changeCartQty(itemId, newQty) {
-  if (newQty < 1) {
-    deleteCartItem(itemId);
+function loadCartPage() {
+  var loading = document.getElementById('cart-loading');
+  var empty = document.getElementById('cart-empty');
+  var list = document.getElementById('cart-items-list');
+  var bottomBar = document.getElementById('cart-bottom-bar');
+  var backBtn = document.querySelector('.cart-back-btn');
+
+  if (backBtn && !backBtn.dataset.boundBack) {
+    backBtn.addEventListener('click', function(evt) {
+      evt.preventDefault();
+      goBack();
+    });
+    backBtn.dataset.boundBack = '1';
+  }
+
+  if (loading) loading.style.display = '';
+  if (empty) empty.style.display = 'none';
+  if (list) list.style.display = 'none';
+  if (bottomBar) bottomBar.style.display = 'none';
+
+  fetchCart().then(function(data) {
+    if (loading) loading.style.display = 'none';
+    renderCartPage(data);
+  });
+}
+window.loadCartPage = loadCartPage;
+
+function updateCartItem(itemId, newQty) {
+  if (newQty <= 0) {
+    removeCartItem(itemId);
     return;
   }
-  app.preloader.show();
-  updateCartItem(itemId, newQty).then(function(data) {
-    app.preloader.hide();
-    if (data) renderCartPage(data);
-  });
-}
 
-function deleteCartItem(itemId) {
-  var el = document.getElementById('cart-item-' + itemId);
-  if (el) el.classList.add('removing');
-  setTimeout(function() {
-    removeCartItem(itemId).then(function(data) {
-      if (data) renderCartPage(data);
-    });
-  }, 250);
-}
-
-function checkoutCart() {
-  app.dialog.alert('Tính năng thanh toán giỏ hàng sẽ sớm ra mắt!', 'Thông báo');
-}
-
-function flyToCartAnimation(btnEl) {
-  var cartIcon = document.querySelector('.vs-header-cart') || document.querySelector('.vs-cart-badge');
-  if (!cartIcon || !btnEl) return;
-
-  var btnRect = btnEl.getBoundingClientRect();
-  var cartRect = cartIcon.getBoundingClientRect();
-
-  var flyEl = document.createElement('div');
-  flyEl.className = 'vs-fly-item';
-  flyEl.innerHTML = '<i class="icon f7-icons">tv</i>';
-  flyEl.style.top = btnRect.top + 'px';
-  flyEl.style.left = btnRect.left + 'px';
-  document.body.appendChild(flyEl);
-
-  requestAnimationFrame(function() {
-    flyEl.style.top = cartRect.top + 'px';
-    flyEl.style.left = cartRect.left + 'px';
-    flyEl.classList.add('flying');
-  });
-
-  setTimeout(function() {
-    flyEl.remove();
-  }, 700);
-}
-
-function formatPrice(num) {
-  if (!num && num !== 0) return '0';
-  return Number(num).toLocaleString('vi-VN');
-}
-
-// Init cart badge on app load
-setTimeout(function() {
-  fetch(CART_API + '/count', { headers: cartApiHeaders() })
+  fetch(CART_API + '/items/' + itemId, {
+    method: 'PUT',
+    headers: cartApiHeaders(),
+    body: JSON.stringify({ quantity: newQty })
+  })
     .then(function(r) { return r.json(); })
     .then(function(res) {
       if (res.status && res.data) {
-        updateCartBadge(res.data.count || 0);
+        updateCartBadge(res.data.items_count || 0);
+        loadCartPage();
       }
-    })
-    .catch(function(err) {
-      console.error('Cart count fetch error:', err);
     });
-}, 500);
+}
+window.updateCartItem = updateCartItem;
 
-// Ensure Tab Bar logic is applied correctly after initial page load routing completes 
+function removeCartItem(itemId) {
+  fetch(CART_API + '/items/' + itemId, {
+    method: 'DELETE',
+    headers: cartApiHeaders()
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res.status && res.data) {
+        updateCartBadge(res.data.items_count || 0);
+        loadCartPage();
+      }
+    });
+}
+window.removeCartItem = removeCartItem;
+
+function clearCart() {
+  app.dialog.confirm('Bạn có chắc muốn xóa tất cả sản phẩm?', 'Xác nhận', function () {
+    fetch(CART_API, {
+      method: 'DELETE',
+      headers: cartApiHeaders()
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        updateCartBadge(0);
+        loadCartPage();
+        app.toast.create({ text: 'Đã xóa giỏ hàng', position: 'top', closeTimeout: 1600, cssClass: 'color-green' }).open();
+      });
+  });
+}
+window.clearCart = clearCart;
+
+function checkoutCart() {
+  app.toast.create({ text: 'Tính năng thanh toán giỏ hàng đang được cập nhật.', position: 'top', closeTimeout: 1800 }).open();
+}
+window.checkoutCart = checkoutCart;
+
+// Ensure Tab Bar is hidden on auth pages
 function enforceTabBarVisibility() {
   var hash = window.location.hash || '';
   var isAuth = hash.includes('/signin') || hash.includes('/signup');
@@ -2269,3 +2199,37 @@ function enforceTabBarVisibility() {
 window.addEventListener('hashchange', enforceTabBarVisibility);
 window.addEventListener('load', enforceTabBarVisibility);
 enforceTabBarVisibility();
+
+// Framework7 Route Events
+$$(document).on('page:init', '.page[data-name="service"]', function (e) {
+  var serviceId = e.detail.route.query.service;
+  initServicePage(serviceId);
+});
+
+$$(document).on('page:init', '.page[data-name="cart"]', function (e) {
+  if (window.NavigationStore) window.NavigationStore.push('cart', {});
+  loadCartPage();
+});
+
+$$(document).on('page:init', '.page[data-name="services"]', function () {
+  initServicesListPage();
+});
+
+$$(document).on('page:init', '.page[data-name="orders"]', function () {
+  initOrdersPage();
+});
+
+$$(document).on('page:init', '.page[data-name="profile"]', function () {
+  initProfilePage();
+});
+
+$$(document).on('page:init', '.page[data-name="signin"]', function (e) {
+  initPasswordToggles(e.detail.el);
+  initAuthForms(e.detail.el);
+});
+
+$$(document).on('page:init', '.page[data-name="signup"]', function (e) {
+  initPasswordToggles(e.detail.el);
+  initAuthForms(e.detail.el);
+});
+
