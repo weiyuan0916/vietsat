@@ -3,21 +3,26 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Cart;
-use App\Models\CartItem;
-use App\Models\Service;
+use App\Services\CartService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class CartController extends Controller
 {
+    private CartService $cartService;
+
+    public function __construct(CartService $cartService)
+    {
+        $this->cartService = $cartService;
+    }
+
     /**
      * GET /api/v1/cart
      */
     public function index(Request $request): JsonResponse
     {
-        $cart = $this->resolveCart($request);
+        $cart = $this->cartService->resolveCartFromRequest($request);
 
         if (!$cart) {
             return response()->json([
@@ -36,8 +41,8 @@ class CartController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Lấy giỏ hàng thành công.',
-            'data' => $this->formatCart($cart),
+            'message' => 'Lấy Giỏ hàng thành công.',
+            'data' => $this->cartService->formatCart($cart),
         ]);
     }
 
@@ -55,49 +60,28 @@ class CartController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Dữ liệu không hợp lệ.',
+                'data' => null,
                 'errors' => $validator->errors(),
             ], 422);
         }
 
-        $service = Service::where('id', $request->service_id)
-            ->where('is_active', true)
-            ->first();
-
-        if (!$service) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Dịch vụ không tồn tại hoặc đã ngừng hoạt động.',
-            ], 404);
-        }
-
-        $cart = $this->resolveOrCreateCart($request);
+        $cart = $this->cartService->resolveOrCreateCartFromRequest($request);
         $quantity = $request->input('quantity', 1);
 
-        $existingItem = CartItem::where('cart_id', $cart->id)
-            ->where('service_id', $service->id)
-            ->first();
+        $result = $this->cartService->addItem($cart, $request->service_id, $quantity);
 
-        if ($existingItem) {
-            $existingItem->quantity += $quantity;
-            $existingItem->subtotal = $existingItem->quantity * $existingItem->price;
-            $existingItem->save();
-        } else {
-            CartItem::create([
-                'cart_id' => $cart->id,
-                'service_id' => $service->id,
-                'quantity' => $quantity,
-                'price' => $service->price,
-                'subtotal' => $quantity * $service->price,
-            ]);
+        if (!$result['success']) {
+            return response()->json([
+                'status' => false,
+                'message' => $result['message'],
+                'data' => null,
+            ], 404);
         }
-
-        $cart->calculateTotals();
-        $cart->load('items.service');
 
         return response()->json([
             'status' => true,
             'message' => 'Thêm vào giỏ hàng thành công.',
-            'data' => $this->formatCart($cart),
+            'data' => $result['data'],
         ], 201);
     }
 
@@ -114,31 +98,35 @@ class CartController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Dữ liệu không hợp lệ.',
+                'data' => null,
                 'errors' => $validator->errors(),
             ], 422);
         }
 
-        $cart = $this->resolveCart($request);
+        $cart = $this->cartService->resolveCartFromRequest($request);
+
         if (!$cart) {
-            return response()->json(['status' => false, 'message' => 'Giỏ hàng không tồn tại.'], 404);
+            return response()->json([
+                'status' => false,
+                'message' => 'Giỏ hàng không tồn tại.',
+                'data' => null,
+            ], 404);
         }
 
-        $item = CartItem::where('id', $itemId)->where('cart_id', $cart->id)->first();
-        if (!$item) {
-            return response()->json(['status' => false, 'message' => 'Không tìm thấy sản phẩm trong giỏ.'], 404);
+        $result = $this->cartService->updateItemQuantity($cart, $itemId, $request->quantity);
+
+        if (!$result['success']) {
+            return response()->json([
+                'status' => false,
+                'message' => $result['message'],
+                'data' => null,
+            ], 404);
         }
-
-        $item->quantity = $request->quantity;
-        $item->subtotal = $item->quantity * $item->price;
-        $item->save();
-
-        $cart->calculateTotals();
-        $cart->load('items.service');
 
         return response()->json([
             'status' => true,
             'message' => 'Cập nhật giỏ hàng thành công.',
-            'data' => $this->formatCart($cart),
+            'data' => $result['data'],
         ]);
     }
 
@@ -147,24 +135,30 @@ class CartController extends Controller
      */
     public function removeItem(Request $request, int $itemId): JsonResponse
     {
-        $cart = $this->resolveCart($request);
+        $cart = $this->cartService->resolveCartFromRequest($request);
+
         if (!$cart) {
-            return response()->json(['status' => false, 'message' => 'Giỏ hàng không tồn tại.'], 404);
+            return response()->json([
+                'status' => false,
+                'message' => 'Giỏ hàng không tồn tại.',
+                'data' => null,
+            ], 404);
         }
 
-        $item = CartItem::where('id', $itemId)->where('cart_id', $cart->id)->first();
-        if (!$item) {
-            return response()->json(['status' => false, 'message' => 'Không tìm thấy sản phẩm trong giỏ.'], 404);
-        }
+        $result = $this->cartService->removeItem($cart, $itemId);
 
-        $item->delete();
-        $cart->calculateTotals();
-        $cart->load('items.service');
+        if (!$result['success']) {
+            return response()->json([
+                'status' => false,
+                'message' => $result['message'],
+                'data' => null,
+            ], 404);
+        }
 
         return response()->json([
             'status' => true,
             'message' => 'Xoá khỏi giỏ hàng thành công.',
-            'data' => $this->formatCart($cart),
+            'data' => $result['data'],
         ]);
     }
 
@@ -173,18 +167,27 @@ class CartController extends Controller
      */
     public function clear(Request $request): JsonResponse
     {
-        $cart = $this->resolveCart($request);
+        $cart = $this->cartService->resolveCartFromRequest($request);
+
         if (!$cart) {
-            return response()->json(['status' => true, 'message' => 'Giỏ hàng đã trống.']);
+            return response()->json([
+                'status' => true,
+                'message' => 'Giỏ hàng đã trống.',
+                'data' => [
+                    'items' => [],
+                    'subtotal' => 0,
+                    'total' => 0,
+                    'items_count' => 0,
+                ],
+            ]);
         }
 
-        CartItem::where('cart_id', $cart->id)->delete();
-        $cart->update(['subtotal' => 0, 'total' => 0, 'tax' => 0, 'discount' => 0, 'shipping' => 0]);
+        $result = $this->cartService->clearCart($cart);
 
         return response()->json([
             'status' => true,
             'message' => 'Đã xoá toàn bộ giỏ hàng.',
-            'data' => $this->formatCart($cart),
+            'data' => $result['data'],
         ]);
     }
 
@@ -193,76 +196,12 @@ class CartController extends Controller
      */
     public function count(Request $request): JsonResponse
     {
-        $cart = $this->resolveCart($request);
-        $count = $cart ? CartItem::where('cart_id', $cart->id)->sum('quantity') : 0;
+        $cart = $this->cartService->resolveCartFromRequest($request);
+        $count = $cart ? $this->cartService->getItemCount($cart) : 0;
 
         return response()->json([
             'status' => true,
             'data' => ['count' => (int) $count],
         ]);
-    }
-
-    // ── Helpers ───────────────────────────────────────────
-
-    private function resolveCart(Request $request): ?Cart
-    {
-        if ($request->user()) {
-            return Cart::where('user_id', $request->user()->id)->first();
-        }
-
-        $sessionId = $request->header('X-Cart-Session') ?? $request->cookie('cart_session');
-        if ($sessionId) {
-            return Cart::where('session_id', $sessionId)->first();
-        }
-
-        return null;
-    }
-
-    private function resolveOrCreateCart(Request $request): Cart
-    {
-        $cart = $this->resolveCart($request);
-        if ($cart) {
-            return $cart;
-        }
-
-        $sessionId = $request->header('X-Cart-Session') ?? $request->cookie('cart_session') ?? \Illuminate\Support\Str::uuid()->toString();
-
-        return Cart::create([
-            'user_id' => $request->user()?->id,
-            'session_id' => $sessionId,
-            'subtotal' => 0,
-            'tax' => 0,
-            'shipping' => 0,
-            'discount' => 0,
-            'total' => 0,
-        ]);
-    }
-
-    private function formatCart(Cart $cart): array
-    {
-        $items = $cart->items->map(function (CartItem $item) {
-            $service = $item->service;
-            $serviceName = $service ? $service->name : 'Dịch vụ đã xoá';
-
-            return [
-                'id' => $item->id,
-                'service_id' => $item->service_id,
-                'name' => $serviceName,
-                'service_name' => $serviceName,
-                'duration_days' => $service ? $service->duration_days : null,
-                'quantity' => $item->quantity,
-                'price' => (int) $item->price,
-                'subtotal' => (int) $item->subtotal,
-            ];
-        });
-
-        return [
-            'cart_id' => $cart->id,
-            'session_id' => $cart->session_id,
-            'items' => $items,
-            'subtotal' => (int) $cart->subtotal,
-            'total' => (int) $cart->total,
-            'items_count' => $cart->items->sum('quantity'),
-        ];
     }
 }

@@ -2,75 +2,24 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Events\PaymentExpired;
-use App\Events\PaymentPending;
-use App\Events\PaymentSuccess;
 use App\Http\Controllers\Controller;
-use App\Models\Service;
-use App\Models\ServiceOrder;
-use App\Services\ExternalServiceApi;
-use App\Services\DeviceTrackingService;
+use App\Services\OrderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
-    private ExternalServiceApi $externalServiceApi;
-    private DeviceTrackingService $deviceTrackingService;
+    private OrderService $orderService;
 
-    public function __construct(ExternalServiceApi $externalServiceApi, DeviceTrackingService $deviceTrackingService)
+    public function __construct(OrderService $orderService)
     {
-        $this->externalServiceApi = $externalServiceApi;
-        $this->deviceTrackingService = $deviceTrackingService;
+        $this->orderService = $orderService;
     }
 
     /**
      * Create a new service order.
      *
      * POST /api/v1/orders
-     *
-     * Request Body:
-     * {
-     *   "facebook_profile_link": "https://facebook.com/...",
-     *   "service_id": 1 (optional - if not provided, uses default service)
-     * }
-     *
-     * Response (201) - Success:
-     * {
-     *   "status": true,
-     *   "message": "Tạo đơn hàng thành công.",
-     *   "data": {
-     *     "order_code": "ORD-XXXXXXXXXX",
-     *     "amount": 100000,
-     *     "expires_at": "2026-01-31T10:05:00Z",
-     *     "qr_content": "bank:ORD-XXXXXXXXXX:100000",
-     *     "status": "pending",
-     *     "service": {
-     *       "id": 1,
-     *       "name": "Default Plan",
-     *       "duration_days": 90
-     *     }
-     *   }
-     * }
-     *
-     * Response (422) - Validation failed:
-     * {
-     *   "status": false,
-     *   "message": "Dữ liệu đầu vào không hợp lệ.",
-     *   "data": null,
-     *   "errors": {
-     *     "facebook_profile_link": ["The facebook profile link field is required."]
-     *   }
-     * }
-     *
-     * Response (404) - No active service:
-     * {
-     *   "status": false,
-     *   "message": "Không tìm thấy dịch vụ hoạt động.",
-     *   "data": null
-     * }
      */
     public function store(Request $request): JsonResponse
     {
@@ -88,170 +37,41 @@ class OrderController extends Controller
             ], 422);
         }
 
-        // Get service from external API or local database
-        $serviceData = null;
-        $localServiceId = null;
+        $userId = $request->user()?->id;
 
-        if ($this->shouldUseExternalApi()) {
-            // Try to get from external API
-            if ($request->service_id) {
-                $serviceData = $this->externalServiceApi->getServiceById($request->service_id);
-            } else {
-                $serviceData = $this->externalServiceApi->getDefaultService();
-            }
+        $result = $this->orderService->createOrder(
+            $request->facebook_profile_link,
+            $request->service_id,
+            $userId,
+            $request
+        );
 
-            if (!$serviceData) {
-                $localService = $this->resolveLocalService($request->service_id);
-
-                if ($localService) {
-                    $localServiceId = $localService->id;
-                    $serviceData = [
-                        'id' => $localService->id,
-                        'name' => $localService->name,
-                        'duration_days' => $localService->duration_days,
-                        'price' => $localService->price,
-                    ];
-                }
-            }
-        }
-
-        if (!$serviceData) {
-            // Use local database
-            $localService = $this->resolveLocalService($request->service_id);
-
-            if (!$localService || !$localService->is_active) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Dịch vụ không hợp lệ hoặc đã ngừng hoạt động.',
-                    'data' => null,
-                ], 404);
-            }
-
-            $localServiceId = $localService->id;
-            $serviceData = [
-                'id' => $localService->id,
-                'name' => $localService->name,
-                'duration_days' => $localService->duration_days,
-                'price' => $localService->price,
-            ];
-        }
-
-        $amount = $serviceData['price'];
-
-        return DB::transaction(function () use ($request, $serviceData, $localServiceId, $amount) {
-            // Delete all pending orders older than 5 minutes before creating new order
-            ServiceOrder::where('status', ServiceOrder::STATUS_PENDING)
-                ->where('expires_at', '<', now())
-                ->delete();
-
-            // Generate device fingerprint
-            $deviceFingerprint = $this->deviceTrackingService->generateFingerprint($request);
-
-            // Prepare order data
-            $orderData = [
-                'order_code' => 'ORDFB' . Str::upper(Str::random(10)),
-                'amount' => $amount,
-                'status' => ServiceOrder::STATUS_PENDING,
-                'expires_at' => now()->addMinutes(5),
-                'facebook_profile_link' => $request->facebook_profile_link,
-                'device_fingerprint' => $deviceFingerprint,
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ];
-
-            // Add user_id if authenticated
-            if ($request->user()) {
-                $orderData['user_id'] = $request->user()->id;
-            }
-
-            // Add service data based on API source
-            if ($localServiceId === null) {
-                // Store external service data as JSON
-                $orderData['service_data'] = $serviceData;
-                $orderData['service_id'] = null; // No local service
-            } else {
-                // Use local service
-                $orderData['service_id'] = $localServiceId;
-            }
-
-            $order = ServiceOrder::create($orderData);
-
-            event(new PaymentPending($order));
-
+        if (!$result['success']) {
+            $status = $result['error'] === 'service_not_found' ? 404 : 400;
             return response()->json([
-                'status' => true,
-                'message' => 'Tạo đơn hàng thành công.',
-                'data' => [
-                    'order_code' => $order->order_code,
-                    'amount' => $order->amount,
-                    'expires_at' => $order->expires_at->toIso8601String(),
-                    'qr_content' => 'bank:' . $order->order_code . ':' . $order->amount,
-                    'status' => $order->status,
-                    'service' => [
-                        'id' => $serviceData['id'],
-                        'name' => $serviceData['name'],
-                        'duration_days' => $serviceData['duration_days'],
-                    ],
-                ],
-            ], 201);
-        });
+                'status' => false,
+                'message' => $result['message'],
+                'data' => null,
+            ], $status);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Tạo đơn hàng thành công.',
+            'data' => $result['data'],
+        ], 201);
     }
 
     /**
      * Get order details and status.
      *
      * GET /api/v1/orders/{orderCode}
-     *
-     * Response (200) - Pending order:
-     * {
-     *   "status": true,
-     *   "message": "Lấy thông tin đơn hàng thành công.",
-     *   "data": {
-     *     "order_code": "ORD-XXXXXXXXXX",
-     *     "amount": 100000,
-     *     "status": "pending",
-     *     "expires_at": "2026-01-31T10:05:00Z",
-     *     "paid_at": null,
-     *     "created_at": "2026-01-31T10:00:00Z",
-     *     "service": {
-     *       "id": 1,
-     *       "name": "Default Plan",
-     *       "duration_days": 90
-     *     }
-     *   }
-     * }
-     *
-     * Response (200) - Paid order:
-     * {
-     *   "status": true,
-     *   "message": "Lấy thông tin đơn hàng thành công.",
-     *   "data": {
-     *     "order_code": "ORD-XXXXXXXXXX",
-     *     "amount": 100000,
-     *     "status": "paid",
-     *     "expires_at": "2026-01-31T10:05:00Z",
-     *     "paid_at": "2026-01-31T10:02:00Z",
-     *     "created_at": "2026-01-31T10:00:00Z",
-     *     "service": {
-     *       "id": 1,
-     *       "name": "Default Plan",
-     *       "duration_days": 90
-     *     }
-     *   }
-     * }
-     *
-     * Response (404) - Order not found:
-     * {
-     *   "status": false,
-     *   "message": "Không tìm thấy đơn hàng.",
-     *   "data": null
-     * }
      */
     public function show(string $orderCode): JsonResponse
     {
-        $order = ServiceOrder::where('order_code', $orderCode)->first();
+        $order = $this->orderService->getOrder($orderCode);
 
-        if (! $order) {
+        if (!$order) {
             return response()->json([
                 'status' => false,
                 'message' => 'Không tìm thấy đơn hàng.',
@@ -259,10 +79,6 @@ class OrderController extends Controller
             ], 404);
         }
 
-        $this->expireOrderIfNeeded($order);
-        $order->refresh();
-
-        // Get service info (from external or local)
         $serviceInfo = $order->getServiceInfo();
 
         return response()->json([
@@ -301,53 +117,29 @@ class OrderController extends Controller
             ], 422);
         }
 
-        $order = ServiceOrder::where('order_code', $request->order_code)->first();
+        $result = $this->orderService->verifyPayment(
+            $request->order_code,
+            $request->bank_txn_id
+        );
 
-        if (!$order) {
+        if (!$result['success']) {
+            $status = match ($result['error']) {
+                'order_not_found' => 404,
+                'already_paid', 'order_expired' => 400,
+                default => 400,
+            };
+
             return response()->json([
                 'status' => false,
-                'message' => 'Không tìm thấy đơn hàng.',
+                'message' => $result['message'],
                 'data' => null,
-            ], 404);
+            ], $status);
         }
-
-        // Check if order is already paid
-        if ($order->status === ServiceOrder::STATUS_PAID) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Đơn hàng đã được thanh toán.',
-                'data' => null,
-            ], 400);
-        }
-
-        // Check if order is expired
-        if ($order->isTimeExpired()) {
-            $this->expireOrderIfNeeded($order);
-            return response()->json([
-                'status' => false,
-                'message' => 'Đơn hàng đã hết hạn.',
-                'data' => null,
-            ], 400);
-        }
-
-        // Update order as paid
-        $order->update([
-            'status' => ServiceOrder::STATUS_PAID,
-            'paid_at' => now(),
-            'bank_txn_id' => $request->bank_txn_id,
-        ]);
-
-        // Trigger payment success event
-        event(new PaymentSuccess($order));
 
         return response()->json([
             'status' => true,
             'message' => 'Xác nhận thanh toán thành công.',
-            'data' => [
-                'order_code' => $order->order_code,
-                'status' => $order->status,
-                'paid_at' => $order->paid_at->toIso8601String(),
-            ],
+            'data' => $result['data'],
         ]);
     }
 
@@ -368,16 +160,9 @@ class OrderController extends Controller
             ], 401);
         }
 
-        $orders = ServiceOrder::where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $orders = $this->orderService->getUserOrders($user->id);
 
-        $orders->each(function (ServiceOrder $order) {
-            $this->expireOrderIfNeeded($order);
-        });
-        $orders->each->refresh();
-
-        if ($orders->isEmpty()) {
+        if (empty($orders)) {
             return response()->json([
                 'status' => true,
                 'message' => 'Không có đơn hàng.',
@@ -388,60 +173,7 @@ class OrderController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Lấy danh sách đơn hàng thành công.',
-            'data' => $orders->map(function (ServiceOrder $order) {
-                return [
-                    'order_code' => $order->order_code,
-                    'amount' => $order->amount,
-                    'status' => $order->status,
-                    'facebook_profile_link' => $order->facebook_profile_link,
-                    'expires_at' => $order->expires_at?->toIso8601String(),
-                    'paid_at' => $order->paid_at?->toIso8601String(),
-                    'created_at' => $order->created_at->toIso8601String(),
-                    'service' => $order->getServiceInfo(),
-                ];
-            }),
+            'data' => $orders,
         ]);
-    }
-
-    private function resolveLocalService(?int $serviceId): ?Service
-    {
-        if (!$serviceId) {
-            return Service::where('is_active', true)->first();
-        }
-
-        return Service::where('id', $serviceId)
-            ->where('is_active', true)
-            ->first();
-    }
-
-    private function shouldUseExternalApi(): bool
-    {
-        if (!config('services.service.use_external_api', false)) {
-            return false;
-        }
-
-        $baseUrl = rtrim((string) config('services.external_api.base_url', ''), '/');
-        $currentApiBaseUrl = rtrim(url('/api/v1'), '/');
-
-        if ($baseUrl === '' || $baseUrl === $currentApiBaseUrl) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private function expireOrderIfNeeded(ServiceOrder $order): bool
-    {
-        if (!$order->isTimeExpired()) {
-            return false;
-        }
-
-        if (!$order->markExpired()) {
-            return false;
-        }
-
-        event(new PaymentExpired($order));
-
-        return true;
     }
 }
