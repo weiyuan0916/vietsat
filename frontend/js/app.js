@@ -1756,38 +1756,38 @@ function initHomePage() {
         featuredServices = featuredServices.slice(0, 2);
 
         var servicesHtml = featuredServices.map(function(service) {
-            var durationText = formatDuration(service.duration_days);
-            var priceText = formatPrice(service.price);
+            var durationDays = service.duration_days || 30;
+            var durationText = 'Thời hạn: ' + (durationDays >= 30 ? Math.round(durationDays / 30) * 30 + ' ngày' : durationDays + ' ngày');
+            var priceText = service.price ? service.price.toLocaleString('vi-VN') : '0';
             
             var isPremium = service.price > 100000;
             var iconClass = isPremium ? 'vs-service-icon premium' : 'vs-service-icon';
             var iconName = isPremium ? 'crown' : 'tv';
             var desc = escapeHtml(service.description || 'Xem tất cả kênh truyền hình cơ bản và nâng cao. Hỗ trợ đa thiết bị.');
 
-            return '' +
-              '<div class="vs-service-card-detailed home-service-card">' +
+            return '<div class="vs-service-card-detailed">' +
                 '<div class="vs-service-card-top">' +
-                  '<div class="' + iconClass + '">' +
-                    '<i class="icon f7-icons">' + iconName + '</i>' +
-                  '</div>' +
-                  '<div class="vs-service-details">' +
-                    '<div class="vs-service-title-row">' +
-                      '<h3 class="vs-service-name">' + escapeHtml(service.name) + '</h3>' +
-                      '<div class="vs-service-price">' + priceText + 'đ</div>' +
+                    '<div class="' + iconClass + '">' +
+                        '<i class="icon f7-icons">' + iconName + '</i>' +
                     '</div>' +
-                    '<p class="vs-service-duration">' + durationText + '</p>' +
-                  '</div>' +
+                    '<div class="vs-service-details">' +
+                        '<div class="vs-service-title-row">' +
+                            '<h3 class="vs-service-name">' + escapeHtml(service.name) + '</h3>' +
+                            '<div class="vs-service-price">' + priceText + 'đ</div>' +
+                        '</div>' +
+                        '<p class="vs-service-duration">' + durationText + '</p>' +
+                    '</div>' +
                 '</div>' +
                 '<p class="vs-service-desc">' + desc + '</p>' +
                 '<div class="vs-service-actions" style="display:flex;gap:8px;margin-top:12px;">' +
-                  '<button class="vs-service-cart-btn" onclick="event.preventDefault();addToCart(' + service.id + ', 1, this);" style="flex:0 0 40px;height:40px;border-radius:12px;border:1px solid var(--vs-border-subtle);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;">' +
-                    '<i class="icon f7-icons" style="font-size:18px;color:var(--vs-accent);">cart</i>' +
-                  '</button>' +
-                  '<a href="/service/?service=' + service.id + '" class="vs-service-register-btn link" style="flex:1;display:flex;align-items:center;justify-content:center;border-radius:12px;height:40px;background:var(--vs-accent);color:#fff;font-weight:700;font-size:14px;">' +
-                    'Mua ngay <i class="icon f7-icons" style="font-size: 16px;margin-left:4px;">arrow_right</i>' +
-                  '</a>' +
+                    '<button class="vs-service-cart-btn" onclick="event.preventDefault();event.stopPropagation();addToCart(' + service.id + ', 1, this);" style="flex:0 0 40px;height:40px;border-radius:12px;border:1px solid var(--vs-border-subtle);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;">' +
+                        '<i class="icon f7-icons" style="font-size:18px;color:var(--vs-accent);">cart</i>' +
+                    '</button>' +
+                    '<a href="/service/?service=' + service.id + '" class="vs-service-register-btn link" style="flex:1;display:flex;align-items:center;justify-content:center;border-radius:12px;height:40px;background:var(--vs-accent);color:#fff;font-weight:700;font-size:14px;">' +
+                        'Mua ngay <i class="icon f7-icons" style="font-size: 16px;margin-left:4px;">arrow_right</i>' +
+                    '</a>' +
                 '</div>' +
-              '</div>';
+            '</div>';
         }).join('');
         
         containerEl.innerHTML = servicesHtml;
