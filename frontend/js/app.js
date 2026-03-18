@@ -65,18 +65,6 @@ var app = new Framework7({
       url: 'pages/pages/service.html',
     },
     {
-      path: '/services/',
-      url: 'pages/pages/services.html',
-    },
-    {
-      path: '/orders/',
-      url: 'pages/pages/orders.html',
-    },
-    {
-      path: '/profile/',
-      url: 'pages/pages/profile.html',
-    },
-    {
       path: '/signin/',
       url: 'pages/pages/signin.html',
     },
@@ -176,6 +164,7 @@ var tabTransitionMs = 260;
 var tabSwiper = null;
 var isSyncingTabFromRoute = false;
 var isSyncingHashFromTab = false;
+var lastTabBeforeOverlay = 'home';
 
 function getTabByHash() {
   var raw = String(window.location.hash || '').trim();
@@ -186,13 +175,18 @@ function getTabByHash() {
   return routeTabMap[normalized] || 'home';
 }
 
-function syncHashForTab(tabName) {
+function syncHashForTab(tabName, options) {
+  options = options || {};
   if (isSyncingHashFromTab) return;
   var route = tabRouteMap[tabName] || '/';
   var nextHash = '#!' + (route === '/' ? '/' : route);
   if (window.location.hash === nextHash) return;
   isSyncingHashFromTab = true;
-  window.history.replaceState(null, '', nextHash);
+  if (options.mode === 'push') {
+    window.history.pushState(null, '', nextHash);
+  } else {
+    window.history.replaceState(null, '', nextHash);
+  }
   isSyncingHashFromTab = false;
 }
 
@@ -221,6 +215,7 @@ document.addEventListener('click', function(e) {
     e.preventDefault();
     e.stopPropagation();
     if (app && app.views && app.views.main) {
+      lastTabBeforeOverlay = currentTab;
       app.views.main.router.navigate(dataHref);
     }
     return;
@@ -246,17 +241,16 @@ document.addEventListener('click', function(e) {
       e.stopPropagation();
       switchTab(tabMap[path], null);
     } else {
-      // For other routes like /service/, /cart/, /signin/, use F7 explicit navigation
       e.preventDefault();
       e.stopPropagation();
       if (app && app.views && app.views.main) {
+        lastTabBeforeOverlay = currentTab;
         app.views.main.router.navigate(href);
       }
     }
   }
 });
 
-// Go back to previous page
 function clearMainViewOverlayPages() {
   var mainView = document.getElementById('main-view');
   if (!mainView) return;
@@ -266,40 +260,29 @@ function clearMainViewOverlayPages() {
       child.parentNode.removeChild(child);
     }
   });
-
-  if (app && app.views && app.views.main && app.views.main.router) {
-    var router = app.views.main.router;
-    router.history = [];
-    router.url = '';
-  }
 }
 
 function goBack() {
-  var previous = null;
-  if (window.NavigationStore) {
-    previous = window.NavigationStore.back();
-  }
-
   if (app && app.views && app.views.main) {
     var router = app.views.main.router;
     var currentRoute = normalizeRoutePath(
       (router.currentRoute && router.currentRoute.url) || router.url || window.location.hash.replace(/^#!/, '')
     );
-    var isCartRoute = currentRoute === '/cart/' || (window.location.hash || '').includes('/cart/');
+    var isOverlayRoute = currentRoute === '/cart/' || currentRoute === '/service/' || currentRoute === '/signin/' || currentRoute === '/signup/';
     var currentPage = document.querySelector('.page-current');
     var currentPageName = currentPage ? currentPage.getAttribute('data-name') : '';
 
-    if (isCartRoute || currentPageName === 'cart') {
+    if (isOverlayRoute || currentPageName === 'cart' || currentPageName === 'service' || currentPageName === 'signin' || currentPageName === 'signup') {
       if (router.history.length > 1) {
         router.back();
         setTimeout(function() {
           clearMainViewOverlayPages();
-          switchTab('home', null);
+          switchTab(lastTabBeforeOverlay || 'home', null, { historyMode: 'replace' });
         }, 0);
         return;
       }
       clearMainViewOverlayPages();
-      switchTab('home', null);
+      switchTab(lastTabBeforeOverlay || 'home', null, { historyMode: 'replace' });
       return;
     }
 
@@ -308,11 +291,7 @@ function goBack() {
       return;
     }
 
-    var fallbackTab = 'home';
-    if (previous && previous.route && tabUrlMap[previous.route]) {
-      fallbackTab = previous.route;
-    }
-    if (typeof switchTab === 'function') switchTab(fallbackTab, null);
+    if (typeof switchTab === 'function') switchTab(getTabByHash(), null, { historyMode: 'replace' });
   }
 }
 
@@ -444,7 +423,7 @@ $$(document).on('submit', '#login-form', function(evt) {
       }
       window.AuthStore.setAuth(user || null, token);
       clearMainViewOverlayPages();
-      switchTab('home', null);
+      switchTab('home', null, { historyMode: 'replace' });
     })
     .catch(function(err) {
       app.dialog.close();
@@ -795,8 +774,9 @@ function switchTab(tabName, element, options) {
   }
 
   var targetIndex = getTabIndex(targetTab);
+  var isTabChanged = targetTab !== currentTab;
   if (tabSwiper) {
-    if (targetTab === currentTab) {
+    if (!isTabChanged) {
       ensureTabLoaded(targetTab);
     } else {
       tabSwiper.slideTo(targetIndex, tabTransitionMs);
@@ -804,7 +784,9 @@ function switchTab(tabName, element, options) {
   }
 
   if (options.syncHash !== false) {
-    syncHashForTab(targetTab);
+    syncHashForTab(targetTab, {
+      mode: options.historyMode || (isTabChanged ? 'push' : 'replace')
+    });
   }
 }
 
@@ -876,7 +858,7 @@ function initApp() {
     var initialTab = getTabByHash();
     console.log('App: Loading initial tab', initialTab);
     debugLog('D', 'app.js:timeout', 'Calling switchTab for initial tab', { tab: initialTab });
-    switchTab(initialTab, null);
+    switchTab(initialTab, null, { historyMode: 'replace' });
   }, 100);
 }
 
