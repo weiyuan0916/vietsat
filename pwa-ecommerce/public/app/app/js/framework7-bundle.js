@@ -46574,4 +46574,4 @@
     return Framework7;
 
 }));
-
+//# sourceMappingURL=framework7-bundle.js.map

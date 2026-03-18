@@ -4,9 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Service;
 use App\Models\ServiceOrder;
-use App Illuminate\Foundation\Testing\RefreshDatabase;
-\Models\User;
-useuse Tests\TestCase;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class OrderApiTest extends TestCase
 {
@@ -144,6 +144,24 @@ class OrderApiTest extends TestCase
         $response = $this->getJson('/api/v1/orders/my-orders');
 
         $response->assertStatus(401);
+    }
+
+    /**
+     * Test returns empty orders list with friendly message.
+     */
+    public function test_returns_empty_orders_with_message_when_user_has_no_orders(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user, 'sanctum')
+            ->getJson('/api/v1/orders/my-orders');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'Không có đơn hàng.',
+                'data' => [],
+            ]);
     }
 
     /**

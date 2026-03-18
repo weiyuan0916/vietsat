@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\PcInfoController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\PageController;
 
 /*
@@ -374,6 +375,32 @@ Route::prefix('v1')->group(function () {
             ->name('store');
 
         /**
+         * POST /api/v1/orders/verify-payment
+         * Verify payment from TPBank webhook
+         *
+         * This endpoint is called by api_tpbank_free when a transaction is detected.
+         * It verifies the device fingerprint before confirming payment.
+         *
+         * Request Body:
+         * {
+         *   "order_code": "ORDFBXXXXXXXXXX",
+         *   "bank_txn_id": "TPB123456789"
+         * }
+         */
+        Route::post('verify-payment', [OrderController::class, 'verifyPayment'])
+            ->name('verify-payment');
+
+        /**
+         * GET /api/v1/orders/my-orders
+         * Get current user's orders
+         *
+         * Requires authentication (sanctum)
+         */
+        Route::get('my-orders', [OrderController::class, 'myOrders'])
+            ->name('my-orders')
+            ->middleware('auth:sanctum');
+
+        /**
          * GET /api/v1/orders/{orderCode}
          * Get order details and status
          *
@@ -405,32 +432,16 @@ Route::prefix('v1')->group(function () {
          */
         Route::get('{orderCode}', [OrderController::class, 'show'])
             ->name('show');
+    });
 
-        /**
-         * POST /api/v1/orders/verify-payment
-         * Verify payment from TPBank webhook
-         *
-         * This endpoint is called by api_tpbank_free when a transaction is detected.
-         * It verifies the device fingerprint before confirming payment.
-         *
-         * Request Body:
-         * {
-         *   "order_code": "ORDFBXXXXXXXXXX",
-         *   "bank_txn_id": "TPB123456789"
-         * }
-         */
-        Route::post('verify-payment', [OrderController::class, 'verifyPayment'])
-            ->name('verify-payment');
-
-        /**
-         * GET /api/v1/orders/my-orders
-         * Get current user's orders
-         *
-         * Requires authentication (sanctum)
-         */
-        Route::get('my-orders', [OrderController::class, 'myOrders'])
-            ->name('my-orders')
-            ->middleware('auth:sanctum');
+    // Cart Routes
+    Route::prefix('cart')->name('cart.')->group(function () {
+        Route::get('/', [CartController::class, 'index'])->name('index');
+        Route::post('/items', [CartController::class, 'addItem'])->name('items.add');
+        Route::put('/items/{itemId}', [CartController::class, 'updateItem'])->name('items.update');
+        Route::delete('/items/{itemId}', [CartController::class, 'removeItem'])->name('items.remove');
+        Route::delete('/', [CartController::class, 'clear'])->name('clear');
+        Route::get('/count', [CartController::class, 'count'])->name('count');
     });
 
     // Facebook Profile Routes

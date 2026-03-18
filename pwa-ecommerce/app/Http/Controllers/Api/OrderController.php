@@ -383,6 +383,14 @@ class OrderController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        if ($orders->isEmpty()) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Không có đơn hàng.',
+                'data' => [],
+            ]);
+        }
+
         return response()->json([
             'status' => true,
             'message' => 'Lấy danh sách đơn hàng thành công.',

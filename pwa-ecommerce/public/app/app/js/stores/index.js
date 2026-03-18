@@ -9,19 +9,17 @@
   // Export stores to window
   // ServiceStore is in service.js
   // OrderStore is in order.js
-  // NavigationStore is in navigation.js
 
   // Convenience check for store readiness
   window.StoresReady = {
     check() {
-      return !!(window.ServiceStore && window.OrderStore && window.NavigationStore);
+      return !!(window.ServiceStore && window.OrderStore);
     },
     
     status() {
       return {
         serviceStore: !!window.ServiceStore,
         orderStore: !!window.OrderStore,
-        navigationStore: !!window.NavigationStore,
         ready: this.check()
       };
     }

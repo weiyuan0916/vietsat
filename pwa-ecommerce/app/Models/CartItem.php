@@ -23,6 +23,7 @@ class CartItem extends Model
     protected $fillable = [
         'cart_id',
         'product_id',
+        'service_id',
         'quantity',
         'price',
         'subtotal',
@@ -54,6 +55,14 @@ class CartItem extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * Get the service for the cart item.
+     */
+    public function service(): BelongsTo
+    {
+        return $this->belongsTo(Service::class);
     }
 
     /**
