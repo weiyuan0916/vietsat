@@ -4,7 +4,7 @@ namespace App\Repositories\Eloquent;
 
 use App\Models\Cart;
 use App\Models\CartItem;
-use App\Models\Product;
+use App\Models\Service;
 use App\Repositories\Interfaces\CartRepositoryInterface;
 
 /**
@@ -37,7 +37,7 @@ class CartRepository implements CartRepositoryInterface
     public function getUserCart(int $userId): ?Cart
     {
         return $this->cart->where('user_id', $userId)
-            ->with(['items.product.primaryImage'])
+            ->with(['items.service'])
             ->first();
     }
 
@@ -65,31 +65,33 @@ class CartRepository implements CartRepositoryInterface
     /**
      * Add item to cart.
      */
-    public function addItem(int $cartId, int $productId, int $quantity = 1, array $options = []): void
+    public function addItem(int $cartId, int $serviceId, int $quantity = 1, array $options = []): void
     {
-        $product = Product::find($productId);
+        $service = Service::where('id', $serviceId)
+            ->where('is_active', true)
+            ->first();
 
-        if (!$product) {
+        if (!$service) {
             return;
         }
 
         $existingItem = $this->cartItem->where('cart_id', $cartId)
-            ->where('product_id', $productId)
+            ->where('service_id', $serviceId)
             ->first();
 
-        $price = $product->effective_price;
+        $price = $service->price;
 
         if ($existingItem) {
             $existingItem->quantity += $quantity;
-            $existingItem->subtotal = $existingItem->quantity * $price;
+            $existingItem->setAttribute('subtotal', (string) ($existingItem->quantity * (float) $price));
             $existingItem->save();
         } else {
             $this->cartItem->create([
                 'cart_id' => $cartId,
-                'product_id' => $productId,
+                'service_id' => $serviceId,
                 'quantity' => $quantity,
                 'price' => $price,
-                'subtotal' => $quantity * $price,
+                'subtotal' => (string) ($quantity * (float) $price),
                 'options' => $options,
             ]);
         }
@@ -109,7 +111,7 @@ class CartRepository implements CartRepositoryInterface
         }
 
         $cartItem->quantity = $quantity;
-        $cartItem->subtotal = $quantity * $cartItem->price;
+        $cartItem->setAttribute('subtotal', (string) ((float) $quantity * (float) $cartItem->price));
         $cartItem->save();
 
         $this->calculateTotals($cartItem->cart_id);

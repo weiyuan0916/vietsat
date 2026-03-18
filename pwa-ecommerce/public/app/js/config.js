@@ -14,9 +14,11 @@
 
   // Configuration object
   // __API_BASE_URL__ is replaced by Vite at build time
+  const fallbackApiBaseUrl = 'https://tiemnhaduy.com/api/v1';
+
   window.AppConfig = {
     // API Configuration
-    apiBaseUrl: backendConfig.apiBaseUrl || window.__API_BASE_URL__ || 'https://pwa-ecommerce.test/api',
+    apiBaseUrl: backendConfig.apiBaseUrl || window.__API_BASE_URL__ || fallbackApiBaseUrl,
     
     // App Info
     appName: 'TiemNhaDuy',

@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\FacebookProfileRequest;
 use App\Services\FacebookUidExtractorService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 
 class FacebookProfileController extends Controller
 {
@@ -145,17 +145,23 @@ class FacebookProfileController extends Controller
      *   }
      * }
      */
-    public function validateBatch(FacebookProfileRequest $request): JsonResponse
+    public function validateBatch(Request $request): JsonResponse
     {
-        $urls = $request->input('urls', []);
+        $validator = Validator::make($request->all(), [
+            'urls' => ['required', 'array', 'min:1'],
+            'urls.*' => ['required', 'string'],
+        ]);
 
-        if (empty($urls)) {
+        if ($validator->fails()) {
             return response()->json([
                 'status' => false,
-                'message' => 'Danh sách URL không được để trống.',
+                'message' => 'Dữ liệu đầu vào không hợp lệ.',
                 'data' => null,
+                'errors' => $validator->errors(),
             ], 422);
         }
+
+        $urls = $request->input('urls', []);
 
         $results = [];
         $validCount = 0;
@@ -259,6 +265,7 @@ class FacebookProfileController extends Controller
         // If we got UID from URL, return it directly
         if ($uidFromUrl !== null && $this->uidExtractor->isValidUid($uidFromUrl)) {
             return response()->json([
+                'status' => true,
                 'success' => true,
                 'message' => 'UID được trích xuất thành công từ URL.',
                 'data' => array_merge($parsed, [
@@ -272,13 +279,16 @@ class FacebookProfileController extends Controller
 
         if (!$result['success']) {
             return response()->json([
+                'status' => false,
                 'success' => false,
                 'message' => $result['error'],
                 'data' => null,
+                'errors' => null,
             ], 422);
         }
 
         return response()->json([
+            'status' => true,
             'success' => true,
             'message' => 'UID được trích xuất thành công.',
             'data' => array_merge($parsed, [

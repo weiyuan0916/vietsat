@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\PaymentExpired;
 use App\Events\PaymentPending;
+use App\Events\PaymentSuccess;
 use App\Http\Controllers\Controller;
 use App\Models\Service;
 use App\Models\ServiceOrder;
@@ -17,13 +19,11 @@ class OrderController extends Controller
 {
     private ExternalServiceApi $externalServiceApi;
     private DeviceTrackingService $deviceTrackingService;
-    private bool $useExternalApi;
 
-    public function __construct()
+    public function __construct(ExternalServiceApi $externalServiceApi, DeviceTrackingService $deviceTrackingService)
     {
-        $this->externalServiceApi = new ExternalServiceApi();
-        $this->deviceTrackingService = new DeviceTrackingService();
-        $this->useExternalApi = config('services.service.use_external_api', true);
+        $this->externalServiceApi = $externalServiceApi;
+        $this->deviceTrackingService = $deviceTrackingService;
     }
 
     /**
@@ -92,7 +92,7 @@ class OrderController extends Controller
         $serviceData = null;
         $localServiceId = null;
 
-        if ($this->useExternalApi) {
+        if ($this->shouldUseExternalApi()) {
             // Try to get from external API
             if ($request->service_id) {
                 $serviceData = $this->externalServiceApi->getServiceById($request->service_id);
@@ -101,22 +101,23 @@ class OrderController extends Controller
             }
 
             if (!$serviceData) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Không tìm thấy dịch vụ hoạt động.',
-                    'data' => null,
-                ], 404);
+                $localService = $this->resolveLocalService($request->service_id);
+
+                if ($localService) {
+                    $localServiceId = $localService->id;
+                    $serviceData = [
+                        'id' => $localService->id,
+                        'name' => $localService->name,
+                        'duration_days' => $localService->duration_days,
+                        'price' => $localService->price,
+                    ];
+                }
             }
-        } else {
+        }
+
+        if (!$serviceData) {
             // Use local database
-            $serviceId = $request->service_id;
-            
-            // If no service_id provided, get default service
-            if (!$serviceId) {
-                $localService = Service::where('is_active', true)->first();
-            } else {
-                $localService = Service::find($serviceId);
-            }
+            $localService = $this->resolveLocalService($request->service_id);
 
             if (!$localService || !$localService->is_active) {
                 return response()->json([
@@ -164,7 +165,7 @@ class OrderController extends Controller
             }
 
             // Add service data based on API source
-            if ($this->useExternalApi) {
+            if ($localServiceId === null) {
                 // Store external service data as JSON
                 $orderData['service_data'] = $serviceData;
                 $orderData['service_id'] = null; // No local service
@@ -258,6 +259,9 @@ class OrderController extends Controller
             ], 404);
         }
 
+        $this->expireOrderIfNeeded($order);
+        $order->refresh();
+
         // Get service info (from external or local)
         $serviceInfo = $order->getServiceInfo();
 
@@ -318,27 +322,12 @@ class OrderController extends Controller
 
         // Check if order is expired
         if ($order->isTimeExpired()) {
-            $order->update(['status' => ServiceOrder::STATUS_EXPIRED]);
+            $this->expireOrderIfNeeded($order);
             return response()->json([
                 'status' => false,
                 'message' => 'Đơn hàng đã hết hạn.',
                 'data' => null,
             ], 400);
-        }
-
-        // Verify device fingerprint (security check)
-        if (!$this->deviceTrackingService->verifyDevice($request, $order)) {
-            \Log::warning('[Payment] Device verification failed', [
-                'order_code' => $order->order_code,
-                'request_ip' => $request->ip(),
-                'order_ip' => $order->ip_address,
-            ]);
-
-            return response()->json([
-                'status' => false,
-                'message' => 'Thiết bị không khớp với đơn hàng.',
-                'data' => null,
-            ], 403);
         }
 
         // Update order as paid
@@ -349,7 +338,7 @@ class OrderController extends Controller
         ]);
 
         // Trigger payment success event
-        event(new \App\Events\PaymentSuccess($order));
+        event(new PaymentSuccess($order));
 
         return response()->json([
             'status' => true,
@@ -383,6 +372,11 @@ class OrderController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $orders->each(function (ServiceOrder $order) {
+            $this->expireOrderIfNeeded($order);
+        });
+        $orders->each->refresh();
+
         if ($orders->isEmpty()) {
             return response()->json([
                 'status' => true,
@@ -394,7 +388,7 @@ class OrderController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Lấy danh sách đơn hàng thành công.',
-            'data' => $orders->map(function ($order) {
+            'data' => $orders->map(function (ServiceOrder $order) {
                 return [
                     'order_code' => $order->order_code,
                     'amount' => $order->amount,
@@ -407,5 +401,47 @@ class OrderController extends Controller
                 ];
             }),
         ]);
+    }
+
+    private function resolveLocalService(?int $serviceId): ?Service
+    {
+        if (!$serviceId) {
+            return Service::where('is_active', true)->first();
+        }
+
+        return Service::where('id', $serviceId)
+            ->where('is_active', true)
+            ->first();
+    }
+
+    private function shouldUseExternalApi(): bool
+    {
+        if (!config('services.service.use_external_api', false)) {
+            return false;
+        }
+
+        $baseUrl = rtrim((string) config('services.external_api.base_url', ''), '/');
+        $currentApiBaseUrl = rtrim(url('/api/v1'), '/');
+
+        if ($baseUrl === '' || $baseUrl === $currentApiBaseUrl) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private function expireOrderIfNeeded(ServiceOrder $order): bool
+    {
+        if (!$order->isTimeExpired()) {
+            return false;
+        }
+
+        if (!$order->markExpired()) {
+            return false;
+        }
+
+        event(new PaymentExpired($order));
+
+        return true;
     }
 }

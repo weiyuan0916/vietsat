@@ -12,11 +12,9 @@
   // Try to get config from window.APP_CONFIG (set by Laravel backend)
   const backendConfig = window.APP_CONFIG || {};
 
-  // Determine API base URL based on environment
-  // Always call to production API: https://tiemnhaduy.com/api/v1
   let apiBaseUrl = backendConfig.apiBaseUrl || window.__API_BASE_URL__;
   
-  // If no valid URL is set, always use production API
+  // Fallback: luôn gọi thẳng production API khi không có config khác
   if (!apiBaseUrl) {
     apiBaseUrl = 'https://tiemnhaduy.com/api/v1';
   }

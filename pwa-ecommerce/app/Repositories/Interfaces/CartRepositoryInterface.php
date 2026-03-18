@@ -22,7 +22,7 @@ interface CartRepositoryInterface
     /**
      * Add item to cart.
      */
-    public function addItem(int $cartId, int $productId, int $quantity = 1, array $options = []): void;
+    public function addItem(int $cartId, int $serviceId, int $quantity = 1, array $options = []): void;
 
     /**
      * Update cart item quantity.

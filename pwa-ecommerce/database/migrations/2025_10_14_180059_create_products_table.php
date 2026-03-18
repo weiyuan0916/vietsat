@@ -11,7 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('products', function (Blueprint $table) {
+        $supportsFullText = in_array(Schema::getConnection()->getDriverName(), ['mysql', 'mariadb', 'pgsql'], true);
+
+        Schema::create('products', function (Blueprint $table) use ($supportsFullText) {
             $table->id();
             $table->foreignId('vendor_id')->constrained()->cascadeOnDelete();
             $table->foreignId('category_id')->constrained()->restrictOnDelete();
@@ -70,7 +72,10 @@ return new class extends Migration
             $table->index(['is_active', 'is_featured']);
             $table->index('stock_status');
             $table->index('rating');
-            $table->fullText(['name', 'description']);
+
+            if ($supportsFullText) {
+                $table->fullText(['name', 'description']);
+            }
         });
     }
 

@@ -16,9 +16,10 @@
     async create(facebookProfileLink) {
       try {
         const api = new window.ApiService(window.AppConfig.apiBaseUrl);
-        return await api.post('/orders', { 
+        const response = await api.post('/orders', { 
           facebook_profile_link: facebookProfileLink 
         });
+        return response?.data ?? response;
       } catch (error) {
         console.error('Error creating order:', error);
         throw error;
@@ -33,7 +34,8 @@
     async getStatus(orderCode) {
       try {
         const api = new window.ApiService(window.AppConfig.apiBaseUrl);
-        return await api.get(`/orders/${orderCode}`);
+        const response = await api.get(`/orders/${orderCode}`);
+        return response?.data ?? response;
       } catch (error) {
         console.error(`Error checking order ${orderCode}:`, error);
         throw error;
@@ -48,7 +50,8 @@
     async getByCode(orderCode) {
       try {
         const api = new window.ApiService(window.AppConfig.apiBaseUrl);
-        return await api.get(`/orders/${orderCode}`);
+        const response = await api.get(`/orders/${orderCode}`);
+        return response?.data ?? response;
       } catch (error) {
         console.error(`Error fetching order ${orderCode}:`, error);
         throw error;
@@ -65,7 +68,8 @@
         const api = new window.ApiService(window.AppConfig.apiBaseUrl);
         const queryString = new URLSearchParams(params).toString();
         const endpoint = queryString ? `/orders/my-orders?${queryString}` : '/orders/my-orders';
-        return await api.get(endpoint);
+        const response = await api.get(endpoint);
+        return response?.data ?? response;
       } catch (error) {
         console.error('Error listing orders:', error);
         throw error;

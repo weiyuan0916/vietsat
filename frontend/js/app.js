@@ -527,7 +527,20 @@ function initOrdersPage() {
     if (!iso) return '—';
     var d = new Date(iso);
     if (Number.isNaN(d.getTime())) return '—';
-    return d.toLocaleDateString('vi-VN');
+    return d.toLocaleString('vi-VN');
+  }
+
+  function getStatusMeta(status) {
+    switch (status) {
+      case 'paid':
+        return { text: 'Đã thanh toán', bg: 'rgba(34, 197, 94, 0.12)', color: 'var(--vs-success)' };
+      case 'processing':
+        return { text: 'Đang xử lý', bg: 'rgba(59, 130, 246, 0.12)', color: '#2563EB' };
+      case 'expired':
+        return { text: 'Đã hết hạn', bg: 'rgba(244, 63, 94, 0.12)', color: '#E11D48' };
+      default:
+        return { text: 'Chờ thanh toán', bg: 'var(--vs-bg-secondary)', color: 'var(--vs-text-secondary)' };
+    }
   }
 
   function renderOrders(orders) {
@@ -537,33 +550,25 @@ function initOrdersPage() {
       var amount = o?.amount || 0;
       var amountText = Number(amount).toLocaleString('vi-VN') + 'đ';
       var createdAt = fmtDate(o?.created_at);
-      var expiresAt = fmtDate(o?.expires_at);
       var status = o?.status || 'pending';
-      var isActive = status === 'paid' || status === 'processing';
-      var badgeBg = isActive ? 'rgba(34, 197, 94, 0.1)' : 'var(--vs-bg-secondary)';
-      var badgeColor = isActive ? 'var(--vs-success)' : 'var(--vs-text-secondary)';
-      var icon = isActive ? 'checkmark_alt_circle' : 'time';
-      var iconBg = isActive ? 'rgba(34, 197, 94, 0.1)' : 'var(--vs-bg-secondary)';
-      var iconColor = isActive ? 'var(--vs-success)' : 'var(--vs-text-secondary)';
-      var badgeText = isActive ? 'Đang hoạt động' : (status === 'expired' ? 'Đã hết hạn' : 'Chờ thanh toán');
+      var orderCode = o?.order_code || o?.code || '—';
+      var statusMeta = getStatusMeta(status);
 
       return (
-        '<div class="vs-service-card detailed" style="margin-bottom: 16px;' + (isActive ? '' : 'opacity:0.75;') + '">' +
-          '<div class="vs-service-card-top" style="align-items: flex-start;">' +
-            '<div class="vs-service-icon-wrap">' +
-              '<div class="vs-service-icon" style="background: ' + iconBg + '; color: ' + iconColor + ';">' +
-                '<i class="icon f7-icons">' + icon + '</i>' +
-              '</div>' +
-              '<div class="text-align-left">' +
-                '<h3 class="vs-service-name" style="margin-bottom: 4px;">' + escapeHtml(serviceName) + '</h3>' +
-                '<p class="vs-service-duration" style="font-size: 13px;">Ngày mua: ' + createdAt + '</p>' +
-                '<p class="vs-service-duration" style="font-size: 13px; color: var(--vs-text-primary);">Hết hạn: <span style="font-weight: 600;">' + expiresAt + '</span></p>' +
-              '</div>' +
+        '<div class="vs-service-card detailed" style="margin-bottom: 16px; padding: 16px;">' +
+          '<div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">' +
+            '<div style="min-width:0;">' +
+              '<div style="font-family: var(--vs-font-heading); font-size: 15px; font-weight: 700; color: var(--vs-text-primary);">#' + escapeHtml(orderCode) + '</div>' +
+              '<div style="font-size: 13px; color: var(--vs-text-secondary); margin-top: 4px;">' + createdAt + '</div>' +
             '</div>' +
-            '<div class="text-align-right">' +
-              '<div class="vs-service-price" style="font-size: 15px;">' + amountText + '</div>' +
-              '<span class="badge" style="background: ' + badgeBg + '; color: ' + badgeColor + '; margin-top: 4px; padding: 4px 8px; border-radius: 8px;">' + escapeHtml(badgeText) + '</span>' +
+            '<span style="background:' + statusMeta.bg + '; color:' + statusMeta.color + '; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:600; white-space:nowrap;">' + escapeHtml(statusMeta.text) + '</span>' +
+          '</div>' +
+          '<div style="margin-top: 14px; display:flex; align-items:center; justify-content:space-between; gap:12px;">' +
+            '<div style="min-width:0;">' +
+              '<div style="font-family: var(--vs-font-heading); font-size: 16px; font-weight: 700; color: var(--vs-text-primary);">' + escapeHtml(serviceName) + '</div>' +
+              '<div style="font-size: 13px; color: var(--vs-text-secondary); margin-top: 4px;">Lịch sử mua hàng</div>' +
             '</div>' +
+            '<div style="font-family: var(--vs-font-heading); font-size: 16px; font-weight: 800; color: var(--vs-accent); white-space:nowrap;">' + amountText + '</div>' +
           '</div>' +
         '</div>'
       );
@@ -1298,7 +1303,7 @@ function getApiBaseUrl() {
   if (window.AppConfig && window.AppConfig.apiBaseUrl) {
     return window.AppConfig.apiBaseUrl;
   }
-  return 'https://tiemnhaduy.com/api/v1';
+  return `${window.location.origin}/api/v1`;
 }
 var API_BASE_URL = getApiBaseUrl();
 console.log('API Base URL:', API_BASE_URL);
@@ -1313,11 +1318,12 @@ console.log('API Base URL:', API_BASE_URL);
  */
 async function fetchDefaultService() {
     try {
-        const response = await fetch(`${API_BASE_URL}/service/default`);
+        const response = await fetch(`${API_BASE_URL}/services/default`);
         if (!response.ok) {
             throw new Error('Failed to fetch service');
         }
-        return response.json();
+        const payload = await response.json();
+        return payload?.data || payload;
     } catch (error) {
         console.error('Error fetching service:', error);
         throw error;
@@ -1345,7 +1351,8 @@ async function createOrder(facebookProfileLink) {
             throw new Error(error.message || 'Failed to create order');
         }
         
-        return response.json();
+        const payload = await response.json();
+        return payload?.data || payload;
     } catch (error) {
         console.error('Error creating order:', error);
         throw error;
@@ -1363,7 +1370,8 @@ async function checkOrderStatus(orderCode) {
         if (!response.ok) {
             throw new Error('Failed to check order');
         }
-        return response.json();
+        const payload = await response.json();
+        return payload?.data || payload;
     } catch (error) {
         console.error('Error checking order:', error);
         throw error;
@@ -1557,9 +1565,9 @@ function initServicePage(serviceId) {
     }
 
     var serviceInfoEl = pageEl.querySelector('#service-order-view');
-    var orderFormEl = pageEl.querySelector('#order-form');
     var paymentInfoEl = pageEl.querySelector('#payment-info');
     var currentOrderCode = null;
+    var currentServiceId = serviceId || null;
     
     function loadServiceInfo() {
         app.preloader.show();
@@ -1596,7 +1604,8 @@ function initServicePage(serviceId) {
                 if (summaryPriceEl) summaryPriceEl.textContent = priceText;
                 if (summaryTotalEl) summaryTotalEl.textContent = priceText;
                 if (bottomTotalEl) bottomTotalEl.textContent = priceText;
-                
+                currentServiceId = service.id || currentServiceId;
+
                 if (serviceInfoEl) serviceInfoEl.style.display = 'block';
                 app.preloader.hide();
             })
@@ -1607,56 +1616,36 @@ function initServicePage(serviceId) {
             });
     }
     
-    if (orderFormEl) {
-        orderFormEl.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            var formData = new FormData(orderFormEl);
-            var facebookLink = formData.get('facebook_profile_link');
-            
-            if (!facebookLink || !facebookLink.includes('facebook.com')) {
-                app.dialog.alert('Vui lòng nhập link Facebook hợp lệ', 'Lỗi');
-                return;
-            }
-            
-            app.dialog.preloader('Đang tạo đơn hàng...');
-            
-            OrderApi.create(facebookLink)
-                .then(function(orderData) {
-                    app.dialog.close();
-                    
-                    currentOrderCode = orderData.order_code;
-                    
-                    var orderCodeEl = document.getElementById('order-code');
-                    var orderAmountEl = document.getElementById('order-amount');
-                    var orderExpiresEl = document.getElementById('order-expires');
-                    var qrContainer = document.getElementById('qr-code');
-                    var transferContentEl = document.getElementById('transfer-content');
-                    
-                    if (orderCodeEl) orderCodeEl.textContent = orderData.order_code;
-                    if (orderAmountEl) orderAmountEl.textContent = orderData.amount.toLocaleString('vi-VN');
-                    
-                    var expiresDate = new Date(orderData.expires_at);
-                    if (orderExpiresEl) orderExpiresEl.textContent = expiresDate.toLocaleString('vi-VN');
-                    
-                    if (qrContainer && orderData.qr_content) {
-                        qrContainer.innerHTML = '<img src="' + orderData.qr_content + '" alt="QR Code" style="max-width: 200px;">';
-                    }
-                    if (transferContentEl) transferContentEl.textContent = orderData.order_code;
-                    
-                    orderFormEl.style.display = 'none';
-                    if (paymentInfoEl) paymentInfoEl.style.display = 'block';
-                    
-                    // subscribeToOrder(orderData.order_code); // Missing in direct scripts?
-                    startStatusPolling(orderData.order_code);
-                })
-                .catch(function(error) {
-                    app.dialog.close();
-                    app.dialog.alert(error.message || 'Không thể tạo đơn hàng.', 'Lỗi');
-                    console.error('Order creation error:', error);
+    // Bind CTA buttons after service info loaded
+    function bindCtaButtons() {
+        var cartBtn = document.getElementById('service-cart-btn');
+        var buyBtn = document.getElementById('service-buy-btn');
+
+        if (cartBtn && !cartBtn.dataset.bound) {
+            cartBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!currentServiceId) return;
+                addToCart(currentServiceId, 1, cartBtn);
+            });
+            cartBtn.dataset.bound = '1';
+        }
+
+        if (buyBtn && !buyBtn.dataset.bound) {
+            buyBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!currentServiceId) return;
+                addToCart(currentServiceId, 1, buyBtn)?.then(function () {
+                    openCartPage();
                 });
-        });
+            });
+            buyBtn.dataset.bound = '1';
+        }
     }
+
+    // ensure buttons bound after initial load
+    setTimeout(bindCtaButtons, 0);
     
     var pollingInterval = null;
     
@@ -1762,35 +1751,43 @@ function initHomePage() {
             return;
         }
         
-        var isDark = document.body.classList.contains('dark');
+        var featuredServices = services.slice();
+        featuredServices.sort(function() { return Math.random() - 0.5; });
+        featuredServices = featuredServices.slice(0, 2);
 
-        var servicesHtml = services.map(function(service) {
+        var servicesHtml = featuredServices.map(function(service) {
             var durationText = formatDuration(service.duration_days);
             var priceText = formatPrice(service.price);
             
-            // Check if service is premium based on price or name as a simple heuristic
             var isPremium = service.price > 100000;
             var iconClass = isPremium ? 'vs-service-icon premium' : 'vs-service-icon';
             var iconName = isPremium ? 'crown' : 'tv';
-            
-            return '<a href="/service/?service=' + service.id + '" class="vs-service-card link">' +
+            var desc = escapeHtml(service.description || 'Xem tất cả kênh truyền hình cơ bản và nâng cao. Hỗ trợ đa thiết bị.');
+
+            return '' +
+              '<div class="vs-service-card-detailed home-service-card">' +
                 '<div class="vs-service-card-top">' +
-                    '<div class="' + iconClass + '">' +
-                        '<i class="icon f7-icons">' + iconName + '</i>' +
+                  '<div class="' + iconClass + '">' +
+                    '<i class="icon f7-icons">' + iconName + '</i>' +
+                  '</div>' +
+                  '<div class="vs-service-details">' +
+                    '<div class="vs-service-title-row">' +
+                      '<h3 class="vs-service-name">' + escapeHtml(service.name) + '</h3>' +
+                      '<div class="vs-service-price">' + priceText + 'đ</div>' +
                     '</div>' +
-                    '<div class="vs-service-details">' +
-                        '<div class="vs-service-title-row">' +
-                            '<h3 class="vs-service-name">' + escapeHtml(service.name) + '</h3>' +
-                            '<div class="vs-service-price">' +
-                                '<span class="vs-service-price-value">' + priceText + '</span>' +
-                                '<span class="vs-service-price-currency">đ</span>' +
-                            '</div>' +
-                        '</div>' +
-                        '<p class="vs-service-duration">' + durationText + '</p>' +
-                    '</div>' +
+                    '<p class="vs-service-duration">' + durationText + '</p>' +
+                  '</div>' +
                 '</div>' +
-                '<p class="vs-service-desc">' + escapeHtml(service.description || 'Xem tất cả kênh truyền hình cơ bản và nâng cao. Hỗ trợ đa thiết bị.') + '</p>' +
-            '</a>';
+                '<p class="vs-service-desc">' + desc + '</p>' +
+                '<div class="vs-service-actions" style="display:flex;gap:8px;margin-top:12px;">' +
+                  '<button class="vs-service-cart-btn" onclick="event.preventDefault();addToCart(' + service.id + ', 1, this);" style="flex:0 0 40px;height:40px;border-radius:12px;border:1px solid var(--vs-border-subtle);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;">' +
+                    '<i class="icon f7-icons" style="font-size:18px;color:var(--vs-accent);">cart</i>' +
+                  '</button>' +
+                  '<a href="/service/?service=' + service.id + '" class="vs-service-register-btn link" style="flex:1;display:flex;align-items:center;justify-content:center;border-radius:12px;height:40px;background:var(--vs-accent);color:#fff;font-weight:700;font-size:14px;">' +
+                    'Mua ngay <i class="icon f7-icons" style="font-size: 16px;margin-left:4px;">arrow_right</i>' +
+                  '</a>' +
+                '</div>' +
+              '</div>';
         }).join('');
         
         containerEl.innerHTML = servicesHtml;
@@ -1912,11 +1909,11 @@ function initServicesListPage() {
                 '</div>' +
                 '<p class="vs-service-desc">' + desc + '</p>' +
                 '<div class="vs-service-actions" style="display:flex;gap:8px;margin-top:12px;">' +
-                    '<button class="vs-service-cart-btn" onclick="event.preventDefault();event.stopPropagation();addToCart(' + service.id + ', 1, this);" style="flex:0 0 44px;height:40px;border-radius:12px;border:1px solid var(--vs-border-strong);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;">' +
-                        '<i class="icon f7-icons" style="font-size:18px;color:var(--vs-accent);">cart_badge_plus</i>' +
+                    '<button class="vs-service-cart-btn" onclick="event.preventDefault();event.stopPropagation();addToCart(' + service.id + ', 1, this);" style="flex:0 0 40px;height:40px;border-radius:12px;border:1px solid var(--vs-border-subtle);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;">' +
+                        '<i class="icon f7-icons" style="font-size:18px;color:var(--vs-accent);">cart</i>' +
                     '</button>' +
-                    '<a href="/service/?service=' + service.id + '" class="vs-service-register-btn link" style="flex:1;">' +
-                        'Đăng ký ngay <i class="icon f7-icons" style="font-size: 16px;">arrow_right</i>' +
+                    '<a href="/service/?service=' + service.id + '" class="vs-service-register-btn link" style="flex:1;display:flex;align-items:center;justify-content:center;border-radius:12px;height:40px;background:var(--vs-accent);color:#fff;font-weight:700;font-size:14px;">' +
+                        'Mua ngay <i class="icon f7-icons" style="font-size: 16px;margin-left:4px;">arrow_right</i>' +
                     '</a>' +
                 '</div>' +
             '</div>';
@@ -1975,31 +1972,84 @@ function initServicesListPage() {
 
 // Initialize cart badge count on app load
 const updateCartBadge = (count) => {
-  const badge = document.querySelector('.vs-tab-item[data-tab="orders"] .badge');
-  if (badge) {
+  const homeBadge = document.getElementById('home-cart-badge');
+
+  [homeBadge].forEach(function(badge) {
+    if (!badge) return;
     badge.textContent = count;
     badge.style.display = count > 0 ? 'flex' : 'none';
+  });
+};
+
+const CART_SESSION_STORAGE_KEY = 'cart_session_id';
+
+const getStoredCartSession = () => {
+  try {
+    return localStorage.getItem(CART_SESSION_STORAGE_KEY);
+  } catch (_) {
+    return null;
+  }
+};
+
+const setStoredCartSession = (sessionId) => {
+  if (!sessionId) return;
+
+  try {
+    localStorage.setItem(CART_SESSION_STORAGE_KEY, sessionId);
+  } catch (_) {
+    // noop
   }
 };
 
 const cartApiHeaders = () => {
   const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
-  return {
-    'Authorization': token ? `Bearer ${token}` : '',
+  const cartSession = getStoredCartSession();
+  const headers = {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  if (cartSession) {
+    headers['X-Cart-Session'] = cartSession;
+  }
+
+  return headers;
 };
 
-const CART_API = API_BASE_URL + '/cart';
+const CART_API = (window.API_BASE_URL || `${window.location.origin}/api/v1`) + '/cart';
+
+function normalizeCartData(data) {
+  if (!data) {
+    return { items: [], subtotal: 0, total: 0, items_count: 0 };
+  }
+
+  if (data.session_id) {
+    setStoredCartSession(data.session_id);
+  }
+
+  return {
+    ...data,
+    items: (data.items || []).map(function(item) {
+      return {
+        ...item,
+        name: item.name || item.service_name || 'Dịch vụ'
+      };
+    })
+  };
+}
 
 function fetchCart() {
   return fetch(CART_API, { headers: cartApiHeaders() })
     .then(function(r) { return r.json(); })
     .then(function(res) {
       if (res.status && res.data) {
-        updateCartBadge(res.data.items_count || 0);
-        return res.data;
+        var cartData = normalizeCartData(res.data);
+        updateCartBadge(cartData.items_count || 0);
+        return cartData;
       }
       updateCartBadge(0);
       return { items: [], subtotal: 0, total: 0, items_count: 0 };
@@ -2020,10 +2070,12 @@ function addToCart(serviceId, quantity, btnEl) {
     .then(function(r) { return r.json(); })
     .then(function(res) {
       if (res.status && res.data) {
-        updateCartBadge(res.data.items_count || 0);
+        var cartData = normalizeCartData(res.data);
+        updateCartBadge(cartData.items_count || 0);
         app.toast.create({ text: 'Đã thêm vào giỏ hàng!', position: 'top', closeTimeout: 1500, cssClass: 'color-green' }).open();
-        return res.data;
+        return cartData;
       }
+      app.toast.create({ text: (res && res.message) || 'Không thể thêm vào giỏ hàng.', position: 'top', closeTimeout: 2000 }).open();
       return null;
     })
     .catch(function(err) {
@@ -2070,7 +2122,7 @@ function renderCartPage(data) {
     var itemTotal = price * qty;
     html += '<div class="vs-cart-item" data-id="' + item.id + '">';
     html += '<div class="vs-cart-item-info">';
-    html += '<div class="vs-cart-item-name">' + (item.name || 'Dịch vụ') + '</div>';
+    html += '<div class="vs-cart-item-name">' + (item.name || item.service_name || 'Dịch vụ') + '</div>';
     html += '<div class="vs-cart-item-price">' + formatPrice(itemTotal) + '</div>';
     html += '</div>';
     html += '<div class="vs-cart-item-qty">';
@@ -2126,9 +2178,15 @@ function updateCartItem(itemId, newQty) {
     .then(function(r) { return r.json(); })
     .then(function(res) {
       if (res.status && res.data) {
-        updateCartBadge(res.data.items_count || 0);
+        var cartData = normalizeCartData(res.data);
+        updateCartBadge(cartData.items_count || 0);
         loadCartPage();
+        return;
       }
+      app.toast.create({ text: (res && res.message) || 'Không thể cập nhật giỏ hàng.', position: 'top', closeTimeout: 2000 }).open();
+    })
+    .catch(function() {
+      app.toast.create({ text: 'Lỗi kết nối.', position: 'top', closeTimeout: 2000 }).open();
     });
 }
 window.updateCartItem = updateCartItem;
@@ -2141,9 +2199,15 @@ function removeCartItem(itemId) {
     .then(function(r) { return r.json(); })
     .then(function(res) {
       if (res.status && res.data) {
-        updateCartBadge(res.data.items_count || 0);
+        var cartData = normalizeCartData(res.data);
+        updateCartBadge(cartData.items_count || 0);
         loadCartPage();
+        return;
       }
+      app.toast.create({ text: (res && res.message) || 'Không thể xoá khỏi giỏ hàng.', position: 'top', closeTimeout: 2000 }).open();
+    })
+    .catch(function() {
+      app.toast.create({ text: 'Lỗi kết nối.', position: 'top', closeTimeout: 2000 }).open();
     });
 }
 window.removeCartItem = removeCartItem;
@@ -2156,9 +2220,13 @@ function clearCart() {
     })
       .then(function(r) { return r.json(); })
       .then(function(res) {
-        updateCartBadge(0);
+        var cartData = normalizeCartData(res.data);
+        updateCartBadge((cartData && cartData.items_count) || 0);
         loadCartPage();
         app.toast.create({ text: 'Đã xóa giỏ hàng', position: 'top', closeTimeout: 1600, cssClass: 'color-green' }).open();
+      })
+      .catch(function() {
+        app.toast.create({ text: 'Lỗi kết nối.', position: 'top', closeTimeout: 2000 }).open();
       });
   });
 }
@@ -2180,6 +2248,9 @@ function enforceTabBarVisibility() {
 }
 window.addEventListener('hashchange', enforceTabBarVisibility);
 window.addEventListener('load', enforceTabBarVisibility);
+window.addEventListener('load', function () {
+  fetchCart();
+});
 enforceTabBarVisibility();
 
 // Framework7 Route Events

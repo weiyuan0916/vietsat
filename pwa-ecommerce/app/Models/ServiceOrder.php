@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 class ServiceOrder extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'order_code',
         'service_id',
@@ -135,5 +138,17 @@ class ServiceOrder extends Model
     public function hasExternalServiceData(): bool
     {
         return !empty($this->service_data);
+    }
+
+    public function markExpired(): bool
+    {
+        if ($this->status !== self::STATUS_PENDING) {
+            return false;
+        }
+
+        $this->status = self::STATUS_EXPIRED;
+        $this->save();
+
+        return true;
     }
 }

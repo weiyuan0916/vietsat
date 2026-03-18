@@ -15,7 +15,8 @@
     async getDefault() {
       try {
         const api = new window.ApiService(window.AppConfig.apiBaseUrl);
-        return await api.get('/service/default');
+        const response = await api.get('/services/default');
+        return response?.data ?? response;
       } catch (error) {
         console.error('Error fetching default service:', error);
         throw error;
@@ -30,7 +31,8 @@
     async getById(id) {
       try {
         const api = new window.ApiService(window.AppConfig.apiBaseUrl);
-        return await api.get(`/services/${id}`);
+        const response = await api.get(`/services/${id}`);
+        return response?.data ?? response;
       } catch (error) {
         console.error(`Error fetching service ${id}:`, error);
         throw error;
@@ -41,14 +43,33 @@
      * Fetch all active services
      * @returns {Promise<Array>} List of active services
      */
-    async getAll() {
+    async getAll(page = 1, perPage = 10) {
       try {
         const api = new window.ApiService(window.AppConfig.apiBaseUrl);
-        return await api.get('/services');
+        const response = await api.get(`/services?page=${page}&per_page=${perPage}`);
+
+        if (response?.data) {
+          return {
+            items: response.data.items || [],
+            meta: response.data.meta || {},
+            links: response.data.links || {},
+          };
+        }
+
+        return {
+          items: Array.isArray(response) ? response : [],
+          meta: {},
+          links: {},
+        };
       } catch (error) {
         console.error('Error fetching services:', error);
         throw error;
       }
+    },
+
+    async getList() {
+      const result = await this.getAll();
+      return result.items;
     }
   };
 

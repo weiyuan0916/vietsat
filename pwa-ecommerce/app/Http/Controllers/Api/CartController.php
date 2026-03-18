@@ -242,10 +242,13 @@ class CartController extends Controller
     {
         $items = $cart->items->map(function (CartItem $item) {
             $service = $item->service;
+            $serviceName = $service ? $service->name : 'Dịch vụ đã xoá';
+
             return [
                 'id' => $item->id,
                 'service_id' => $item->service_id,
-                'service_name' => $service ? $service->name : 'Dịch vụ đã xoá',
+                'name' => $serviceName,
+                'service_name' => $serviceName,
                 'duration_days' => $service ? $service->duration_days : null,
                 'quantity' => $item->quantity,
                 'price' => (int) $item->price,
