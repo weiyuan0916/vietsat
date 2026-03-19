@@ -13,6 +13,10 @@
       "fill": "#0C0C0C",
       "layout": "vertical",
       "gap": 24,
+      "padding": [
+        0,
+        24
+      ],
       "justifyContent": "center",
       "alignItems": "center",
       "children": [
@@ -64,11 +68,14 @@
           "type": "frame",
           "id": "tGysW",
           "name": "Start Button",
-          "width": "fill_container",
           "height": 56,
           "fill": "#FF3B30",
           "cornerRadius": 4,
           "layout": "vertical",
+          "padding": [
+            0,
+            32
+          ],
           "justifyContent": "center",
           "alignItems": "center",
           "children": [
@@ -3171,7 +3178,7 @@
     {
       "type": "frame",
       "id": "XT07P",
-      "x": 520,
+      "x": 1040,
       "y": 1960,
       "name": "Order Success",
       "clip": true,
@@ -3335,7 +3342,7 @@
     {
       "type": "frame",
       "id": "0cy4O",
-      "x": 1040,
+      "x": 1560,
       "y": 1960,
       "name": "Order History",
       "clip": true,
@@ -5437,7 +5444,7 @@
     {
       "type": "frame",
       "id": "siNnB",
-      "x": 1560,
+      "x": 2080,
       "y": 1960,
       "name": "Order Detail",
       "clip": true,
@@ -7820,6 +7827,800 @@
                   "letterSpacing": 2
                 }
               ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "bEZNu",
+      "x": 520,
+      "y": 1960,
+      "name": "Sreen Payment",
+      "clip": true,
+      "width": 402,
+      "height": 874,
+      "fill": "#0C0C0C",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "nTlBX",
+          "name": "Header",
+          "width": "fill_container",
+          "fill": "#0C0C0C",
+          "layout": "vertical",
+          "padding": [
+            0,
+            0,
+            12,
+            0
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "J5Ux1",
+              "name": "Status Bar",
+              "width": "fill_container",
+              "height": 62,
+              "padding": [
+                0,
+                24
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "fOn1F",
+                  "name": "qrTime",
+                  "fill": "#FFFFFF",
+                  "content": "12:36",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "tiIt2",
+                  "name": "qrInd",
+                  "fill": "#FFFFFF",
+                  "content": "⦁⦁⦁ 📶 🔋",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "fQEug",
+              "name": "qrHeadRow",
+              "width": "fill_container",
+              "padding": [
+                8,
+                24
+              ],
+              "justifyContent": "space_between",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "MzOKO",
+                  "name": "qrTitleCol",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "kR0LF",
+                      "name": "qrBack",
+                      "fill": "#FFFFFF",
+                      "content": "←",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "952fq",
+                      "name": "qrTitleBox",
+                      "layout": "vertical",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "GAwXO",
+                          "name": "qrTitle",
+                          "fill": "#FFFFFF",
+                          "content": "#TND2024031901",
+                          "fontFamily": "Inter",
+                          "fontSize": 18,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "iPWrB",
+                          "name": "qrSub",
+                          "fill": "#E0E8FF",
+                          "content": "18:45 • T4, 18/03/2026",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "CJkby",
+                          "name": "qrSteps",
+                          "gap": 8,
+                          "padding": [
+                            4,
+                            0,
+                            0,
+                            0
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "VIwVK",
+                              "name": "qrStep1",
+                              "fill": "#A3C2FF",
+                              "content": "✓  Thông tin dịch vụ",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "3pARA",
+                              "name": "qrStepLine",
+                              "width": 16,
+                              "height": 1,
+                              "fill": "#A3C2FF"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "zM7KH",
+                              "name": "qrStep2",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "PkAhP",
+                                  "name": "qrStep2Dot",
+                                  "width": 16,
+                                  "height": 16,
+                                  "fill": "#FFFFFF",
+                                  "cornerRadius": 8,
+                                  "layout": "vertical",
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "IufIK",
+                                      "name": "qrStep2Num",
+                                      "fill": "#1A66FF",
+                                      "content": "6",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "700"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "R9h8l",
+                                  "name": "qrStep2Txt",
+                                  "fill": "#FFFFFF",
+                                  "content": "Thanh toán",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "iSv9S",
+                  "name": "qrDetailBtn",
+                  "fill": "#FFFFFF",
+                  "content": "Chi tiết",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "3vMVP",
+          "name": "Timer Banner",
+          "width": "fill_container",
+          "height": 36,
+          "fill": "#FFB800",
+          "layout": "vertical",
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "kPxhK",
+              "name": "qrBannerTxt",
+              "fill": "#1A1A1A",
+              "content": "Thời gian thanh toán còn lại 00:23",
+              "fontFamily": "Inter",
+              "fontSize": 13,
+              "fontWeight": "600"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "au9Am",
+          "name": "Body",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            20,
+            16,
+            100,
+            16
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "zdeU0",
+              "name": "qrBodyTitle",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "mZM6B",
+                  "name": "qrTitleIcon",
+                  "fill": "#1A66FF",
+                  "content": "💳",
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "isTcO",
+                  "name": "qrTitleTxt",
+                  "fill": "#FFFFFF",
+                  "content": "QR chuyển khoản/ Ví điện tử",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "AapWH",
+              "name": "QR Card",
+              "clip": true,
+              "width": "fill_container",
+              "fill": "#1A1A1A",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "bjSuH",
+                  "name": "Warning",
+                  "width": "fill_container",
+                  "fill": "#2A0A0A",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "padding": [
+                    12,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "f7l7n",
+                      "name": "qrWarn1",
+                      "fill": "#FF453A",
+                      "content": "Luôn thanh toán với mã QR mới nhất!",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "vnGo8",
+                      "name": "qrWarn2",
+                      "fill": "#FF453A",
+                      "content": "Mã sẽ hết hạn lúc 12:37 • T4, 18/03",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "10TYB",
+                  "name": "Content",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 20,
+                  "padding": [
+                    16,
+                    16,
+                    24,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "EgUXf",
+                      "name": "qrInstruct",
+                      "layout": "vertical",
+                      "gap": 4,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "diUbE",
+                          "name": "qrInstruct1",
+                          "fill": "#FFFFFF",
+                          "content": "Chuyển khoản bằng mã QR",
+                          "fontFamily": "Inter",
+                          "fontSize": 16,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "3DZBz",
+                          "name": "qrInstruct2",
+                          "fill": "#8A8A8A",
+                          "content": "Kiểm tra kỹ số tiền hiển thị trên mã QR. Mã QR sẽ thay đổi khi Tổng tiền thay đổi.",
+                          "textAlign": "center",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Lb5ML",
+                      "name": "QR Grid",
+                      "width": "fill_container",
+                      "gap": 16,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "k6cT5",
+                          "name": "Actions Col",
+                          "width": 104,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "sGqqc",
+                              "name": "Action 1",
+                              "width": "fill_container",
+                              "height": 84,
+                              "fill": "#2A2A2A",
+                              "cornerRadius": 8,
+                              "layout": "vertical",
+                              "gap": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "J2IWx",
+                                  "name": "i1",
+                                  "fill": "#FFCC00",
+                                  "content": "download",
+                                  "fontFamily": "Material Icons",
+                                  "fontSize": 24,
+                                  "fontWeight": "normal"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "DMryI",
+                                  "name": "act1Txt",
+                                  "fill": "#FFFFFF",
+                                  "content": "Lưu ảnh mã\nQR về máy",
+                                  "textAlign": "center",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "0sTRp",
+                              "name": "Action 2",
+                              "width": "fill_container",
+                              "height": 84,
+                              "fill": "#2A2A2A",
+                              "cornerRadius": 8,
+                              "layout": "vertical",
+                              "gap": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "jZ5bT",
+                                  "name": "i2",
+                                  "fill": "#FFCC00",
+                                  "content": "smartphone",
+                                  "fontFamily": "Material Icons",
+                                  "fontSize": 24,
+                                  "fontWeight": "normal"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "d9eaj",
+                                  "name": "act2Txt",
+                                  "fill": "#FFFFFF",
+                                  "content": "Tải lên app\nthanh toán",
+                                  "textAlign": "center",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "jeYo3",
+                              "name": "Action 3",
+                              "width": "fill_container",
+                              "height": 84,
+                              "fill": "#2A2A2A",
+                              "cornerRadius": 8,
+                              "layout": "vertical",
+                              "gap": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "cMQCj",
+                                  "name": "i3",
+                                  "fill": "#FFCC00",
+                                  "content": "hourglass_empty",
+                                  "fontFamily": "Material Icons",
+                                  "fontSize": 24,
+                                  "fontWeight": "normal"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "mbVgI",
+                                  "name": "act3Txt",
+                                  "fill": "#FFFFFF",
+                                  "content": "Chờ xác nhận",
+                                  "textAlign": "center",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "CgeHG",
+                          "name": "QR Col",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 4,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "A0zhj",
+                              "name": "qrLogos",
+                              "fill": "#1A66FF",
+                              "content": "VIETQR",
+                              "fontFamily": "Sora",
+                              "fontSize": 14,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "w4EVm",
+                              "name": "qrAmount",
+                              "fill": "#FF3B30",
+                              "content": "270.000 đ",
+                              "fontFamily": "Sora",
+                              "fontSize": 18,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "ELdBk",
+                              "name": "qrImg",
+                              "metadata": {
+                                "type": "unsplash",
+                                "username": "rick_rothenberg",
+                                "link": "https://unsplash.com/@rick_rothenberg",
+                                "author": "Rick Rothenberg"
+                              },
+                              "width": 200,
+                              "height": 200,
+                              "fill": {
+                                "type": "image",
+                                "enabled": true,
+                                "url": "https://images.unsplash.com/photo-1695911053184-2a6bc67b3b99?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzM5MTI4OTl8&ixlib=rb-4.1.0&q=80&w=1080",
+                                "mode": "fill"
+                              },
+                              "children": [
+                                {
+                                  "type": "rectangle",
+                                  "id": "jO0UL",
+                                  "fill": {
+                                    "type": "image",
+                                    "enabled": true,
+                                    "url": "../image.png",
+                                    "mode": "fill"
+                                  },
+                                  "width": 199,
+                                  "height": 197
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "4PKmY",
+                              "name": "qrSubLink",
+                              "fill": "#1A66FF",
+                              "content": "Quét / chụp màn hình",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "DPKW2",
+                      "name": "qrDiv",
+                      "width": "fill_container",
+                      "height": 1,
+                      "fill": "#F0F0F0"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "STnqS",
+                      "name": "Save & Refresh",
+                      "width": "fill_container",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "pm4dI",
+                          "name": "Save Button",
+                          "width": "fill_container",
+                          "height": 48,
+                          "fill": "#1A66FF",
+                          "cornerRadius": 4,
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "rItPQ",
+                              "name": "qrSaveTxt",
+                              "fill": "#FFFFFF",
+                              "content": "Lưu mã QR về máy",
+                              "fontFamily": "Inter",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "WDEGw",
+                          "name": "qrRefBtn",
+                          "width": 48,
+                          "height": 48,
+                          "fill": "#2A2A2A",
+                          "cornerRadius": 4,
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "GFhuA",
+                              "name": "i4",
+                              "fill": "#FFFFFF",
+                              "content": "refresh",
+                              "fontFamily": "Material Icons",
+                              "fontSize": 20,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "7jtg2",
+                      "name": "qrRefTxt",
+                      "fill": "#8A8A8A",
+                      "content": "Bạn có thể lấy mã QR mới nếu quét mã hoặc thanh toán không thành công",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "P7rIP",
+              "name": "Help Line",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "nYR5H",
+                  "name": "qrHelp1",
+                  "fill": "#FFFFFF",
+                  "content": "Không thể quét mã QR?",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "Knsk1",
+                  "name": "qrHelp2",
+                  "fill": "#1A66FF",
+                  "content": "Tự nhập thông tin",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "RsnPM",
+          "name": "Sticky CTA",
+          "width": "fill_container",
+          "fill": "#1A1A1A",
+          "layout": "vertical",
+          "gap": 8,
+          "padding": [
+            16,
+            24,
+            24,
+            24
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "pLwFU",
+              "name": "ctaRow",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "TESuz",
+                  "name": "priceCol",
+                  "layout": "vertical",
+                  "gap": 2,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ckTCs",
+                      "name": "pLbl",
+                      "fill": "#8A8A8A",
+                      "content": "Tổng tiền",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "LykC0",
+                      "name": "priceBox",
+                      "gap": 4,
+                      "alignItems": "end",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "QwlMl",
+                          "name": "price",
+                          "fill": "#FFFFFF",
+                          "content": "270.000đ",
+                          "fontFamily": "Sora",
+                          "fontSize": 16,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "jBP0F",
+                          "name": "priceArr",
+                          "fill": "#FFFFFF",
+                          "content": "^",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "2d2NZ",
+                  "name": "ctaBtn",
+                  "width": 200,
+                  "height": 48,
+                  "fill": "#FFCC00",
+                  "cornerRadius": 4,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "BO0HX",
+                      "name": "ctaBtnTxt",
+                      "fill": "#1A1A1A",
+                      "content": "Tôi đã chuyển khoản",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "InFNM",
+              "name": "ctaSub",
+              "fill": "#8A8A8A",
+              "content": "Nhân viên sẽ liên hệ để xác nhận lịch hẹn của bạn",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
             }
           ]
         }
