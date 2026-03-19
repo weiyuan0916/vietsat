@@ -86,7 +86,7 @@ class CartService
                 return ['success' => true];
             });
 
-            if (is_array($result)) {
+            if (is_array($result) && ! ($result['success'] ?? false)) {
                 return $result;
             }
 
@@ -102,6 +102,7 @@ class CartService
                 'service_id' => $serviceId,
                 'quantity' => $quantity,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return [

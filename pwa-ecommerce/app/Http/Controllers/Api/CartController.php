@@ -51,38 +51,58 @@ class CartController extends Controller
      */
     public function addItem(Request $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'service_id' => 'required|integer|exists:services,id',
-            'quantity' => 'nullable|integer|min:1|max:10',
-        ]);
+        try {
+            $validator = Validator::make($request->all(), [
+                'service_id' => 'required|integer|exists:services,id',
+                'quantity' => 'nullable|integer|min:1|max:10',
+            ]);
 
-        if ($validator->fails()) {
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Dữ liệu không hợp lệ.',
+                    'data' => null,
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            $cart = $this->cartService->resolveOrCreateCartFromRequest($request);
+            $serviceId = (int) $request->input('service_id');
+            $quantity = (int) $request->input('quantity', 1) ?: 1;
+
+            $result = $this->cartService->addItem($cart, $serviceId, $quantity);
+
+            if (! ($result['success'] ?? false)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $result['message'] ?? 'Không thể thêm vào giỏ hàng.',
+                    'data' => null,
+                ], 404);
+            }
+
+            $data = $result['data'] ?? null;
+            if ($data === null) {
+                $cart->refresh()->load('items.service');
+                $data = $this->cartService->formatCart($cart);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Thêm vào giỏ hàng thành công.',
+                'data' => $data,
+            ], 201);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Cart addItem controller error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
             return response()->json([
                 'status' => false,
-                'message' => 'Dữ liệu không hợp lệ.',
+                'message' => 'Lỗi máy chủ. Vui lòng thử lại sau.',
                 'data' => null,
-                'errors' => $validator->errors(),
-            ], 422);
+            ], 500);
         }
-
-        $cart = $this->cartService->resolveOrCreateCartFromRequest($request);
-        $quantity = $request->input('quantity', 1);
-
-        $result = $this->cartService->addItem($cart, $request->service_id, $quantity);
-
-        if (!$result['success']) {
-            return response()->json([
-                'status' => false,
-                'message' => $result['message'],
-                'data' => null,
-            ], 404);
-        }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Thêm vào giỏ hàng thành công.',
-            'data' => $result['data'],
-        ], 201);
     }
 
     /**

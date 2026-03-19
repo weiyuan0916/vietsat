@@ -216,7 +216,26 @@ document.addEventListener('click', function(e) {
     e.stopPropagation();
     if (app && app.views && app.views.main) {
       lastTabBeforeOverlay = currentTab;
-      app.views.main.router.navigate(dataHref);
+      // Overlay routes: luôn reload để click nhiều lần vẫn mở được
+      var overlayRoutes = ['/cart/', '/service/', '/signin/', '/signup/'];
+      var isOverlay = overlayRoutes.some(function (r) { return dataHref === r || dataHref.startsWith(r + '?'); });
+      // Xóa các overlay pages cũ trong main view trước khi navigate lại
+      if (isOverlay) {
+        var mainView = document.getElementById('main-view');
+        if (mainView) {
+          var existingPages = mainView.querySelectorAll('.page[data-name]');
+          existingPages.forEach(function(p) {
+            var pageName = p.getAttribute('data-name');
+            if (['cart', 'service', 'signin', 'signup'].indexOf(pageName) !== -1) {
+              p.remove();
+            }
+          });
+        }
+        // Dùng reloadCurrent để force re-render
+        app.views.main.router.navigate(dataHref, { reloadCurrent: true });
+      } else {
+        app.views.main.router.navigate(dataHref);
+      }
     }
     return;
   }
@@ -245,7 +264,26 @@ document.addEventListener('click', function(e) {
       e.stopPropagation();
       if (app && app.views && app.views.main) {
         lastTabBeforeOverlay = currentTab;
-        app.views.main.router.navigate(href);
+        var overlayRoutes = ['/cart/', '/service/', '/signin/', '/signup/'];
+        var isOverlayRoute = overlayRoutes.some(function (r) { return path === r || path.startsWith(r.replace(/\/$/, '') + '?'); });
+        
+        if (isOverlayRoute) {
+          // Xóa các overlay pages cũ trong main view
+          var mainView = document.getElementById('main-view');
+          if (mainView) {
+            var existingPages = mainView.querySelectorAll('.page[data-name]');
+            existingPages.forEach(function(p) {
+              var pageName = p.getAttribute('data-name');
+              if (['cart', 'service', 'signin', 'signup'].indexOf(pageName) !== -1) {
+                p.remove();
+              }
+            });
+          }
+          // Dùng reloadCurrent để force re-render
+          app.views.main.router.navigate(href, { reloadCurrent: true });
+        } else {
+          app.views.main.router.navigate(href);
+        }
       }
     }
   }
@@ -1239,18 +1277,12 @@ $$(document).on("page:init", '.page[data-name="onboarding"]', function (e) {
 
 // 14. Swiper
 
-$$(".swiper-slide a[data-href]").on("click", function () {
-  app.views.current.router.navigate($$(this).attr("data-href"));
-});
-$$(document).on("page:init", function (e) {
-  $$(".swiper-slide a[data-href]").on("click", function () {
-    app.views.current.router.navigate($$(this).attr("data-href"));
-  });
-});
+// Điều hướng data-href đã xử lý trong document click handler (trên) — không bind trùng ở đây để tránh navigate 2 lần và lỗi click lần 2 không vào cart.
 
 // Debug: Log all page init events
 $$(document).on('page:init', function(e) {
   console.log('F7 page:init:', e.detail);
+  enforceTabBarVisibility();
 });
 
 // 15. Switch Theme
@@ -2121,16 +2153,34 @@ function renderCartPage(data) {
     var qty = item.quantity || 1;
     var itemTotal = price * qty;
     html += '<div class="vs-cart-item" data-id="' + item.id + '">';
-    html += '<div class="vs-cart-item-info">';
-    html += '<div class="vs-cart-item-name">' + (item.name || item.service_name || 'Dịch vụ') + '</div>';
-    html += '<div class="vs-cart-item-price">' + formatPrice(itemTotal) + '</div>';
+    // Image placeholder
+    html += '<div class="vs-cart-item-img" style="width: 72px; height: 72px; border-radius: 12px; background: var(--vs-border-subtle); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">';
+    html += '<i class="icon f7-icons" style="font-size: 28px; color: var(--vs-text-secondary);">tv</i>';
     html += '</div>';
-    html += '<div class="vs-cart-item-qty">';
-    html += '<button onclick="updateCartItem(' + item.id + ', ' + (qty - 1) + ')" class="vs-qty-btn">-</button>';
-    html += '<span>' + qty + '</span>';
-    html += '<button onclick="updateCartItem(' + item.id + ', ' + (qty + 1) + ')" class="vs-qty-btn">+</button>';
+    // Info + controls
+    html += '<div class="vs-cart-item-body" style="flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0;">';
+    html += '<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">';
+    html += '<div style="flex: 1; min-width: 0;">';
+    html += '<div class="vs-cart-item-name" style="font-size: 16px;">' + (item.name || item.service_name || 'Dịch vụ') + '</div>';
+    html += '<div class="vs-cart-item-price" style="font-size: 16px;">' + formatPrice(itemTotal) + '</div>';
     html += '</div>';
+    // Delete button
+    html += '<button onclick="removeFromCart(' + item.id + ')" class="vs-cart-item-delete" style="width: 36px; height: 36px; border-radius: 10px; background: var(--vs-bg-primary); border: 1px solid var(--vs-border-strong); display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer;">';
+    html += '<i class="icon f7-icons" style="font-size: 16px; color: var(--vs-text-secondary);">trash</i>';
+    html += '</button>';
     html += '</div>';
+    // Quantity controls - horizontal
+    html += '<div class="vs-qty-controls" style="display: flex; align-items: center; gap: 0; background: var(--vs-bg-primary); border-radius: 10px; border: 1px solid var(--vs-border-strong); overflow: hidden; width: fit-content;">';
+    html += '<button onclick="updateCartItem(' + item.id + ', ' + (qty - 1) + ')" class="vs-qty-btn" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer;' + (qty <= 1 ? 'opacity: 0.4; pointer-events: none;' : '') + '">';
+    html += '<i class="icon f7-icons" style="font-size: 16px;">minus</i>';
+    html += '</button>';
+    html += '<span style="width: 40px; text-align: center; font-family: var(--vs-font-heading); font-size: 16px; font-weight: 600; color: var(--vs-text-primary); border-left: 1px solid var(--vs-border-strong); border-right: 1px solid var(--vs-border-strong); line-height: 36px;">' + qty + '</span>';
+    html += '<button onclick="updateCartItem(' + item.id + ', ' + (qty + 1) + ')" class="vs-qty-btn" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer;">';
+    html += '<i class="icon f7-icons" style="font-size: 16px;">plus</i>';
+    html += '</button>';
+    html += '</div>';
+    html += '</div>'; // end body
+    html += '</div>'; // end item
   });
 
   if (list) list.innerHTML = html;
@@ -2237,13 +2287,23 @@ function checkoutCart() {
 }
 window.checkoutCart = checkoutCart;
 
-// Ensure Tab Bar is hidden on auth pages
+// Ensure Tab Bar is hidden on non-tab pages (cart, service, auth, etc.)
 function enforceTabBarVisibility() {
   var hash = window.location.hash || '';
-  var isAuth = hash.includes('/signin') || hash.includes('/signup');
+  // Framework7 dùng #!/path/ hoặc #/path/ — lấy path sau # hoặc #!
+  var cleanPath = (hash.replace(/^#!?/, '') || '/').split('?')[0].trim() || '/';
+  if (cleanPath.indexOf('/') !== 0) cleanPath = '/' + cleanPath;
+
+  // Các trang cần ẨN Tab Bar
+  var hideOnPages = ['/cart', '/service', '/signin', '/signup', '/forgot-password'];
+
+  var isDetailPage = hideOnPages.some(function(page) {
+    return cleanPath === page || cleanPath.startsWith(page + '/') || cleanPath.startsWith(page + '?');
+  });
+
   var tabBarWrap = document.querySelector('.vs-tab-bar-wrap');
   if (tabBarWrap) {
-    tabBarWrap.style.display = isAuth ? 'none' : '';
+    tabBarWrap.style.display = isDetailPage ? 'none' : '';
   }
 }
 window.addEventListener('hashchange', enforceTabBarVisibility);
@@ -2262,6 +2322,7 @@ $$(document).on('page:init', '.page[data-name="service"]', function (e) {
 $$(document).on('page:init', '.page[data-name="cart"]', function (e) {
   if (window.NavigationStore) window.NavigationStore.push('cart', {});
   loadCartPage();
+  enforceTabBarVisibility();
 });
 
 $$(document).on('page:init', '.page[data-name="services"]', function () {

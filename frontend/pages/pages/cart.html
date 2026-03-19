@@ -1,20 +1,18 @@
-<div class="page vs-cart-page" data-name="cart" data-url="/cart/">
+<div class="page vs-cart-page vs-detail-page" data-name="cart" data-url="/cart/">
     <div class="page-content">
 
         <!-- Header -->
         <div class="vs-header" style="padding-top: 24px;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <a href="#" class="link icon-only vs-header-btn cart-back-btn">
-                    <i class="icon f7-icons">chevron_left</i>
-                </a>
-                <h1 class="vs-header-title">Giỏ hàng</h1>
-            </div>
-            <a href="#" class="link vs-text-secondary" style="font-size: 14px; font-weight: 500;" id="cart-clear-btn"
+            <a href="#" class="link icon-only vs-header-btn cart-back-btn">
+                <i class="icon f7-icons">chevron_left</i>
+            </a>
+            <h1 class="vs-header-title" style="position: absolute; left: 50%; transform: translateX(-50%);">Giỏ hàng</h1>
+            <a href="#" class="link vs-text-secondary" style="font-size: 14px; font-weight: 500; margin-left: auto;" id="cart-clear-btn"
                 onclick="clearCart(); return false;">Xoá tất cả</a>
         </div>
 
         <!-- Cart Items -->
-        <div class="vs-content" style="padding-top: 8px;">
+        <div class="vs-content vs-cart-items-container" style="padding-top: 8px; flex: 1; min-height: 0;">
 
             <!-- Loading -->
             <div id="cart-loading" class="text-align-center" style="padding: 40px;">
@@ -46,19 +44,19 @@
 
     </div>
 
-    <!-- Bottom Bar -->
+    <!-- Bottom Bar - Pinned above Tab Bar -->
     <div class="vs-cart-bottom-bar" id="cart-bottom-bar" style="display: none;">
         <div class="vs-cart-summary">
             <div class="vs-cart-summary-row">
-                <span class="vs-text-secondary" style="font-size: 14px;">Tổng cộng</span>
+                <span class="vs-text-secondary" style="font-size: 16px;">Tổng cộng</span>
                 <span
-                    style="font-family: var(--vs-font-heading); font-size: 22px; font-weight: 800; color: var(--vs-accent);"
+                    style="font-family: var(--vs-font-heading); font-size: 20px; font-weight: 800; color: var(--vs-accent);"
                     id="cart-total-price">0đ</span>
             </div>
         </div>
         <a href="#" class="button vs-btn-primary vs-cart-checkout-btn" onclick="checkoutCart(); return false;">
+            <i class="icon f7-icons" style="font-size: 18px;">creditcard</i>
             <span>Thanh toán</span>
-            <i class="icon f7-icons" style="font-size: 16px;">arrow_right</i>
         </a>
     </div>
 </div>
