@@ -1771,6 +1771,19 @@ function initServicePage(serviceId) {
 var _homeUnsubscribe = null;
 
 function initHomePage() {
+  const container = document.querySelector('[data-tab="home"]');
+
+  if (!container) {
+    console.log('home container not found');
+    return;
+  }
+
+  const el = container.querySelector('.your-element');
+
+  if (!el) {
+    console.log('element not found inside home');
+    return;
+  }
     console.log('initHomePage: called');
     
     var containerEl = document.getElementById('services-container');
