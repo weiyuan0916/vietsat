@@ -1,0 +1,80 @@
+<div class="page no-navbar no-toolbar vs-auth-page" data-name="signup">
+  <div class="page-content" style="background: var(--vs-bg-primary);">
+    <a href="#" class="link icon-only" onclick="goBack(); return false;"
+      style="position: absolute; top: 16px; left: 16px; color: var(--vs-text-primary);">
+      <i class="icon f7-icons">arrow_left</i>
+    </a>
+
+    <div class="vs-auth-hero">
+      <div class="vs-auth-logo">
+        <i class="icon f7-icons">satellite_fill</i>
+      </div>
+      <h1 class="vs-auth-title">TiemNhaDuy</h1>
+      <p class="vs-text-secondary" style="font-size: 14px;">Tạo tài khoản mới</p>
+    </div>
+
+    <div style="padding: 0 24px;">
+      <form id="signup-form">
+
+        <div class="vs-input-group" style="margin-bottom: 14px;">
+          <label class="vs-text-secondary"
+            style="font-size: 13px; display: block; margin-bottom: 8px; font-weight: 500;">Họ và tên</label>
+          <div style="position: relative;">
+            <i class="icon f7-icons"
+              style="position: absolute; left: 16px; top: 14px; color: var(--vs-text-secondary); font-size: 20px;">person</i>
+            <input type="text" name="name" class="vs-input" placeholder="Nguyễn Văn A" style="padding-left: 48px;"
+              required>
+          </div>
+        </div>
+
+        <div class="vs-input-group" style="margin-bottom: 14px;">
+          <label class="vs-text-secondary"
+            style="font-size: 13px; display: block; margin-bottom: 8px; font-weight: 500;">Email</label>
+          <div style="position: relative;">
+            <i class="icon f7-icons"
+              style="position: absolute; left: 16px; top: 14px; color: var(--vs-text-secondary); font-size: 20px;">envelope</i>
+            <input type="email" name="email" class="vs-input" placeholder="email@example.com"
+              style="padding-left: 48px;" required>
+          </div>
+        </div>
+
+        <div class="vs-input-group" style="margin-bottom: 14px;">
+          <label class="vs-text-secondary"
+            style="font-size: 13px; display: block; margin-bottom: 8px; font-weight: 500;">Mật khẩu</label>
+          <div style="position: relative;">
+            <i class="icon f7-icons"
+              style="position: absolute; left: 16px; top: 14px; color: var(--vs-text-secondary); font-size: 20px;">lock</i>
+            <input type="password" name="password" class="vs-input js-password-input" placeholder="••••••••"
+              style="padding-left: 48px; padding-right: 48px;" required>
+            <i class="icon f7-icons js-toggle-password" role="button" tabindex="0" aria-label="Hiện mật khẩu"
+              style="position: absolute; right: 16px; top: 14px; color: var(--vs-text-secondary); font-size: 20px; cursor: pointer;">eye_slash</i>
+          </div>
+        </div>
+
+        <div class="vs-input-group" style="margin-bottom: 24px;">
+          <label class="vs-text-secondary"
+            style="font-size: 13px; display: block; margin-bottom: 8px; font-weight: 500;">Nhập lại mật khẩu</label>
+          <div style="position: relative;">
+            <i class="icon f7-icons"
+              style="position: absolute; left: 16px; top: 14px; color: var(--vs-text-secondary); font-size: 20px;">lock</i>
+            <input type="password" name="password_confirmation" class="vs-input js-password-input"
+              placeholder="••••••••" style="padding-left: 48px; padding-right: 48px;" required>
+            <i class="icon f7-icons js-toggle-password" role="button" tabindex="0" aria-label="Hiện mật khẩu"
+              style="position: absolute; right: 16px; top: 14px; color: var(--vs-text-secondary); font-size: 20px; cursor: pointer;">eye_slash</i>
+          </div>
+        </div>
+
+        <button type="submit" class="button vs-btn-primary" style="width: 100%;">
+          Đăng ký
+        </button>
+
+      </form>
+
+      <div style="text-align: center; margin-top: 32px;">
+        <p class="vs-text-secondary" style="font-size: 14px;">
+          Đã có tài khoản? <a href="/signin/" class="vs-accent" style="font-weight: 600;">Đăng nhập</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

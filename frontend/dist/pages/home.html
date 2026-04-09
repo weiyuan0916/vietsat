@@ -1,0 +1,106 @@
+<div class="page vs-home-page" data-name="home" data-url="/">
+  <div class="page-content">
+
+    <div class="vs-home-sticky">
+      <!-- Custom Header -->
+      <div class="vs-header">
+        <div class="vs-header-brand">
+          <div class="vs-logo-box">
+            <i class="icon f7-icons">satellite_fill</i>
+          </div>
+          <div class="vs-brand-name">TiemNhaDuy</div>
+        </div>
+        <div class="vs-header-actions">
+          <a href="#" class="link icon-only vs-header-cart" data-href="/cart/">
+            <i class="icon f7-icons">cart</i>
+            <span class="vs-cart-badge" id="home-cart-badge" style="display:none;">0</span>
+          </a>
+          <a href="#" class="link icon-only vs-header-bell">
+            <i class="icon f7-icons">bell</i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="vs-content">
+
+      <!-- Hero Banner -->
+      <div class="vs-hero">
+        <div class="vs-hero-title">Siêu Sale Tháng 3</div>
+        <p class="vs-hero-subtitle">Giảm đến 50% tất cả dịch vụ</p>
+        <a href="#" class="vs-hero-btn" onclick="switchTab('services', null); return false;">
+          <span>Xem ngay</span>
+          <i class="icon f7-icons">arrow_right</i>
+        </a>
+      </div>
+
+      <!-- Services Section -->
+      <div class="vs-section-header">
+        <h2 class="vs-section-title">Dịch vụ nổi bật</h2>
+        <a href="#" class="vs-section-link" onclick="switchTab('services', null); return false;">Xem tất cả</a>
+      </div>
+
+      <!-- Loading State -->
+      <div id="services-loading" class="text-align-center" style="padding: 20px;">
+        <div class="preloader color-multi"></div>
+        <p class="vs-text-secondary" style="margin-top:10px; font-size: 14px;">Đang tải...</p>
+      </div>
+
+      <!-- Error State -->
+      <div id="services-error" class="text-align-center" style="display: none; padding: 20px;">
+        <i class="icon f7-icons text-color-red" style="font-size: 32px;">exclamationmark_triangle_fill</i>
+        <p class="vs-text-secondary" style="margin-top:10px; font-size: 14px;">Không thể tải dịch vụ</p>
+        <button class="button vs-btn-primary"
+          style="margin-top:16px; width:120px; font-size:14px; height:40px; margin-left:auto; margin-right:auto;"
+          onclick="retryLoadHomeServices()">
+          <i class="icon f7-icons" style="font-size: 16px;">arrow_clockwise</i> Thử lại
+        </button>
+      </div>
+
+      <!-- Services Container -->
+      <div id="services-container" style="display: none;">
+      </div>
+
+      <!-- Features Section -->
+      <div class="vs-section-header" style="margin-top: 24px;">
+        <h2 class="vs-section-title">Tại sao chọn chúng tôi?</h2>
+      </div>
+
+      <div class="vs-features-grid">
+        <div class="vs-feature-card">
+          <div class="vs-feature-icon speed">
+            <i class="icon f7-icons">bolt_fill</i>
+          </div>
+          <h3 class="vs-feature-title">Nhanh chóng</h3>
+          <p class="vs-feature-desc">5 phút</p>
+        </div>
+
+        <div class="vs-feature-card">
+          <div class="vs-feature-icon secure">
+            <i class="icon f7-icons">checkmark_shield_fill</i>
+          </div>
+          <h3 class="vs-feature-title">An toàn</h3>
+          <p class="vs-feature-desc">Bảo mật</p>
+        </div>
+
+        <div class="vs-feature-card">
+          <div class="vs-feature-icon support">
+            <i class="icon f7-icons">headphones</i>
+          </div>
+          <h3 class="vs-feature-title">Hỗ trợ 24/7</h3>
+          <p class="vs-feature-desc">Luôn sẵn sàng</p>
+        </div>
+
+        <div class="vs-feature-card">
+          <div class="vs-feature-icon save">
+            <i class="icon f7-icons">tag_fill</i>
+          </div>
+          <h3 class="vs-feature-title">Tiết kiệm</h3>
+          <p class="vs-feature-desc">Giá tốt nhất</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

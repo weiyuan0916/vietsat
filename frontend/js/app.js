@@ -91,19 +91,19 @@ var app = new Framework7({
   routes: [
     {
       path: '/service/',
-      url: 'pages/pages/service.html',
+      url: 'pages/service.html',
     },
     {
       path: '/signin/',
-      url: 'pages/pages/signin.html',
+      url: 'pages/signin.html',
     },
     {
       path: '/signup/',
-      url: 'pages/pages/signup.html',
+      url: 'pages/signup.html',
     },
     {
       path: '/cart/',
-      url: 'pages/pages/cart.html',
+      url: 'pages/cart.html',
     },
   ],
 });
@@ -172,10 +172,10 @@ var tabIndexMap = {
   profile: 3
 };
 var tabUrlMap = {
-  home: 'pages/pages/home.html',
-  services: 'pages/pages/services.html',
-  orders: 'pages/pages/orders.html',
-  profile: 'pages/pages/profile.html'
+  home: 'pages/home.html',
+  services: 'pages/services.html',
+  orders: 'pages/orders.html',
+  profile: 'pages/profile.html'
 };
 var tabRouteMap = {
   home: '/',
@@ -371,7 +371,7 @@ function loadServicePage(serviceId) {
   if (tabBarWrap) tabBarWrap.style.display = 'none';
 
   // Prepend base URL to handle routing from subdirectories
-  var fullUrl = getPageBaseUrl() + 'pages/pages/service.html';
+  var fullUrl = getPageBaseUrl() + 'pages/service.html';
 
   app.preloader.show();
 

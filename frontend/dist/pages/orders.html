@@ -1,0 +1,41 @@
+<div class="page vs-orders-page" data-name="orders" data-url="/orders/">
+    <div class="page-content" style="padding-bottom: 80px;">
+
+        <div class="vs-header" style="padding-top: 24px;">
+            <h1 class="vs-header-title">Đơn hàng</h1>
+        </div>
+
+        <div class="vs-content" style="margin-top: 16px;">
+            <div id="orders-loading" class="text-align-center" style="padding: 20px;">
+                <div class="preloader color-multi"></div>
+                <p class="vs-text-secondary" style="margin-top:10px; font-size: 14px;">Đang tải đơn hàng...</p>
+            </div>
+
+            <div id="orders-error" class="text-align-center" style="display: none; padding: 20px;">
+                <i class="icon f7-icons text-color-red" style="font-size: 32px;">exclamationmark_triangle_fill</i>
+                <p class="vs-text-secondary" style="margin-top:10px; font-size: 14px;">Không thể tải đơn hàng</p>
+                <button class="button vs-btn-primary"
+                    style="margin-top:16px; width:120px; font-size:14px; height:40px; margin-left:auto; margin-right:auto;"
+                    onclick="retryLoadOrders()">
+                    <i class="icon f7-icons" style="font-size: 16px;">arrow_clockwise</i> Thử lại
+                </button>
+            </div>
+
+            <div id="orders-empty" class="text-align-center" style="display: none; padding: 20px;">
+                <div
+                    style="width: 72px; height: 72px; border-radius: 20px; background: #F4F4F5; display:flex; align-items:center; justify-content:center; margin: 0 auto 16px;">
+                    <i class="icon f7-icons" style="font-size: 32px; color: #A1A1AA;">bag</i>
+                </div>
+                <h3 style="font-family: var(--vs-font-heading); font-size: 18px; font-weight: 700; margin: 0 0 8px 0;">Chưa có đơn hàng</h3>
+                <p class="vs-text-secondary" style="font-size: 14px; margin: 0 0 20px 0;">Khi bạn mua dịch vụ, lịch sử đơn hàng sẽ xuất hiện tại đây.</p>
+                <a href="#" class="button vs-btn-primary"
+                    style="margin-top: 12px; width: 180px; margin-left:auto; margin-right:auto;"
+                    onclick="switchTab('services', null); return false;">
+                    Xem dịch vụ
+                </a>
+            </div>
+
+            <div id="orders-list" style="display: none;"></div>
+        </div>
+    </div>
+</div>

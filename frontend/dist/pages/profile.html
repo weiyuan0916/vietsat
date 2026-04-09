@@ -1,0 +1,77 @@
+<div class="page vs-profile-page" data-name="profile" data-url="/profile/">
+  <div class="page-content">
+
+    <div class="vs-header" style="padding-top: 24px;">
+      <h1 class="vs-header-title">Tài khoản</h1>
+    </div>
+
+    <div class="vs-content">
+
+      <!-- User Profile Card -->
+      <div class="vs-profile-card">
+        <div class="vs-avatar">
+          <i class="icon f7-icons" style="font-size: 28px;">person</i>
+        </div>
+        <div class="vs-profile-info">
+          <h2 class="vs-profile-name" id="profile-name">...</h2>
+          <p class="vs-profile-email" id="profile-email">...</p>
+        </div>
+        <a href="#" class="vs-edit-btn">
+          <i class="icon f7-icons" style="font-size: 14px;">pencil</i>
+        </a>
+      </div>
+
+      <!-- Main Menu -->
+      <div class="vs-menu-list">
+        <a href="#" class="vs-menu-item" onclick="switchTab('orders', null); return false;">
+          <div class="vs-menu-left">
+            <i class="icon f7-icons">bag</i> Đơn hàng của tôi
+          </div>
+          <i class="icon f7-icons chevron">chevron_right</i>
+        </a>
+        <a href="#" class="vs-menu-item">
+          <div class="vs-menu-left">
+            <i class="icon f7-icons">creditcard</i> Phương thức thanh toán
+          </div>
+          <i class="icon f7-icons chevron">chevron_right</i>
+        </a>
+        <a href="#" class="vs-menu-item">
+          <div class="vs-menu-left">
+            <i class="icon f7-icons">bell</i> Thông báo
+          </div>
+          <i class="icon f7-icons chevron">chevron_right</i>
+        </a>
+        <a href="#" class="vs-menu-item">
+          <div class="vs-menu-left">
+            <i class="icon f7-icons">gear</i> Cài đặt
+          </div>
+          <i class="icon f7-icons chevron">chevron_right</i>
+        </a>
+      </div>
+
+      <!-- Support Menu -->
+      <div class="vs-menu-list">
+        <a href="#" class="vs-menu-item">
+          <div class="vs-menu-left">
+            <i class="icon f7-icons">question_circle</i> Trợ giúp & Hỗ trợ
+          </div>
+          <i class="icon f7-icons chevron">chevron_right</i>
+        </a>
+        <a href="#" class="vs-menu-item">
+          <div class="vs-menu-left">
+            <i class="icon f7-icons">info_circle</i> Về chúng tôi
+          </div>
+          <i class="icon f7-icons chevron">chevron_right</i>
+        </a>
+      </div>
+
+      <!-- Logout -->
+      <div style="margin-top: 32px;">
+        <button class="button vs-btn-danger-light" onclick="logoutAndGoSignin()">
+          <i class="icon f7-icons">square_arrow_right</i> Đăng xuất
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

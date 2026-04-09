@@ -1,0 +1,222 @@
+<div class="page vs-detail-page" data-name="service" data-url="/service/">
+  <div class="page-content" style="padding: 0; padding-bottom: 40px !important;">
+
+    <!-- State 1: Service Detail & Order Form -->
+    <div id="service-order-view">
+      <!-- Navbar -->
+      <div class="vs-header">
+        <a href="#" class="link back icon-only" style="color: var(--vs-text-primary);">
+          <i class="icon f7-icons">arrow_left</i>
+        </a>
+        <h2 class="vs-header-title" style="font-size: 20px;">Chi tiết dịch vụ</h2>
+        <a href="#" class="link icon-only vs-header-btn">
+          <i class="icon f7-icons">square_arrow_up</i>
+        </a>
+      </div>
+
+      <div class="vs-content">
+        <!-- Hero Card -->
+        <div class="vs-hero" style="text-align: center; padding: 32px 20px;">
+          <div class="vs-service-icon"
+            style="background: rgba(255,255,255,0.2); color: white; width: 56px; height: 56px; border-radius: 16px; margin: 0 auto 16px;">
+            <i class="icon f7-icons" style="font-size: 28px;">tv</i>
+          </div>
+          <h1 id="service-name" class="vs-hero-title" style="font-size: 24px; margin-bottom: 8px;">Gói VIP 30 ngày</h1>
+          <p class="vs-hero-subtitle" style="margin-bottom: 0;"><span id="service-price">99.000</span>đ / <span
+              id="service-duration">30</span> ngày</p>
+        </div>
+
+        <!-- Info Table -->
+        <div class="vs-info-card"
+          style="background: var(--vs-bg-card); border-radius: 16px; border: 1px solid var(--vs-border-subtle); padding: 16px; margin-top: 16px;">
+          <h3 class="vs-section-title" style="font-size: 16px; margin-bottom: 16px;">Thông tin gói dịch vụ</h3>
+
+          <div class="vs-info-row">
+            <span class="vs-text-secondary">Thời hạn</span>
+            <span class="vs-text-primary" style="font-weight: 600;"><span id="info-duration">30</span> ngày</span>
+          </div>
+          <div class="vs-info-divider"></div>
+
+          <div class="vs-info-row">
+            <span class="vs-text-secondary">Giá</span>
+            <span class="vs-accent" style="font-weight: 600;"><span id="info-price">99.000</span>đ</span>
+          </div>
+          <div class="vs-info-divider"></div>
+
+          <div class="vs-info-row">
+            <span class="vs-text-secondary">Số kênh</span>
+            <span class="vs-text-primary" style="font-weight: 600;">200+ kênh</span>
+          </div>
+          <div class="vs-info-divider"></div>
+
+          <div class="vs-info-row">
+            <span class="vs-text-secondary">Chất lượng</span>
+            <span class="vs-text-primary" style="font-weight: 600;">HD / 4K</span>
+          </div>
+        </div>
+
+        <!-- Purchase Actions -->
+        <div class="vs-info-card"
+          style="background: var(--vs-bg-card); border-radius: 16px; border: 1px solid var(--vs-border-subtle); padding: 16px; margin-top: 16px;">
+          <h3 class="vs-section-title" style="font-size: 16px; margin-bottom: 16px;">Mua dịch vụ</h3>
+
+          <div class="vs-action-row" style="display: flex; gap: 12px;">
+            <button id="service-cart-btn"
+              style="flex: 0 0 56px; height: 56px; border-radius: 16px; border: 1px solid var(--vs-border-subtle); background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+              <i class="icon f7-icons" style="font-size: 22px; color: var(--vs-accent);">cart</i>
+            </button>
+
+            <button id="service-buy-btn" class="button vs-btn-primary"
+              style="flex: 1; height: 56px; border-radius: 16px; font-size: 17px; font-weight: 800;">
+              Mua ngay
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 2: Payment Info (Hidden initially) -->
+    <div id="payment-info" style="display: none;">
+      <!-- Navbar -->
+      <div class="vs-header">
+        <a href="#" class="link icon-only" onclick="cancelOrder()" style="color: var(--vs-text-primary);">
+          <i class="icon f7-icons">arrow_left</i>
+        </a>
+        <h2 class="vs-header-title" style="font-size: 20px;">Thanh toán</h2>
+        <div style="width: 40px;"></div> <!-- Spacer -->
+      </div>
+
+      <div class="vs-content">
+        <!-- Order Summary -->
+        <div class="vs-info-card"
+          style="background: var(--vs-bg-card); border-radius: 16px; border: 1px solid var(--vs-border-subtle); padding: 16px; margin-top: 16px;">
+          <h3 class="vs-section-title" style="font-size: 16px; margin-bottom: 16px;">Thông tin đơn hàng</h3>
+
+          <div class="vs-service-card-top" style="margin-bottom: 16px;">
+            <div class="vs-service-icon-wrap">
+              <div class="vs-service-icon">
+                <i class="icon f7-icons">tv</i>
+              </div>
+              <div>
+                <h3 class="vs-service-name" id="summary-name">Gói VIP 30 ngày</h3>
+                <p class="vs-service-duration"><span id="summary-duration">1 tháng</span></p>
+              </div>
+            </div>
+            <div class="vs-service-price"><span id="summary-price-top">99.000</span>đ</div>
+          </div>
+
+          <div class="vs-info-divider"></div>
+
+          <div class="vs-info-row" style="margin-top: 16px;">
+            <span class="vs-text-secondary">Tổng thanh toán</span>
+            <span class="vs-accent" style="font-weight: 800; font-size: 20px;"><span
+                id="summary-total">99.000</span>đ</span>
+          </div>
+        </div>
+
+        <!-- Payment Methods -->
+        <div style="margin-top: 24px;">
+          <h3 class="vs-section-title" style="font-size: 16px; margin-bottom: 12px;">Phương thức thanh toán</h3>
+
+          <!-- Method 1 -->
+          <label class="vs-payment-method active">
+            <input type="radio" name="payment_method" value="momo" checked style="display:none;">
+            <div class="vs-method-inner">
+              <div class="vs-method-icon" style="background: #DBEAFE; color: #3B82F6;">
+                <i class="icon f7-icons">device_phone_portrait</i>
+              </div>
+              <div class="vs-method-info">
+                <h4>Ví MoMo</h4>
+                <p>Miễn phí giao dịch</p>
+              </div>
+              <div class="vs-method-check"><i class="icon f7-icons">checkmark_alt</i></div>
+            </div>
+          </label>
+
+          <!-- Method 2 -->
+          <label class="vs-payment-method">
+            <input type="radio" name="payment_method" value="zalopay" style="display:none;">
+            <div class="vs-method-inner">
+              <div class="vs-method-icon" style="background: #DCFCE7; color: #22C55E;">
+                <i class="icon f7-icons">creditcard</i>
+              </div>
+              <div class="vs-method-info">
+                <h4>ZaloPay</h4>
+                <p>Giảm 10.000đ cho KH mới</p>
+              </div>
+              <div class="vs-method-check"><i class="icon f7-icons">checkmark_alt</i></div>
+            </div>
+          </label>
+
+          <!-- Method 3 -->
+          <label class="vs-payment-method">
+            <input type="radio" name="payment_method" value="transfer" style="display:none;">
+            <div class="vs-method-inner">
+              <div class="vs-method-icon" style="background: #F3E8FF; color: #A855F7;">
+                <i class="icon f7-icons">building_2_fill</i>
+              </div>
+              <div class="vs-method-info">
+                <h4>Chuyển khoản NH</h4>
+                <p>Xác nhận tự động 24/7</p>
+              </div>
+              <div class="vs-method-check"><i class="icon f7-icons">checkmark_alt</i></div>
+            </div>
+          </label>
+        </div>
+
+        <!-- Original QR Code Info (Hidden but functional based on previous JS) -->
+        <div id="transfer-info-container" style="display: none; margin-top: 24px;">
+          <h3 class="vs-section-title" style="font-size: 16px; margin-bottom: 12px; text-align: center;">Quét mã QR để
+            thanh toán</h3>
+          <div id="qr-code" style="text-align: center; margin: 16px 0;"></div>
+          <div class="vs-info-card text-align-center"
+            style="background: var(--vs-bg-card); border-radius: 16px; padding: 16px; border: 1px dashed var(--vs-accent);">
+            <p style="font-size: 12px; margin-bottom: 8px;" class="vs-text-secondary">Nội dung chuyển khoản</p>
+            <h2 id="transfer-content" class="vs-accent" style="letter-spacing: 2px; margin: 0;">VS12345</h2>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Payment Bar -->
+      <div class="vs-bottom-bar">
+        <div class="vs-bottom-price">
+          <span class="vs-text-secondary" style="font-size: 13px;">Tổng thanh toán</span>
+          <span class="vs-text-primary"
+            style="font-size: 22px; font-weight: 800; font-family: var(--vs-font-heading);"><span
+              id="bottom-total">99.000</span>đ</span>
+        </div>
+        <button class="button vs-btn-primary" onclick="processPayment()" style="width: 140px;">Thanh toán</button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function cancelOrder() {
+    app.dialog.confirm('Bạn có chắc muốn hủy đơn hàng này?', 'Xác nhận', function () {
+      document.getElementById('service-order-view').style.display = 'block';
+      document.getElementById('payment-info').style.display = 'none';
+      if (typeof disconnectReverb === 'function') disconnectReverb();
+    });
+  }
+
+  function processPayment() {
+    // Simulate showing QR
+    app.dialog.preloader('Đang tạo mã thanh toán...');
+    setTimeout(function () {
+      app.dialog.close();
+      document.getElementById('transfer-info-container').style.display = 'block';
+    }, 1000);
+  }
+
+  // Payment method selector logic
+  document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+    radio.addEventListener('change', function () {
+      document.querySelectorAll('.vs-payment-method').forEach(el => el.classList.remove('active'));
+      if (this.checked) this.closest('.vs-payment-method').classList.add('active');
+    });
+  });
+</script>
