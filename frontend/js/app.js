@@ -863,6 +863,12 @@ function switchTab(tabName, element, options) {
 }
 
 function afterTabLoaded(tabName) {
+  const el = document.querySelector(`[data-tab="${tabName}"]`);
+  if (!el) {
+    console.warn('Tab DOM chưa sẵn sàng:', tabName);
+    return;
+  }
+
   switch(tabName) {
     case 'home':
       initHomePage();
