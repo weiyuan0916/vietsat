@@ -42,9 +42,10 @@ import Dom7 from 'dom7';
 // 1. General
 
 "use strict";
-// nếu code cũ dùng $$ hoặc Dom7 global
 window.Dom7 = Dom7;
 window.$$ = Dom7;
+
+var $$ = Dom7;
 
 
 // #region Debug logging - Hypothesis testing
@@ -63,7 +64,8 @@ $$(document).on('click', '.tab-link', function(e) {
 
 var app = new Framework7({
   el: "#app",
-  name: "Yui",
+  name: "TiemNhaDuy",
+  id: 'com.tiemnhaduy.app',
   theme: "ios",
   iosTranslucentBars: false,
   iosTranslucentModals: false,
