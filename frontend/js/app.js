@@ -861,6 +861,7 @@ function switchTab(tabName, element, options) {
     });
   }
 }
+window.switchTab = switchTab;
 
 function afterTabLoaded(tabName) {
   const el = document.querySelector(`[data-tab="${tabName}"]`);
@@ -1777,14 +1778,7 @@ function initHomePage() {
     console.log('home container not found');
     return;
   }
-
-  const el = container.querySelector('.your-element');
-
-  if (!el) {
-    console.log('element not found inside home');
-    return;
-  }
-    console.log('initHomePage: called');
+  console.log('initHomePage: called');
     
     var containerEl = document.getElementById('services-container');
     var loadingEl = document.getElementById('services-loading');
@@ -2163,6 +2157,7 @@ function addToCart(serviceId, quantity, btnEl) {
       return null;
     });
 }
+window.addToCart = addToCart;
 
 function openCartPage() {
   if (app && app.views && app.views.main) {
@@ -2309,6 +2304,7 @@ function removeCartItem(itemId) {
     });
 }
 window.removeCartItem = removeCartItem;
+window.removeFromCart = removeCartItem;
 
 function clearCart() {
   app.dialog.confirm('Bạn có chắc muốn xóa tất cả sản phẩm?', 'Xác nhận', function () {
