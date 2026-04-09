@@ -1,3 +1,17 @@
+import './config.js';
+import './api/base.js';
+import './api/service.js';
+import './api/auth.js';
+import './api/order.js';
+import './api/index.js';
+
+import './stores/service.js';
+import './stores/order.js';
+import './stores/auth.js';
+import './stores/navigation.js';
+import './stores/index.js';
+
+import './framework7-bundle.js';
 /*------------------------------------------------------------------
 
 [Table of contents]
