@@ -113,6 +113,12 @@ app.views.create('.view-main', {
   browserHistoryInitialMatch: false
 });
 
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  var swUrl = new URL('./service-worker.js', window.location.href).toString();
+  navigator.serviceWorker.register(swUrl);
+}
+
 // ====================
 // Browser History Sync - Fix Back Button Issue
 // ====================
@@ -2357,6 +2363,129 @@ window.addEventListener('load', function () {
   fetchCart();
 });
 enforceTabBarVisibility();
+
+var deferredInstallPrompt = null;
+var installPromptDismissKey = 'vs_install_prompt_dismiss_at';
+var installPromptInstallKey = 'vs_install_prompt_installed';
+var installModalAutoCloseTimer = null;
+
+function isIosDevice() {
+  var ua = window.navigator.userAgent || '';
+  return /iPad|iPhone|iPod/.test(ua) || (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1);
+}
+
+function isStandaloneMode() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function hasInstallPromptBeenDismissed() {
+  var dismissedAt = parseInt(localStorage.getItem(installPromptDismissKey) || '0', 10);
+  if (!dismissedAt) return false;
+  return Date.now() - dismissedAt < 3 * 24 * 60 * 60 * 1000;
+}
+
+function getInstallUi() {
+  return {
+    modal: document.getElementById('vs-install-modal'),
+    closeBtn: document.getElementById('vs-install-close'),
+    ctaBtn: document.getElementById('vs-install-cta'),
+    desc: document.getElementById('vs-install-description'),
+    iosNote: document.getElementById('vs-ios-instructions')
+  };
+}
+
+function closeInstallModal(rememberDismiss) {
+  var ui = getInstallUi();
+  if (!ui.modal) return;
+  if (installModalAutoCloseTimer) {
+    clearTimeout(installModalAutoCloseTimer);
+    installModalAutoCloseTimer = null;
+  }
+  ui.modal.style.display = 'none';
+  ui.modal.setAttribute('aria-hidden', 'true');
+  if (rememberDismiss) {
+    localStorage.setItem(installPromptDismissKey, String(Date.now()));
+  }
+}
+
+function openInstallModal() {
+  if (isStandaloneMode()) return;
+
+  var ui = getInstallUi();
+  if (!ui.modal || !ui.closeBtn || !ui.ctaBtn || !ui.desc || !ui.iosNote) return;
+
+  if (isIosDevice()) {
+    ui.desc.textContent = 'Click Install Now to see how to add TiemNhaDuy to your Home Screen on iPhone.';
+  } else if (!deferredInstallPrompt) {
+    ui.desc.textContent = 'Click Install Now to see installation steps for this device/browser.';
+  } else {
+    ui.desc.textContent = 'Click Install Now to add TiemNhaDuy to your Home Screen.';
+  }
+
+  ui.iosNote.style.display = 'none';
+  ui.modal.style.display = 'flex';
+  ui.modal.setAttribute('aria-hidden', 'false');
+  installModalAutoCloseTimer = setTimeout(function() {
+    closeInstallModal(false);
+  }, 10000);
+}
+
+function initInstallModal() {
+  var ui = getInstallUi();
+  if (!ui.modal || !ui.closeBtn || !ui.ctaBtn || !ui.iosNote) return;
+  if (ui.modal.dataset.boundInstallModal === '1') return;
+
+  ui.closeBtn.addEventListener('click', function() {
+    closeInstallModal(true);
+  });
+
+  ui.modal.addEventListener('click', function(e) {
+    if (e.target === ui.modal) {
+      closeInstallModal(true);
+    }
+  });
+
+  ui.ctaBtn.addEventListener('click', async function() {
+    if (isIosDevice()) {
+      ui.iosNote.style.display = 'block';
+      ui.iosNote.innerHTML = '<p>Mở Safari menu Share, chọn Add to Home Screen, sau đó bấm Add.</p>';
+      return;
+    }
+    if (!deferredInstallPrompt) {
+      ui.iosNote.style.display = 'block';
+      ui.iosNote.innerHTML = '<p>Trên trình duyệt này, hãy mở menu trình duyệt và chọn Install app hoặc Add to Home Screen.</p>';
+      return;
+    }
+    deferredInstallPrompt.prompt();
+    var choiceResult = await deferredInstallPrompt.userChoice;
+    if (choiceResult && choiceResult.outcome === 'accepted') {
+      localStorage.setItem(installPromptInstallKey, '1');
+      closeInstallModal(false);
+    } else {
+      closeInstallModal(true);
+    }
+    deferredInstallPrompt = null;
+  });
+
+  ui.modal.dataset.boundInstallModal = '1';
+}
+
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  openInstallModal();
+});
+
+window.addEventListener('appinstalled', function() {
+  localStorage.setItem(installPromptInstallKey, '1');
+  closeInstallModal(false);
+});
+
+window.addEventListener('load', function() {
+  registerServiceWorker();
+  initInstallModal();
+  openInstallModal();
+});
 
 // Framework7 Route Events
 $$(document).on('page:init', '.page[data-name="service"]', function (e) {

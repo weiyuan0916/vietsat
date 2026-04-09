@@ -8,8 +8,11 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="TiemNhaDuy">
   <meta name="theme-color" content="#ffffff">
   <title>TiemNhaDuy</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -113,6 +116,22 @@
             </a>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+  <div id="vs-install-modal" class="vs-install-modal" style="display:none;" aria-hidden="true">
+    <div class="vs-install-card">
+      <button id="vs-install-close" class="vs-install-close" type="button" aria-label="Close">×</button>
+      <div class="vs-install-head">
+        <div class="vs-install-app-icon">T</div>
+        <h3 class="vs-install-title">Welcome to TiemNhaDuy</h3>
+      </div>
+      <p id="vs-install-description" class="vs-install-description">
+        Click Install Now to add TiemNhaDuy to your Home Screen.
+      </p>
+      <button id="vs-install-cta" class="vs-install-btn" type="button">Install Now</button>
+      <div id="vs-ios-instructions" class="vs-ios-instructions" style="display:none;">
+        <p>Mở Safari menu Share, chọn Add to Home Screen, sau đó bấm Add.</p>
       </div>
     </div>
   </div>

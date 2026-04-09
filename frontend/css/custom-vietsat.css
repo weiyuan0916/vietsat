@@ -1295,3 +1295,137 @@ h6,
   transform: scale(0.3);
   opacity: 0;
 }
+
+.vs-install-modal {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  z-index: 12000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: calc(8px + env(safe-area-inset-top)) 8px 8px;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.vs-install-card {
+  width: min(420px, 100%);
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px 20px 18px;
+  position: relative;
+  box-sizing: border-box;
+  box-shadow: 0 10px 35px rgba(15, 23, 42, 0.2);
+  pointer-events: auto;
+}
+
+.vs-install-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  background: transparent;
+  font-size: 38px;
+  line-height: 30px;
+  color: #8a8a8a;
+  cursor: pointer;
+}
+
+.vs-install-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-right: 40px;
+}
+
+.vs-install-app-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: var(--vs-font-heading);
+  font-size: 26px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1d2de4 0%, #6b52ff 100%);
+}
+
+.vs-install-title {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.05;
+  letter-spacing: -0.5px;
+  font-family: var(--vs-font-heading);
+  color: #0f172a;
+}
+
+.vs-install-description {
+  margin: 18px 0 16px;
+  color: #5f6384;
+  font-size: 16px;
+  line-height: 1.4;
+  max-width: 520px;
+}
+
+.vs-install-btn {
+  min-width: 180px;
+  height: 56px;
+  border: 0;
+  border-radius: 28px;
+  padding: 0 28px;
+  background: linear-gradient(135deg, #6366f1 0%, #5445f0 100%);
+  color: #fff;
+  font-family: var(--vs-font-heading);
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.vs-ios-instructions {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #eef2ff;
+  color: #334155;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.vs-ios-instructions p {
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .vs-install-card {
+    border-radius: 14px;
+    padding: 16px 16px 14px;
+  }
+
+  .vs-install-app-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    font-size: 20px;
+  }
+
+  .vs-install-title {
+    font-size: 18px;
+  }
+
+  .vs-install-description {
+    margin-top: 12px;
+    font-size: 14px;
+  }
+
+  .vs-install-btn {
+    height: 48px;
+    min-width: 150px;
+    border-radius: 24px;
+    font-size: 18px;
+  }
+}
