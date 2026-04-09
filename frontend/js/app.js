@@ -11,7 +11,8 @@ import './stores/auth.js';
 import './stores/navigation.js';
 import './stores/index.js';
 
-import './framework7-bundle.js';
+import Framework7 from 'framework7';
+import 'framework7/css/bundle';
 /*------------------------------------------------------------------
 
 [Table of contents]
