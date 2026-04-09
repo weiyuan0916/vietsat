@@ -13,6 +13,10 @@ import './stores/index.js';
 
 import Framework7 from 'framework7';
 import 'framework7/css/bundle';
+
+import Dom7 from 'dom7';
+
+
 /*------------------------------------------------------------------
 
 [Table of contents]
@@ -38,8 +42,10 @@ import 'framework7/css/bundle';
 // 1. General
 
 "use strict";
+// nếu code cũ dùng $$ hoặc Dom7 global
+window.Dom7 = Dom7;
+window.$$ = Dom7;
 
-var $$ = Dom7;
 
 // #region Debug logging - Hypothesis testing
 var DEBUG_LOG_ENDPOINT = 'http://127.0.0.1:7242/ingest/3ba32230-ec0a-40a1-bfce-6b4197209b56';
