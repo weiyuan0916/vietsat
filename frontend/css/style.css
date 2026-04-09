@@ -1862,7 +1862,7 @@ img.actor-image {
   background-position: center;
 }
 .link-banner.error-message {
-  background-image: url("../img/images/pattern-error.png");
+  background-image: linear-gradient(135deg, #ffe7e7 0%, #ffd5d5 100%);
 }
 .link-banner.error-message .link-banner-title,
 .link-banner.error-message .link-banner-subtitle,
@@ -1877,7 +1877,7 @@ img.actor-image {
   color: #508d59;
 }
 .link-banner.success-message {
-  background-image: url("../img/images/pattern-success.png");
+  background-image: linear-gradient(135deg, #e6f8e9 0%, #d7f2dc 100%);
 }
 .list .item-after.event-time {
   color: var(--title-color);
@@ -1937,7 +1937,7 @@ img.actor-image {
 /* 49. Information block */
 
 .information-block {
-  background-image: url("../img/images/pattern-general.png");
+  background-image: linear-gradient(135deg, #f4f7ff 0%, #ebf1ff 100%);
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
@@ -1948,10 +1948,10 @@ img.actor-image {
   margin: 20px 0;
 }
 .information-block.error-message {
-  background-image: url("../img/images/pattern-error.png");
+  background-image: linear-gradient(135deg, #ffe7e7 0%, #ffd5d5 100%);
 }
 .information-block.success-message {
-  background-image: url("../img/images/pattern-success.png");
+  background-image: linear-gradient(135deg, #e6f8e9 0%, #d7f2dc 100%);
 }
 .information-block.success-message h2,
 .information-block.success-message p {

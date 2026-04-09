@@ -361,6 +361,7 @@ function goBack() {
     if (typeof switchTab === 'function') switchTab(getTabByHash(), null, { historyMode: 'replace' });
   }
 }
+window.goBack = goBack;
 
 function loadServicePage(serviceId) {
   var pageContainer = document.getElementById('page-container');
