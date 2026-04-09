@@ -17,8 +17,10 @@ import 'framework7/css/bundle';
 import Dom7 from 'dom7';
 
 import Swiper from 'framework7/components/swiper';
+import Preloader from 'framework7/components/preloader';
 
 Framework7.use([Swiper]);
+Framework7.use([Preloader]);
 
 
 /*------------------------------------------------------------------
