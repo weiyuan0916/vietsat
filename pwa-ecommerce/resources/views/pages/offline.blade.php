@@ -5,8 +5,8 @@
     'showNavbarToggler' => true
 ])
 
-@section('title', 'Offline - No Internet Connection')
-@section('meta_description', 'You are currently offline. Please check your internet connection to continue browsing.')
+@section('title', 'Tiệm Nhà Duy | Mất Kết Nối Internet')
+@section('meta_description', 'Bạn đang ngoại tuyến. Vui lòng kiểm tra kết nối internet để tiếp tục truy cập Tiệm Nhà Duy.')
 
 @section('content')
 <!-- Offline Area -->

@@ -26,6 +26,26 @@ Route::get('/contact', function () {
     return view('pages.contact');
 })->name('contact');
 
+Route::get('/book-table', function () {
+    return view('pages.book-table');
+})->name('book-table');
+
+Route::get('/faqs', function () {
+    return view('pages.faqs');
+})->name('faqs');
+
+Route::get('/terms-of-service', function () {
+    return view('pages.terms-of-service');
+})->name('terms-of-service');
+
+Route::get('/privacy-policy', function () {
+    return view('pages.privacy-policy');
+})->name('privacy-policy');
+
+Route::get('/sitemap', function () {
+    return view('pages.sitemap');
+})->name('sitemap');
+
 // Contact form POST handler
 Route::post('/contact/send', function (Request $request) {
     $data = $request->validate([
