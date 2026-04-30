@@ -31,7 +31,6 @@
 <script src="{{ asset('rosta/js/wow.min.js') }}"></script>
 <!-- Main Custom js file -->
 <script src="{{ asset('rosta/js/function.js') }}"></script>
-<script src="https://www.youtube.com/iframe_api"></script>
 <script>
     (function () {
         var trigger = document.querySelector('.listening-trigger');
@@ -71,48 +70,19 @@
             acc[track.artist] = index;
             return acc;
         }, {});
-        var playerContainer = document.createElement('div');
-        playerContainer.id = 'listening-now-player';
-        playerContainer.setAttribute('aria-hidden', 'true');
-        playerContainer.style.position = 'absolute';
-        playerContainer.style.width = '1px';
-        playerContainer.style.height = '1px';
-        playerContainer.style.overflow = 'hidden';
-        playerContainer.style.left = '-9999px';
-        document.body.appendChild(playerContainer);
-        var player = null;
-        var apiReady = false;
         var currentTrackIndex = 0;
-        var pendingPlay = false;
-        var loadTrack = function (index, autoplay) {
-            if (!player || !orderedTracks.length) {
+        var openTrack = function (index) {
+            if (!orderedTracks.length) {
                 return;
             }
             currentTrackIndex = index % orderedTracks.length;
-            if (autoplay) {
-                player.loadVideoById(orderedTracks[currentTrackIndex].videoId);
-            } else {
-                player.cueVideoById(orderedTracks[currentTrackIndex].videoId);
-            }
+            window.open('https://www.youtube.com/watch?v=' + orderedTracks[currentTrackIndex].videoId, '_blank', 'noopener');
         };
         var startPlayback = function () {
-            pendingPlay = true;
-            if (player && typeof player.playVideo === 'function') {
-                loadTrack(currentTrackIndex, true);
-                player.unMute();
-                player.setVolume(100);
-                return;
-            }
-            if (!apiReady) {
-                var fallbackTrack = orderedTracks[currentTrackIndex] || orderedTracks[0];
-                if (fallbackTrack) {
-                    window.open('https://www.youtube.com/watch?v=' + fallbackTrack.videoId, '_blank', 'noopener');
-                }
-            }
+            openTrack(currentTrackIndex);
         };
         var playArtistByIndex = function (index) {
-            currentTrackIndex = index;
-            startPlayback();
+            openTrack(index);
         };
         allArtistNodes.forEach(function (artistNode) {
             var artistName = artistNode.textContent.trim();
@@ -144,41 +114,5 @@
                 startPlayback();
             }
         });
-        window.onYouTubeIframeAPIReady = function () {
-            apiReady = true;
-            player = new YT.Player('listening-now-player', {
-                height: '1',
-                width: '1',
-                videoId: orderedTracks[0].videoId,
-                playerVars: {
-                    autoplay: 0,
-                    controls: 0,
-                    rel: 0,
-                    modestbranding: 1
-                },
-                events: {
-                    onReady: function () {
-                        if (pendingPlay) {
-                            loadTrack(currentTrackIndex, true);
-                            player.unMute();
-                            player.setVolume(100);
-                            pendingPlay = false;
-                        } else {
-                            loadTrack(currentTrackIndex, false);
-                        }
-                    },
-                    onStateChange: function (event) {
-                        if (event.data === YT.PlayerState.ENDED) {
-                            currentTrackIndex = (currentTrackIndex + 1) % orderedTracks.length;
-                            loadTrack(currentTrackIndex, true);
-                        }
-                    },
-                    onError: function () {
-                        currentTrackIndex = (currentTrackIndex + 1) % orderedTracks.length;
-                        loadTrack(currentTrackIndex, true);
-                    }
-                }
-            });
-        };
     })();
 </script>

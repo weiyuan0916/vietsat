@@ -23,6 +23,7 @@
     <meta name="twitter:title" content="@yield('twitter_title', trim($__env->yieldContent('title', 'Tiệm Nhà Duy')))">
     <meta name="twitter:description" content="@yield('twitter_description', trim($__env->yieldContent('meta_description', 'Tiệm Nhà Duy cung cấp nông sản sạch và đặc sản Tây Nguyên chất lượng cao.')))">
     <meta name="twitter:image" content="@yield('twitter_image', trim($__env->yieldContent('og_image', asset('rosta/images/tiemnhaduy.svg'))))">
+    @stack('head_preloads')
     <script type="application/ld+json">
         {
             "@@context": "https://schema.org",
@@ -51,15 +52,43 @@
     <link rel="manifest" href="{{ asset('rosta/images/favicon_io/site.webmanifest') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com/">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Forum&family=Jost:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <link href="{{ asset('rosta/css/bootstrap.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('rosta/css/slicknav.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('rosta/css/swiper-bundle.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('rosta/css/all.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('rosta/css/animate.css') }}" rel="stylesheet">
-    <link href="{{ asset('rosta/css/magnific-popup.css') }}" rel="stylesheet">
-    <link href="{{ asset('rosta/css/mousecursor.css') }}" rel="stylesheet">
-    <link href="{{ asset('rosta/css/custom.css') }}" rel="stylesheet">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Forum&family=Jost:ital,wght@0,100..900;1,100..900&display=swap" as="style">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Forum&family=Jost:ital,wght@0,100..900;1,100..900&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Forum&family=Jost:ital,wght@0,100..900;1,100..900&display=swap"></noscript>
+    <link rel="preload" href="{{ asset('rosta/webfonts/Room-205.woff2') }}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ asset('rosta/webfonts/bajern.woff2') }}" as="font" type="font/woff2" crossorigin>
+    @php
+        $criticalStylesheets = [
+            'rosta/css/bootstrap.min.css',
+            'rosta/css/custom.css',
+        ];
+        $deferredStylesheets = [
+            'rosta/css/slicknav.min.css',
+            'rosta/css/swiper-bundle.min.css',
+            'rosta/css/all.min.css',
+            'rosta/css/animate.css',
+            'rosta/css/magnific-popup.css',
+            'rosta/css/mousecursor.css',
+        ];
+    @endphp
+    @foreach ($criticalStylesheets as $stylesheet)
+        <link rel="stylesheet" href="{{ asset($stylesheet) }}">
+    @endforeach
+    @foreach ($deferredStylesheets as $stylesheet)
+        <link rel="preload" href="{{ asset($stylesheet) }}" as="style">
+        <link rel="stylesheet" href="{{ asset($stylesheet) }}" media="print" onload="this.media='all'">
+        <noscript><link rel="stylesheet" href="{{ asset($stylesheet) }}"></noscript>
+    @endforeach
+    @php
+        $deferredIconFonts = [
+            'rosta/webfonts/fa-brands-400.woff2',
+            'rosta/webfonts/fa-regular-400.woff2',
+            'rosta/webfonts/fa-solid-900.woff2',
+        ];
+    @endphp
+    @foreach ($deferredIconFonts as $fontFile)
+        <link rel="preload" href="{{ asset($fontFile) }}" as="font" type="font/woff2" crossorigin>
+    @endforeach
     <style>
         body:not(.is-home-page) header.main-header .header-sticky,
         body:not(.is-home-page) header.main-header .header-sticky.active {

@@ -5,6 +5,10 @@
 @section('og_image', asset('rosta/images/tiemnhaduy.svg'))
 @section('canonical_url', route('home'))
 
+@push('head_preloads')
+<link rel="preload" as="image" href="https://cdn.shopify.com/s/files/1/1707/3261/files/hp-poster.webp?v=1736778184" fetchpriority="high" type="image/webp">
+@endpush
+
 @push('structured_data')
 <script type="application/ld+json">
 {
@@ -23,8 +27,8 @@
     <!-- Hero Section Start -->
     <div class="hero hero-video" id="main-content">
         <div class="background">
-            <video rel="preload" fetchpriority="high" autoplay loop muted playsinline poster="https://cdn.shopify.com/s/files/1/1707/3261/files/hp-poster.webp?v=1736778184">
-                <source rel="preload" fetchpriority="high" type="video/mp4" src="https://cdn.shopify.com/videos/c/o/v/f3a0b38123db492c8ddea379bb7e7474.mp4">
+            <video preload="metadata" fetchpriority="high" autoplay loop muted playsinline poster="https://cdn.shopify.com/s/files/1/1707/3261/files/hp-poster.webp?v=1736778184">
+                <source type="video/mp4" src="https://cdn.shopify.com/videos/c/o/v/f3a0b38123db492c8ddea379bb7e7474.mp4">
             </video>
         </div>
         <div class="container">
@@ -446,8 +450,8 @@
                                     <!-- Pricing Image Start -->
                                     <div class="pricing-image">
                                         <figure class="image-anime">
-                                            <video playsinline autoplay muted loop preload="metadata" poster="//amayacoffee.com/cdn/shop/files/preview_images/fc5ee347f8fd40ceb036e150142ae052.thumbnail.0000000000_2000x.jpg?v=1693325112">
-                                                <source src="//amayacoffee.com/cdn/shop/videos/c/vp/fc5ee347f8fd40ceb036e150142ae052/fc5ee347f8fd40ceb036e150142ae052.HD-1080p-4.8Mbps-17830369.mp4?v=0" type="video/mp4">
+                                            <video playsinline autoplay muted loop preload="metadata" poster="https://cdn.shopify.com/s/files/1/1707/3261/files/hp-poster.webp?v=1736778184">
+                                                <source src="https://cdn.shopify.com/videos/c/o/v/f3a0b38123db492c8ddea379bb7e7474.mp4" type="video/mp4">
                                             </video>
                                         </figure>
                                     </div>
