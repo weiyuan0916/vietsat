@@ -27,7 +27,18 @@
     <!-- Hero Section Start -->
     <div class="hero hero-video" id="main-content">
         <div class="background">
-            <video preload="metadata" fetchpriority="high" autoplay loop muted playsinline poster="https://cdn.shopify.com/s/files/1/1707/3261/files/hp-poster.webp?v=1736778184">
+            <img
+                src="https://cdn.shopify.com/s/files/1/1707/3261/files/hp-poster.webp?v=1736778184"
+                alt="Nông sản sạch Tiệm Nhà Duy"
+                fetchpriority="high"
+                loading="eager"
+                decoding="async"
+                width="1920"
+                height="1080"
+                aria-hidden="true"
+                style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;"
+            >
+            <video preload="metadata" autoplay loop muted playsinline poster="https://cdn.shopify.com/s/files/1/1707/3261/files/hp-poster.webp?v=1736778184">
                 <source type="video/mp4" src="https://cdn.shopify.com/videos/c/o/v/f3a0b38123db492c8ddea379bb7e7474.mp4">
             </video>
         </div>
@@ -1063,7 +1074,7 @@
                     <div class="container">
                         <div class="text">
                             <div class="inner">
-                                <h2 class="blinds-text">
+                                <h2 class="blinds-text" aria-label="Sản phẩm">
                                     <div class="blinds-text-wrapper">
                                         <div class="blinds-word" aria-hidden="true">
                                             <span class="char-clip"><span style="--i:0ms">S</span></span>
@@ -1082,7 +1093,7 @@
                                 <div data-reset="true" data-delay="200" reveal="" data-sr-id="7" style="visibility: visible; opacity: 1; transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1); transition: all, opacity 0.6s ease-out 0.2s, transform 0.6s ease-out 0.2s;">
                                     <p>Khám phá bộ sưu tập nông sản mới từ vùng đất Gia Lai và Tây Nguyên. Cập nhật sản phẩm mới mỗi tuần qua bản tin của Tiệm Nhà Duy.</p>
                                 </div>
-                                <a data-reset="true" data-delay="400" reveal="" class="button" href="#" data-sr-id="8" style="visibility: visible; opacity: 1; transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1); transition: all, opacity 0.6s ease-out 0.4s, transform 0.6s ease-out 0.4s;">Xem thêm</a>
+                                <a data-reset="true" data-delay="400" reveal="" class="button" href="{{ route('services') }}" data-sr-id="8" style="visibility: visible; opacity: 1; transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1); transition: all, opacity 0.6s ease-out 0.4s, transform 0.6s ease-out 0.4s;">Xem danh mục sản phẩm</a>
                             </div>
                         </div>
                     </div>
@@ -1099,7 +1110,7 @@
                         <div class="interactive-process-caption">
                             <h3>Chư Sê - Gia Lai</h3>
                             <p>Vùng đất nổi tiếng với cà phê robusta hạt chắc, hương đậm và hậu vị rõ nét, rất được yêu thích tại Việt Nam.</p>
-                            <a href="#">Xem cà phê →</a>
+                            <a href="{{ route('services') }}">Xem cà phê robusta →</a>
                         </div>
                     </div>
                     <div class="interactive-process-image img-1">
@@ -1109,7 +1120,7 @@
                         <div class="interactive-process-caption">
                             <h3>Mắc ca Tây Nguyên</h3>
                             <p>Hạt mắc ca được chọn lọc, béo bùi tự nhiên, thích hợp ăn trực tiếp hoặc kết hợp trong các khẩu phần dinh dưỡng.</p>
-                            <a href="#">Xem mắc ca →</a>
+                            <a href="{{ route('services') }}">Xem sản phẩm mắc ca →</a>
                         </div>
                     </div>
                     <div class="interactive-process-image img-2">
@@ -1119,7 +1130,7 @@
                         <div class="interactive-process-caption">
                             <h3>Tiêu và Bơ</h3>
                             <p>Tiêu đen hữu cơ cay thơm tự nhiên và bơ sáp dẻo ngon là bộ đôi nông sản được khách hàng đặt mua nhiều.</p>
-                            <a href="#">Xem sản phẩm →</a>
+                            <a href="{{ route('services') }}">Xem tiêu và bơ →</a>
                         </div>
                     </div>
                     <div class="interactive-process-image img-3">
@@ -1254,7 +1265,7 @@
                 <div class="text">
                     <h2>Khám phá</h2>
                     <p>Mỗi tuần chúng tôi cập nhật cà phê robusta chất lượng cao từ Chư Sê Gia Lai, giúp bạn bắt đầu ngày mới đầy năng lượng.</p>
-                    <a href="#">Xem bộ sưu tập</a>
+                    <a href="{{ route('services') }}">Xem bộ sưu tập nông sản</a>
                 </div>
             </div>
 
@@ -1268,7 +1279,7 @@
                 <div class="text">
                     <h2>phát huy</h2>
                     <p>Nếu bạn cần nguồn hàng ổn định cho quán cà phê, cửa hàng nông sản hoặc kênh phân phối, chúng tôi sẵn sàng đồng hành với chính sách linh hoạt.</p>
-                    <a href="#">Tìm hiểu thêm</a>
+                    <a href="{{ route('about') }}">Tìm hiểu thêm về Tiệm Nhà Duy</a>
                 </div>
             </div>
         </div>
@@ -1343,7 +1354,7 @@
                         <p>Trong suốt năm năm qua, chúng tôi đã phát triển dòng thức uống hoàn thiện được tuyển chọn kỹ lưỡng, tạo nên với cùng sự chỉn chu, chính xác và tiêu chuẩn đã làm nên tên tuổi quán cà phê đạt nhiều giải thưởng của Onyx.</p>
                         <p>Tìm hiểu thêm về chương trình mới bằng cách nhấp vào liên kết bên dưới.</p>
                     </div>
-                    <a class="button" href="https://onyxcoffeelab.com/products/cafe-expressions">Tìm hiểu thêm</a>
+                    <a class="button" href="https://onyxcoffeelab.com/products/cafe-expressions">Tìm hiểu thêm về Cafe Expressions</a>
                 </div>
             </div>
             <div class="media">

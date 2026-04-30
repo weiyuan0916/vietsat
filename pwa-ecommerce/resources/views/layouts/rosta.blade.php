@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Tiệm Nhà Duy')</title>
     <meta name="description" content="@yield('meta_description', 'Tiệm Nhà Duy cung cấp nông sản sạch và đặc sản Tây Nguyên chất lượng cao.')">
     <meta name="keywords" content="@yield('meta_keywords', 'Tiệm Nhà Duy, nông sản sạch, cà phê robusta, mắc ca, tiêu đen, bơ sáp')">
@@ -132,7 +132,9 @@
     @include('pages.partials.rosta.preloader')
     @include('pages.partials.rosta.ticker')
     @include('pages.partials.rosta.header')
-    @yield('content')
+    <main id="main-content">
+        @yield('content')
+    </main>
     @include('pages.partials.rosta.footer')
     @include('pages.partials.rosta.scripts')
 </body>
