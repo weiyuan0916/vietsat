@@ -33,6 +33,27 @@
 <script src="{{ asset('rosta/js/function.js') }}"></script>
 <script>
     (function () {
+        var hidePreloader = function () {
+            var preloader = document.querySelector('.preloader');
+            if (!preloader) {
+                return;
+            }
+            preloader.style.opacity = '0';
+            preloader.style.pointerEvents = 'none';
+            setTimeout(function () {
+                preloader.style.display = 'none';
+            }, 220);
+        };
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', hidePreloader, { once: true });
+        } else {
+            hidePreloader();
+        }
+        window.addEventListener('load', hidePreloader, { once: true });
+    })();
+</script>
+<script>
+    (function () {
         var trigger = document.querySelector('.listening-trigger');
         if (!trigger) {
             return;

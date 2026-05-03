@@ -181,7 +181,7 @@
                         <!-- About Us Image Start -->
                         <div class="about-us-img">
                             <figure class="image-anime">
-                                <video preload="metadata" id="video_block_096b8d46-578c-4cff-924a-066c60ffabbb" play-on-visible="" autoplay loop muted playsinline poster="https://product.onyxcontent.com/media/pages/ecom/home/12c54db84b-1776176788/screenshot.webp" class="visible">
+                                <video preload="none" id="video_block_096b8d46-578c-4cff-924a-066c60ffabbb" play-on-visible="" autoplay loop muted playsinline poster="https://product.onyxcontent.com/media/pages/ecom/home/12c54db84b-1776176788/screenshot.webp" class="visible">
                                     <source type="video/mp4" src="https://product.onyxcontent.com/media/pages/ecom/home/cfa1f1e98e-1776176712/colombiabrewinghomepagevideo.mp4">
                                 </video>
                             </figure>
@@ -461,7 +461,7 @@
                                     <!-- Pricing Image Start -->
                                     <div class="pricing-image">
                                         <figure class="image-anime">
-                                            <video playsinline autoplay muted loop preload="metadata" poster="https://cdn.shopify.com/s/files/1/1707/3261/files/hp-poster.webp?v=1736778184">
+                                            <video playsinline autoplay muted loop preload="none" poster="https://cdn.shopify.com/s/files/1/1707/3261/files/hp-poster.webp?v=1736778184">
                                                 <source src="https://cdn.shopify.com/videos/c/o/v/f3a0b38123db492c8ddea379bb7e7474.mp4" type="video/mp4">
                                             </video>
                                         </figure>
@@ -1104,7 +1104,7 @@
                 <!-- Interactive Process Image Start -->
                 <div class="interactive-process-list-image video-split">
                     <div class="interactive-process-image img-0 show">
-                        <video autoplay loop muted playsinline preload="metadata" poster="https://product.onyxcontent.com/media/pages/ecom/home/487e8943b1-1749499406/cover-new.webp">
+                        <video autoplay loop muted playsinline preload="none" poster="https://product.onyxcontent.com/media/pages/ecom/home/487e8943b1-1749499406/cover-new.webp">
                             <source type="video/mp4" src="https://product.onyxcontent.com/media/pages/ecom/home/224fcadae6-1749498876/new.mp4">
                         </video>
                         <div class="interactive-process-caption">
@@ -1114,7 +1114,7 @@
                         </div>
                     </div>
                     <div class="interactive-process-image img-1">
-                        <video autoplay loop muted playsinline preload="metadata" poster="https://product.onyxcontent.com/media/pages/ecom/home/f3c96161a3-1774303240/honduras-cover.webp">
+                        <video autoplay loop muted playsinline preload="none" poster="https://product.onyxcontent.com/media/pages/ecom/home/f3c96161a3-1774303240/honduras-cover.webp">
                             <source type="video/mp4" src="https://product.onyxcontent.com/media/pages/ecom/home/4108535e73-1774303284/honduras-fill.mp4">
                         </video>
                         <div class="interactive-process-caption">
@@ -1124,7 +1124,7 @@
                         </div>
                     </div>
                     <div class="interactive-process-image img-2">
-                        <video autoplay loop muted playsinline preload="metadata" poster="https://product.onyxcontent.com/media/pages/ecom/home/851e06e9d6-1763745870/colombia-cover-2.webp">
+                        <video autoplay loop muted playsinline preload="none" poster="https://product.onyxcontent.com/media/pages/ecom/home/851e06e9d6-1763745870/colombia-cover-2.webp">
                             <source type="video/mp4" src="https://product.onyxcontent.com/media/pages/ecom/home/cb45055b2c-1763745691/colombia-10.mp4">
                         </video>
                         <div class="interactive-process-caption">
@@ -1134,7 +1134,7 @@
                         </div>
                     </div>
                     <div class="interactive-process-image img-3">
-                        <video autoplay loop muted playsinline preload="metadata" poster="https://product.onyxcontent.com/media/pages/ecom/home/487e8943b1-1749499406/cover-new.webp">
+                        <video autoplay loop muted playsinline preload="none" poster="https://product.onyxcontent.com/media/pages/ecom/home/487e8943b1-1749499406/cover-new.webp">
                             <source type="video/mp4" src="https://product.onyxcontent.com/media/pages/ecom/home/224fcadae6-1749498876/new.mp4">
                         </video>
                     </div>
@@ -1258,7 +1258,7 @@
             <div class="a-split">
                 <div class="background">
                     <div class="blur"></div>
-                    <video autoplay preload="metadata" id="video_block_9c49ebdd-6f92-4425-88c1-54a3cf5cf4d9" play-on-visible="" loop="" muted="" playsinline="" poster="https://product.onyxcontent.com/media/pages/ecom/home/e70fe566a3-1737134861/subscription-cover.webp" class="visible">
+                    <video autoplay preload="none" id="video_block_9c49ebdd-6f92-4425-88c1-54a3cf5cf4d9" play-on-visible="" loop="" muted="" playsinline="" poster="https://product.onyxcontent.com/media/pages/ecom/home/e70fe566a3-1737134861/subscription-cover.webp" class="visible">
                         <source type="video/mp4" src="https://product.onyxcontent.com/media/pages/ecom/home/a247c39541-1736883966/subscribe.mp4">
                     </video>
                 </div>
@@ -1272,7 +1272,7 @@
             <div class="a-split">
                 <div class="background">
                     <div class="blur"></div>
-                    <video autoplay preload="metadata" id="video_block_9c49ebdd-6f92-4425-88c1-54a3cf5cf4d9" play-on-visible="" loop="" muted="" playsinline="" poster="https://product.onyxcontent.com/media/pages/ecom/home/d800b359f8-1736877618/wholesale-cover-image.webp" class="visible">
+                    <video autoplay preload="none" id="video_block_9c49ebdd-6f92-4425-88c1-54a3cf5cf4d9" play-on-visible="" loop="" muted="" playsinline="" poster="https://product.onyxcontent.com/media/pages/ecom/home/d800b359f8-1736877618/wholesale-cover-image.webp" class="visible">
                         <source type="video/mp4" src="https://product.onyxcontent.com/media/pages/ecom/home/b823d0ebf9-1736877524/wholesale-video.mp4">
                     </video>
                 </div>
