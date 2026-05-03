@@ -21,6 +21,13 @@
     <meta property="og:title" content="@yield('og_title', config('app.name'))">
     <meta property="og:description" content="@yield('og_description', config('app.name') . ' - E-commerce Platform')">
     <meta property="og:image" content="@yield('og_image', asset('frontend/img/core-img/logo-small.png'))">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4GNZ75JE64"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-4GNZ75JE64');
+    </script>
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
