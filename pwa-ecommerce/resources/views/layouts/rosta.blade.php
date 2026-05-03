@@ -18,12 +18,14 @@
     <meta property="og:description" content="@yield('og_description', trim($__env->yieldContent('meta_description', 'Tiệm Nhà Duy cung cấp nông sản sạch và đặc sản Tây Nguyên chất lượng cao.')))">
     <meta property="og:url" content="@yield('og_url', url()->current())">
     <meta property="og:image" content="@yield('og_image', asset('rosta/images/tiemnhaduy.svg'))">
+    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4GNZ75JE64"></script>
     <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-4GNZ75JE64');
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-4GNZ75JE64');
     </script>
 
     <meta name="twitter:card" content="@yield('twitter_card', 'summary_large_image')">
