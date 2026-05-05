@@ -201,7 +201,7 @@
                                 <h3>Giờ hoạt động</h3>
                                 <ul>
                                     <li>Thứ Hai - Thứ Sáu<span>09:30 - 19:30</span></li>
-                                    <li>Thu Bay<span>10:30 - 17:00</span></li>
+                                    <li>Thứ Bảy<span>10:30 - 17:00</span></li>
                                     <li>Chủ Nhật<span>Hỗ trợ trực tuyến</span></li>
                                 </ul>
                             </div>

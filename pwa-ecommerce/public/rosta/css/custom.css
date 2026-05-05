@@ -2368,7 +2368,7 @@ header.main-header .header-sticky,header.main-header .header-sticky.active{backg
 	color: rgba(18, 29, 35, 0.85);
 	display: flex;
 	justify-content: space-between;
-	align-items: baseline;
+	align-items: flex-start;
 	gap: 14px;
 	margin-bottom: 10px;
 	padding-bottom: 10px;
@@ -2382,11 +2382,14 @@ header.main-header .header-sticky,header.main-header .header-sticky.active{backg
 }
 
 .opening-time-content ul li span{
+	min-width: 0;
+	flex: 0 1 auto;
+	max-width: 62%;
 	width: auto;
 	font-weight: 600;
 	color: var(--secondary-color);
 	text-align: right;
-	white-space: nowrap;
+	overflow-wrap: break-word;
 }
 
 /************************************/
@@ -7046,7 +7049,7 @@ header.main-header .header-sticky,header.main-header .header-sticky.active{backg
     }
 
 	.opening-time-box{
-        max-width: 245px;
+        max-width: min(300px, calc(100% - 8px));
 		bottom: 20px;
         padding: 15px;
     }
@@ -7057,10 +7060,11 @@ header.main-header .header-sticky,header.main-header .header-sticky.active{backg
 
 	.opening-time-content ul li{
 		margin-bottom: 10px;
+		gap: 10px;
 	}
 
 	.opening-time-content ul li span{
-		width: 47%;
+		max-width: 68%;
 	}
 
 	.why-choose-us::before{
