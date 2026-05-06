@@ -81,12 +81,20 @@
         ];
     @endphp
     @foreach ($criticalStylesheets as $stylesheet)
-        <link rel="stylesheet" href="{{ asset($stylesheet) }}">
+        @php
+            $stylesheetVersion = file_exists(public_path($stylesheet)) ? filemtime(public_path($stylesheet)) : null;
+            $stylesheetUrl = asset($stylesheet) . ($stylesheetVersion ? '?v=' . $stylesheetVersion : '');
+        @endphp
+        <link rel="stylesheet" href="{{ $stylesheetUrl }}">
     @endforeach
     @foreach ($deferredStylesheets as $stylesheet)
-        <link rel="preload" href="{{ asset($stylesheet) }}" as="style">
-        <link rel="stylesheet" href="{{ asset($stylesheet) }}" media="print" onload="this.media='all'">
-        <noscript><link rel="stylesheet" href="{{ asset($stylesheet) }}"></noscript>
+        @php
+            $stylesheetVersion = file_exists(public_path($stylesheet)) ? filemtime(public_path($stylesheet)) : null;
+            $stylesheetUrl = asset($stylesheet) . ($stylesheetVersion ? '?v=' . $stylesheetVersion : '');
+        @endphp
+        <link rel="preload" href="{{ $stylesheetUrl }}" as="style">
+        <link rel="stylesheet" href="{{ $stylesheetUrl }}" media="print" onload="this.media='all'">
+        <noscript><link rel="stylesheet" href="{{ $stylesheetUrl }}"></noscript>
     @endforeach
     @php
         $deferredIconFonts = [
@@ -131,8 +139,24 @@
             stroke: #111 !important;
             fill: #111 !important;
         }
-        body:not(.is-home-page) .slicknav_icon .slicknav_icon-bar {
+        .navbar-toggle a.slicknav_btn {
+            background-color: transparent !important;
+            background-image: none !important;
+            border-radius: 8px;
+        }
+        .slicknav_btn,
+        .slicknav_menu .slicknav_btn {
+            background: transparent !important;
+            background-color: transparent !important;
+            background-image: none !important;
+        }
+        .slicknav_icon .slicknav_icon-bar {
             background-color: #111 !important;
+        }
+        body:not(.is-home-page) .navbar-toggle a.slicknav_btn:focus,
+        body:not(.is-home-page) .navbar-toggle a.slicknav_btn:focus-visible {
+            outline: none !important;
+            box-shadow: none !important;
         }
     </style>
 </head>

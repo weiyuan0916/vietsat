@@ -889,6 +889,38 @@
                 }
             }
 
+            function getCachedIpData() {
+                var cacheKey = "book_table_ipapi_cache_v1";
+                var ttlMs = 15 * 60 * 1000;
+                try {
+                    var raw = localStorage.getItem(cacheKey);
+                    if (!raw) {
+                        return null;
+                    }
+                    var parsed = JSON.parse(raw);
+                    if (!parsed || !parsed.timestamp || !parsed.data) {
+                        return null;
+                    }
+                    if ((Date.now() - parsed.timestamp) > ttlMs) {
+                        localStorage.removeItem(cacheKey);
+                        return null;
+                    }
+                    return parsed.data;
+                } catch (error) {
+                    return null;
+                }
+            }
+
+            function setCachedIpData(data) {
+                var cacheKey = "book_table_ipapi_cache_v1";
+                try {
+                    localStorage.setItem(cacheKey, JSON.stringify({
+                        timestamp: Date.now(),
+                        data: data
+                    }));
+                } catch (error) {}
+            }
+
             async function loadDeviceSignals() {
                 var browserSignals = {
                     ua: navigator.userAgent || "unknown",
@@ -897,7 +929,13 @@
                     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "unknown",
                     screen: (window.screen ? window.screen.width + "x" + window.screen.height : "unknown")
                 };
-                var ipData = await fetchJson("https://ipapi.co/json/");
+                var ipData = getCachedIpData();
+                if (!ipData) {
+                    ipData = await fetchJson("https://ipapi.co/json/");
+                    if (ipData && ipData.ip) {
+                        setCachedIpData(ipData);
+                    }
+                }
                 var ip = ipData && ipData.ip ? ipData.ip : "unknown";
                 var country = ipData && ipData.country_name ? ipData.country_name : "unknown";
                 var latitude = ipData && ipData.latitude ? ipData.latitude : "";

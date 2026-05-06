@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ServiceOrder;
 use App\Services\OrderService;
+use App\Services\WebPushTestService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -11,9 +13,12 @@ class OrderController extends Controller
 {
     private OrderService $orderService;
 
-    public function __construct(OrderService $orderService)
+    private WebPushTestService $webPushTestService;
+
+    public function __construct(OrderService $orderService, WebPushTestService $webPushTestService)
     {
         $this->orderService = $orderService;
+        $this->webPushTestService = $webPushTestService;
     }
 
     /**
@@ -98,6 +103,7 @@ class OrderController extends Controller
 
     /**
      * Verify payment from TPBank webhook.
+     * On success, OrderService fires PaymentSuccess and sends web push (same path as bank integration in phase 2).
      *
      * POST /api/v1/orders/verify-payment
      */
@@ -139,6 +145,86 @@ class OrderController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Xác nhận thanh toán thành công.',
+            'data' => $result['data'],
+        ]);
+    }
+
+    public function storePushSubscription(Request $request, string $orderCode): JsonResponse
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'endpoint' => ['required', 'string', 'max:500'],
+            'keys' => ['required', 'array'],
+            'keys.p256dh' => ['required', 'string'],
+            'keys.auth' => ['required', 'string'],
+            'content_encoding' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Dữ liệu đầu vào không hợp lệ.',
+                'data' => null,
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $validated = $validator->validated();
+
+        $order = $this->orderService->getOrder($orderCode);
+
+        if (!$order) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Không tìm thấy đơn hàng.',
+                'data' => null,
+            ], 404);
+        }
+
+        if ($order->status !== ServiceOrder::STATUS_PENDING) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Đơn hàng không ở trạng thái chờ thanh toán.',
+                'data' => null,
+            ], 400);
+        }
+
+        $this->webPushTestService->saveSubscription(
+            $order,
+            $validated['endpoint'],
+            $validated['keys']['p256dh'],
+            $validated['keys']['auth'],
+            $validated['content_encoding'] ?? null
+        );
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Đã lưu đăng ký thông báo đẩy.',
+            'data' => null,
+        ]);
+    }
+
+    public function markPaidTest(string $orderCode): JsonResponse
+    {
+        $result = $this->orderService->markPaidTest($orderCode);
+
+        if (!$result['success']) {
+            $status = match ($result['error']) {
+                'order_not_found' => 404,
+                'already_paid', 'order_expired' => 400,
+                'transaction_failed' => 500,
+                default => 400,
+            };
+
+            return response()->json([
+                'status' => false,
+                'message' => $result['message'],
+                'data' => null,
+            ], $status);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Đã xác nhận thanh toán (thử nghiệm).',
             'data' => $result['data'],
         ]);
     }

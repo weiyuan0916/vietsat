@@ -42,20 +42,22 @@
 	}
 
 	/* Hero Slider Layout JS */
-	const hero_slider_layout = new Swiper('.hero-slider-layout .swiper', {
-		effect: 'fade',
-		slidesPerView : 1,
-		speed: 1000,
-		spaceBetween: 0,
-		loop: true,
-		autoplay: {
-			delay: 4000,
-		},
-		pagination: {
-			el: '.hero-pagination',
-			clickable: true,
-		},
-	});
+	if ($('.hero-slider-layout .swiper').length) {
+		const hero_slider_layout = new Swiper('.hero-slider-layout .swiper', {
+			effect: 'fade',
+			slidesPerView : 1,
+			speed: 1000,
+			spaceBetween: 0,
+			loop: true,
+			autoplay: {
+				delay: 4000,
+			},
+			pagination: {
+				el: '.hero-pagination',
+				clickable: true,
+			},
+		});
+	}
 
 	/* testimonial Slider JS */
 	if ($('.testimonial-slider').length) {
@@ -229,104 +231,108 @@
 	} */
 
 	/* Zoom Gallery screenshot */
-	$('.gallery-items').magnificPopup({
-		delegate: 'a',
-		type: 'image',
-		closeOnContentClick: false,
-		closeBtnInside: false,
-		mainClass: 'mfp-with-zoom',
-		image: {
-			verticalFit: true,
-		},
-		gallery: {
-			enabled: true
-		},
-		zoom: {
-			enabled: true,
-			duration: 300, // don't foget to change the duration also in CSS
-			opener: function(element) {
-			  return element.find('img');
-			}
-		}
-	});
-
-	/* Contact form validation */
-	var $contactform = $("#contactForm");
-	$contactform.validator({focus: false}).on("submit", function (event) {
-		if (!event.isDefaultPrevented()) {
-			event.preventDefault();
-			submitForm();
-		}
-	});
-
-	function submitForm(){
-		/* Ajax call to submit form */
-		$.ajax({
-			type: "POST",
-			url: "form-process.php",
-			data: $contactform.serialize(),
-			success : function(text){
-				if (text === "success"){
-					formSuccess();
-				} else {
-					submitMSG(false,text);
+	if ($('.gallery-items').length) {
+		$('.gallery-items').magnificPopup({
+			delegate: 'a',
+			type: 'image',
+			closeOnContentClick: false,
+			closeBtnInside: false,
+			mainClass: 'mfp-with-zoom',
+			image: {
+				verticalFit: true,
+			},
+			gallery: {
+				enabled: true
+			},
+			zoom: {
+				enabled: true,
+				duration: 300,
+				opener: function(element) {
+				  return element.find('img');
 				}
 			}
 		});
 	}
 
-	function formSuccess(){
-		$contactform[0].reset();
-		submitMSG(true, "Message Sent Successfully!")
-	}
+	/* Contact form validation */
+	var $contactform = $("#contactForm");
+	if ($contactform.length) {
+		$contactform.validator({focus: false}).on("submit", function (event) {
+			if (!event.isDefaultPrevented()) {
+				event.preventDefault();
+				submitForm();
+			}
+		});
 
-	function submitMSG(valid, msg){
-		if(valid){
-			var msgClasses = "h4 text-success";
-		} else {
-			var msgClasses = "h4 text-danger";
+		function submitForm(){
+			$.ajax({
+				type: "POST",
+				url: "form-process.php",
+				data: $contactform.serialize(),
+				success : function(text){
+					if (text === "success"){
+						formSuccess();
+					} else {
+						submitMSG(false,text);
+					}
+				}
+			});
 		}
-		$("#msgSubmit").removeClass().addClass(msgClasses).text(msg);
+
+		function formSuccess(){
+			$contactform[0].reset();
+			submitMSG(true, "Message Sent Successfully!")
+		}
+
+		function submitMSG(valid, msg){
+			if(valid){
+				var msgClasses = "h4 text-success";
+			} else {
+				var msgClasses = "h4 text-danger";
+			}
+			$("#msgSubmit").removeClass().addClass(msgClasses).text(msg);
+		}
 	}
 	/* Contact form validation end */
 
 	/* Appointment form validation */
 	var $appointmentForm = $("#appointmentForm");
-	$appointmentForm.validator({focus: false}).on("submit", function (event) {
-		if (!event.isDefaultPrevented()) {
-			event.preventDefault();
-			submitappointmentForm();
-		}
-	});
-
-	function submitappointmentForm(){
-		/* Ajax call to submit form */
-		$.ajax({
-			type: "POST",
-			url: "form-appointment.php",
-			data: $appointmentForm.serialize(),
-			success : function(text){
-				if (text === "success"){
-					appointmentformSuccess();
-				} else {
-					appointmentsubmitMSG(false,text);
-				}
+	if ($appointmentForm.length) {
+		$appointmentForm.validator({focus: false}).on("submit", function (event) {
+			if (!event.isDefaultPrevented()) {
+				event.preventDefault();
+				submitappointmentForm();
 			}
 		});
-	}
 
-	function appointmentformSuccess(){
-		$appointmentForm[0].reset();
-		appointmentsubmitMSG(true, "Message Sent Successfully!")
-	}
-
-	function appointmentsubmitMSG(valid, msg){
-		if(valid){
-			var msgClasses = "h3 text-success";
-		} else {
-			var msgClasses = "h3 text-danger";
+		function submitappointmentForm(){
+			$.ajax({
+				type: "POST",
+				url: "form-appointment.php",
+				data: $appointmentForm.serialize(),
+				success : function(text){
+					if (text === "success"){
+						appointmentformSuccess();
+					} else {
+						appointmentsubmitMSG(false,text);
+					}
+				}
+			});
 		}
-		$("#msgSubmit").removeClass().addClass(msgClasses).text(msg);
+
+		function appointmentformSuccess(){
+			$appointmentForm[0].reset();
+			appointmentsubmitMSG(true, "Message Sent Successfully!")
+		}
+
+		function appointmentsubmitMSG(valid, msg){
+			if(valid){
+				var msgClasses = "h3 text-success";
+			} else {
+				var msgClasses = "h3 text-danger";
+			}
+			$("#msgSubmit").removeClass().addClass(msgClasses).text(msg);
+		}
 	}
 	/* Appointment form validation end */
 

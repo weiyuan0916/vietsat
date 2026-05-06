@@ -447,6 +447,11 @@
             <div class="pulse-animation"></div>
           </div>
 
+          <button type="button" class="button button-fill button-large button-round btn-primary" style="margin-bottom: 12px;" onclick="markPaidTest()">
+            <i class="icon f7-icons">checkmark_seal_fill</i>
+            Đã chuyển khoản
+          </button>
+
           <button type="button" class="button button-outline button-round btn-cancel" onclick="cancelOrder()">
             <i class="icon f7-icons">xmark_circle</i>
             Hủy đơn hàng
@@ -490,6 +495,8 @@ function cancelOrder() {
     if (typeof disconnectReverb === 'function') {
       disconnectReverb();
     }
+
+    window.__webpushOrderCode = null;
 
     app.dialog.alert('Đơn hàng đã được hủy.', 'Thông báo');
   });

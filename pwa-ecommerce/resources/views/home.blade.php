@@ -1,7 +1,7 @@
 @extends('layouts.rosta')
 
-@section('title', 'Tiệm Nhà Duy')
-@section('meta_description', 'Trang chủ theo giao diện index-video của rosta.')
+@section('title', 'Cà phê Tây Nguyên nguyên bản | Tiệm Nhà Duy')
+@section('meta_description', 'Khám phá cà phê Tây Nguyên nguyên bản với hương vị đậm đà, từ hạt rang chất lượng đến ly pha chuẩn gu dành cho người yêu cà phê Việt.')
 @section('og_image', asset('rosta/images/tiemnhaduy.svg'))
 @section('canonical_url', route('home'))
 
@@ -15,7 +15,7 @@
     "@@context": "https://schema.org",
     "@@type": "WebPage",
     "name": "Tiệm Nhà Duy",
-    "description": "Trang chủ theo giao diện index-video của rosta.",
+    "description": "Khám phá cà phê Tây Nguyên nguyên bản với hương vị đậm đà, từ hạt rang chất lượng đến ly pha chuẩn gu dành cho người yêu cà phê Việt.",
     "url": "{{ route('home') }}",
     "inLanguage": "vi-VN"
 }
@@ -202,7 +202,7 @@
                                 <ul>
                                     <li>Thứ Hai - Thứ Sáu<span>09:30 - 19:30</span></li>
                                     <li>Thứ Bảy<span>10:30 - 17:00</span></li>
-                                    <li>Chủ Nhật<span>Hỗ trợ trực tuyến</span></li>
+                                    <li>Chủ Nhật<span>Online</span></li>
                                 </ul>
                             </div>
                             <!-- Opening Time Content End -->

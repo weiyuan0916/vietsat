@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\LicenseController;
 use App\Http\Controllers\Api\PcInfoController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\WebPushController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\PageController;
@@ -23,7 +24,11 @@ use App\Http\Controllers\Api\PageController;
 */
 
 Route::prefix('v1')->group(function () {
-    
+
+    Route::get('webpush/vapid-public-key', [WebPushController::class, 'vapidPublicKey'])
+        ->middleware('throttle:60,1')
+        ->name('webpush.vapid-public-key');
+
     // License Management Routes
     Route::prefix('licenses')->name('licenses.')->group(function () {
         
@@ -389,6 +394,14 @@ Route::prefix('v1')->group(function () {
          */
         Route::post('verify-payment', [OrderController::class, 'verifyPayment'])
             ->name('verify-payment');
+
+        Route::post('{orderCode}/push-subscriptions', [OrderController::class, 'storePushSubscription'])
+            ->middleware('throttle:30,1')
+            ->name('push-subscriptions');
+
+        Route::post('{orderCode}/mark-paid-test', [OrderController::class, 'markPaidTest'])
+            ->middleware('throttle:30,1')
+            ->name('mark-paid-test');
 
         /**
          * GET /api/v1/orders/my-orders

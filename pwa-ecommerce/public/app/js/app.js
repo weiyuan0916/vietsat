@@ -1550,6 +1550,39 @@ $$(document).on('page:init', '.page[data-name="service"]', function (e) {
  * PAGE INITIALIZATIONS
  */
 
+window.markPaidTest = function () {
+  var code = window.__webpushOrderCode;
+  if (!code) {
+    app.dialog.alert('Không có mã đơn hàng.', 'Lỗi');
+    return;
+  }
+  if (!window.WebPush || typeof window.WebPush.markPaidTest !== 'function') {
+    app.dialog.alert('Web Push chưa sẵn sàng.', 'Lỗi');
+    return;
+  }
+  app.dialog.confirm(
+    'Xác nhận đã chuyển khoản? Đơn sẽ được đánh dấu đã thanh toán.',
+    'Xác nhận',
+    function () {
+      app.dialog.preloader('Đang xử lý...');
+      window.WebPush.markPaidTest(code)
+        .then(function (res) {
+          app.dialog.close();
+          var msg = (res && res.message) ? res.message : 'Đã xác nhận.';
+          if (app.toast && app.toast.create) {
+            app.toast.create({ text: msg, position: 'top', closeTimeout: 2800 }).open();
+          } else {
+            app.dialog.alert(msg, 'Thông báo');
+          }
+        })
+        .catch(function (err) {
+          app.dialog.close();
+          app.dialog.alert((err && err.message) || 'Không thể xác nhận.', 'Lỗi');
+        });
+    }
+  );
+};
+
 function initServicePage(serviceId) {
     var pageEl = document.querySelector('.page[data-name="service"]');
     if (!pageEl) return;
@@ -1629,7 +1662,8 @@ function initServicePage(serviceId) {
                     app.dialog.close();
                     
                     currentOrderCode = orderData.order_code;
-                    
+                    window.__webpushOrderCode = orderData.order_code;
+
                     var orderCodeEl = document.getElementById('order-code');
                     var orderAmountEl = document.getElementById('order-amount');
                     var orderExpiresEl = document.getElementById('order-expires');
@@ -1650,8 +1684,17 @@ function initServicePage(serviceId) {
                     orderFormEl.style.display = 'none';
                     if (paymentInfoEl) paymentInfoEl.style.display = 'block';
                     
-                    // subscribeToOrder(orderData.order_code); // Missing in direct scripts?
                     startStatusPolling(orderData.order_code);
+
+                    if (window.WebPush && typeof window.WebPush.subscribe === 'function') {
+                      if (window.Notification && Notification.permission === 'default') {
+                        Notification.requestPermission().then(function () {
+                          window.WebPush.subscribe(orderData.order_code);
+                        });
+                      } else {
+                        window.WebPush.subscribe(orderData.order_code);
+                      }
+                    }
                 })
                 .catch(function(error) {
                     app.dialog.close();

@@ -255,8 +255,11 @@
             </p>
           </div>
 
-          <!-- Cancel Button -->
           <div class="block" style="margin-top: 16px;">
+            <button type="button" class="button button-fill button-large button-round" style="margin-bottom: 12px;" onclick="markPaidTest()">
+              <i class="icon f7-icons" style="margin-right: 8px;">checkmark_seal_fill</i>
+              Đã chuyển khoản
+            </button>
             <button type="button" class="button button-outline button-round" onclick="cancelOrder()">
               <i class="icon f7-icons" style="margin-right: 8px;">xmark_circle</i>
               Hủy đơn hàng
@@ -290,7 +293,9 @@ function cancelOrder() {
     if (typeof disconnectReverb === 'function') {
       disconnectReverb();
     }
-    
+
+    window.__webpushOrderCode = null;
+
     app.dialog.alert('Đơn hàng đã được hủy.', 'Thông báo');
   });
 }

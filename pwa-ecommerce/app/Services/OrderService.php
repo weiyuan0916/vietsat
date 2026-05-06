@@ -16,17 +16,23 @@ use Illuminate\Support\Str;
 class OrderService
 {
     private ExternalServiceApi $externalServiceApi;
+
     private DeviceTrackingService $deviceTrackingService;
+
     private ServiceOrderRepositoryInterface $repository;
+
+    private WebPushTestService $webPushTestService;
 
     public function __construct(
         ExternalServiceApi $externalServiceApi,
         DeviceTrackingService $deviceTrackingService,
-        ServiceOrderRepositoryInterface $repository
+        ServiceOrderRepositoryInterface $repository,
+        WebPushTestService $webPushTestService
     ) {
         $this->externalServiceApi = $externalServiceApi;
         $this->deviceTrackingService = $deviceTrackingService;
         $this->repository = $repository;
+        $this->webPushTestService = $webPushTestService;
     }
 
     public function createOrder(
@@ -179,6 +185,8 @@ class OrderService
 
                 event(new PaymentSuccess($order));
 
+                $this->webPushTestService->notifyPaid($order);
+
                 return [
                     'success' => true,
                     'data' => [
@@ -192,6 +200,71 @@ class OrderService
             Log::error('Order verifyPayment transaction failed', [
                 'order_code' => $orderCode,
                 'bank_txn_id' => $bankTxnId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'error' => 'transaction_failed',
+                'message' => 'Có lỗi xảy ra khi xác nhận thanh toán.',
+            ];
+        }
+    }
+
+    public function markPaidTest(string $orderCode): array
+    {
+        try {
+            return DB::transaction(function () use ($orderCode) {
+                $order = $this->findOrderByCodeWithLock($orderCode);
+
+                if (!$order) {
+                    return [
+                        'success' => false,
+                        'error' => 'order_not_found',
+                        'message' => 'Không tìm thấy đơn hàng.',
+                    ];
+                }
+
+                if ($order->status === ServiceOrder::STATUS_PAID) {
+                    return [
+                        'success' => false,
+                        'error' => 'already_paid',
+                        'message' => 'Đơn hàng đã được thanh toán.',
+                    ];
+                }
+
+                if ($order->isTimeExpired()) {
+                    $this->expireOrderIfNeeded($order);
+
+                    return [
+                        'success' => false,
+                        'error' => 'order_expired',
+                        'message' => 'Đơn hàng đã hết hạn.',
+                    ];
+                }
+
+                $order->update([
+                    'status' => ServiceOrder::STATUS_PAID,
+                    'paid_at' => now(),
+                    'bank_txn_id' => 'TEST_' . Str::upper(Str::random(12)),
+                ]);
+
+                event(new PaymentSuccess($order));
+
+                $this->webPushTestService->notifyPaid($order);
+
+                return [
+                    'success' => true,
+                    'data' => [
+                        'order_code' => $order->order_code,
+                        'status' => $order->status,
+                        'paid_at' => $order->paid_at->toIso8601String(),
+                    ],
+                ];
+            });
+        } catch (\Exception $e) {
+            Log::error('Order markPaidTest transaction failed', [
+                'order_code' => $orderCode,
                 'error' => $e->getMessage(),
             ]);
 

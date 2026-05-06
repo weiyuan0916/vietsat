@@ -268,5 +268,41 @@ class OrderApiTest extends TestCase
 
         Event::assertDispatched(PaymentExpired::class);
     }
+
+    public function test_webpush_vapid_public_key_endpoint(): void
+    {
+        $response = $this->getJson('/api/v1/webpush/vapid-public-key');
+
+        $response->assertOk()
+            ->assertJsonStructure([
+                'status',
+                'data' => [
+                    'public_key',
+                ],
+            ]);
+    }
+
+    public function test_mark_paid_test_marks_order_paid(): void
+    {
+        $order = ServiceOrder::factory()->create([
+            'status' => ServiceOrder::STATUS_PENDING,
+            'expires_at' => now()->addMinutes(5),
+        ]);
+        Event::fake([PaymentSuccess::class]);
+
+        $response = $this->postJson('/api/v1/orders/' . $order->order_code . '/mark-paid-test');
+
+        $response->assertOk()
+            ->assertJson([
+                'status' => true,
+            ]);
+
+        $order->refresh();
+        $this->assertSame(ServiceOrder::STATUS_PAID, $order->status);
+        $this->assertNotNull($order->bank_txn_id);
+        $this->assertStringStartsWith('TEST_', $order->bank_txn_id);
+
+        Event::assertDispatched(PaymentSuccess::class);
+    }
 }
 
